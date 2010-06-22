@@ -18,12 +18,12 @@ import sys
 import unittest
 import logging
 
-from logtools import filterbots, geoip, logtools_config, interpolate_config
+from logtools import (filterbots, geoip, 
+        logtools_config, interpolate_config)
 
 class ConfigurationTestCase(unittest.TestCase):
-    def setUp(self):
-        pass
-    def testConfiguration(self):
+    def testInterpolation(self):
+        self.assertEqual(1, interpolate_config(1, 'bogus_sec', 'bogus_key'))
         self.assertRaises(KeyError, interpolate_config, None, 'bogus_sec', 'bogus_key')
 
 class FilterBotsTestCase(unittest.TestCase):

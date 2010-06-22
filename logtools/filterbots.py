@@ -42,7 +42,7 @@ def filterbots_parse_args():
     
     return options, args
 
-def filterbots(options, args,fh=sys.stdin.readlines()):
+def filterbots(options, args,fh):
     """Filter bots from a log stream using
     ip/useragent blacklists"""
     bots_ua = dict.fromkeys([l.strip() for l in open(options.bots_ua, "r")])
@@ -75,5 +75,5 @@ def filterbots(options, args,fh=sys.stdin.readlines()):
 def main():
     """Console entry-point"""
     options, args = filterbots_parse_args()
-    return filterbots(options, args)
+    return filterbots(options, args, fh=sys.stdin.readlines())
 

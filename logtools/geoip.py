@@ -37,7 +37,7 @@ def geoip_parse_args():
 
     return options, args
 
-def geoip(options, args, fh=sys.stdin.readlines()):
+def geoip(options, args, fh):
     try:
         import GeoIP
     except ImportError:
@@ -59,5 +59,5 @@ def geoip(options, args, fh=sys.stdin.readlines()):
 def main():
     """Console entry-point"""
     options, args = geoip_parse_args()
-    return geoip(options, args)
+    return geoip(options, args, fh=sys.stdin.readlines())
 

@@ -15,6 +15,8 @@ from fabric.decorators import hosts
 
 log = logging.getLogger(__name__)
 
+env.proj_name = 'logtools'
+
 def dist():
     """Create distributable"""
     local('python setup.py bdist_egg')
@@ -23,16 +25,12 @@ def deploy(deploydir, virtualenv=None):
     """Deploy distributable on target machine.
     Specify 'virtualenv' as path to the virtualenv (if any),
     Specify 'deploydir' as directory to push egg file to."""
-    _mkenv(); _find_dist();
+    _find_dist()
     put("dist/%s" % env.dist_fname, deploydir)
     source_me = ''
     if virtualenv:
         source_me = 'source {0}/bin/activate && '.format(virtualenv)
     run(source_me + 'easy_install -U {0}/{1}'.format(deploydir, env.dist_fname))
-
-def _mkenv():
-    """Create our environment"""
-    env.proj_name = 'logtools'
 
 def _find_dist():
     """Find latest version of our distributable and point to it in env"""

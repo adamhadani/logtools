@@ -12,7 +12,7 @@ from optparse import OptionParser
 
 from _config import logtools_config, interpolate_config
 
-def parse_args():
+def filterbots_parse_args():
     parser = OptionParser(usage="%prog -u <useragents_blacklist_file> -i <ips_blacklist_file> -r <ip_useragent_regexp>")
     parser.add_option("-u", dest="bots_ua", default=None, help="Bots useragents blacklist file")
     parser.add_option("-i", dest="bots_ips", default=None, help="Bots ips blacklist file")
@@ -32,7 +32,7 @@ def parse_args():
     return options, args
 
 def filterbots():
-    options, args = parse_args()
+    options, args = filterbots_parse_args()
     bots_ua = dict.fromkeys([l.strip() for l in open(options.bots_ua, "r")])
     bots_ips = dict.fromkeys([l.strip() for l in open(options.bots_ips, "r")])
 

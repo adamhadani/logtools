@@ -3,3 +3,34 @@ A log files analysis / filtering framework.
 
 logtools encompasses of a few easy-to-use, easy to configure command-line
 tools, typically used in conjunction with Apache logs.
+
+Console Scripts
+---------------
+
+* filterbots - used to filterbots based on an ip blacklist and a useragent black list files.
+               The actual regular expression mask used for matching is also user-specified,
+               so this can be used quite generically.
+* geoip - Simple helper utility for using the GeoIP tool to tag log lines by the IP's country.
+
+
+Configuration
+-------------
+All tools' command-line parameters can assume a default value using interpolating
+from /etc/logtools.cfg and ~/.logtoolsrc, if these exist.
+This allows for convenient operation where these options rarely change.
+The configuration file format is of the form:
+
+[script_name]
+optname: optval
+
+For example:
+
+[geoip]
+ip_re: ^(.*?) -
+
+[filterbots]
+bots_ua: /home/www/conf/bots_useragents.txt
+bots_ips: /home/www/conf/bots_hosts.txt
+ip_ua_re: ^(?P<ip>.*?) -(?:.*?"){5}(?P<ua>.*?)"
+
+

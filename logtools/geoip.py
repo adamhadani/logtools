@@ -18,7 +18,7 @@ try:
 except ImportError:
     logging.warn("GeoIP Python package must be installed to use logtools geoip command")
 
-def parse_args():
+def geoip_parse_args():
     parser = OptionParser()
     parser.add_option("-r", "--re", dest="ip_re", default=None, 
                     help="Regular expression to lookup IP in logrow")
@@ -26,14 +26,14 @@ def parse_args():
     options, args = parser.parse_args()
     
     # Interpolate from configuration
-    options.ip_re  = interpolate_config(options.re, 'geoip', 'ip_re')
+    options.ip_re  = interpolate_config(options.ip_re, 'geoip', 'ip_re')
 
     return options, args
 
-def main():
-    options, args = parse_args()
+def geoip():
+    options, args = geoip_parse_args()
     gi = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
-    ip_re = re.compile(options.re)
+    ip_re = re.compile(options.ip_re)
 
     for line in imap(lambda x: x.strip(), sys.stdin.readlines()):
         match = ip_re.match(line)

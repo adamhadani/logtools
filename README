@@ -7,10 +7,11 @@ tools, typically used in conjunction with Apache logs.
 Console Scripts
 ---------------
 
-* filterbots - used to filterbots based on an ip blacklist and a useragent black list files.
+* filterbots - used to filter bots based on an ip blacklist and a useragent blacklist file(s).
                The actual regular expression mask used for matching is also user-specified,
-               so this can be used quite generically.
-* geoip - Simple helper utility for using the GeoIP tool to tag log lines by the IP's country.
+               so this can be used with any arbitrary log format (See examples below).
+* geoip      - Simple helper utility for using the GeoIP tool to tag log lines by the IP's country.
+               The regular expression mask used for matching the IP in the log line is user-specified.
 
 
 Configuration
@@ -32,5 +33,25 @@ ip_re: ^(.*?) -
 bots_ua: /home/www/conf/bots_useragents.txt
 bots_ips: /home/www/conf/bots_hosts.txt
 ip_ua_re: ^(?P<ip>.*?) -(?:.*?"){5}(?P<ua>.*?)"
+
+Usage Examples
+--------------
+1. The following example demonstrates specifying a custom regular expression for matching
+the ip/user agent. Notice the use of named match groups in the regular expression - (?P<name>...).
+The ips/useragents files are not specified in commandline and therefore are assumed to be defined
+in ~/.logtoolsrc or /etc/logtools.cfg. The option --print is used to actually print matching lines.
+
+	cat error_log.1 | filterbots -r ".*\[client (?P<ip>.*?)\].*USER_AGENT:(?P<ua>.*?)\'" --print
+
+Notice that its easy to reverse the filtermask simply by adding the --reverse flag:
+
+	cat error_log.1 | filterbots -r ".*\[client (?P<ip>.*?)\].*USER_AGENT:(?P<ua>.*?)\'" --print --reverse
+
+2. The following example demonstrates using the geoip wrapper. Pretty self-explanatory:
+
+	cat access_log.1 | geoip -r '.*client (.*?)\]'
+
+3. All tools admit a --help command-line option that will print out detailed information about the different
+   options available.
 
 

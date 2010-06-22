@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-
+"""
+logtools.geoip
+GeoIP interoperability tool.
+Requires the GeoIP library and Python bindings
+"""
 import os
 import re
 import sys

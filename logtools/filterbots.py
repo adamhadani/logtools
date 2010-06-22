@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-filterbots
+logtools.filterbots
 Filter bots from logrows based on an ip/host and useragent blacklists.
 
 """

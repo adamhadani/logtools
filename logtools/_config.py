@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-logtools.config
+logtools._config
 
 Interpolation of logtools parameters using file-based configuration
 in /etc/logtools.cfg or ~/.logtoolsrc.

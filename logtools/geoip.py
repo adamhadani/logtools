@@ -28,9 +28,6 @@ def parse_args():
     # Interpolate from configuration
     options.ip_re  = interpolate_config(options.re, 'geoip', 'ip_re')
 
-    if options.re is None:
-        parser.error("Must supply IP regular expressions. Type --help for usage instructions")
-
     return options, args
 
 def main():

@@ -1,0 +1,5 @@
+logtools
+A log files analysis / filtering framework.
+
+logtools encompasses of a few easy-to-use, easy to configure command-line
+tools, typically used in conjunction with Apache logs.

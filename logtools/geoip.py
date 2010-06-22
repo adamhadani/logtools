@@ -37,18 +37,17 @@ def geoip_parse_args():
 
     return options, args
 
-def geoip():
+def geoip(options, args, fh=sys.stdin.readlines()):
     try:
         import GeoIP
     except ImportError:
         logging.error("GeoIP Python package must be installed to use logtools geoip command")
         sys.exit(-1)
 
-    options, args = geoip_parse_args()
     gi = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
     ip_re = re.compile(options.ip_re)
 
-    for line in imap(lambda x: x.strip(), sys.stdin.readlines()):
+    for line in imap(lambda x: x.strip(), fh):
         match = ip_re.match(line)
         if match: 
             ip = match.group(1)
@@ -57,7 +56,8 @@ def geoip():
                 logging.debug("No Geocode for IP: %s", ip)
             print "{0}\t{1}".format(ip, geocode)
 
-
-if __name__ == "__main__":
-    sys.exit(main())
+def main():
+    """Console entry-point"""
+    options, args = geoip_parse_args()
+    return geoip(options, args)
 

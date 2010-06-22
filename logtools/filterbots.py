@@ -42,8 +42,9 @@ def filterbots_parse_args():
     
     return options, args
 
-def filterbots():
-    options, args = filterbots_parse_args()
+def filterbots(options, args,fh=sys.stdin.readlines()):
+    """Filter bots from a log stream using
+    ip/useragent blacklists"""
     bots_ua = dict.fromkeys([l.strip() for l in open(options.bots_ua, "r")])
     bots_ips = dict.fromkeys([l.strip() for l in open(options.bots_ips, "r")])
 
@@ -51,7 +52,7 @@ def filterbots():
 
     num_lines=0
     num_filtered=0
-    for line in imap(lambda x: x.strip(), sys.stdin.readlines()):
+    for line in imap(lambda x: x.strip(), fh):
         match = ua_ip_re.match(line)
         if not match:
             logging.warn("No match for line: %s", line)
@@ -68,8 +69,11 @@ def filterbots():
         if options.printlines:
             print line
 
-    print >> sys.stderr, "Number of lines after filtering: ", num_lines
-    print >> sys.stderr, "Number of lines filtered: ", num_filtered
+    logging.info("Number of lines after filtering: %s", num_lines)
+    logging.info("Number of lines filtered: %s", num_filtered)
 
-if __name__ == "__main__":
-    sys.exit(main())
+def main():
+    """Console entry-point"""
+    options, args = filterbots_parse_args()
+    return filterbots(options, args)
+

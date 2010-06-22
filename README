@@ -23,7 +23,6 @@ or check out the project directory, and then run:
 
 Console Scripts
 ---------------
-
 * filterbots - used to filter bots based on an ip blacklist and a useragent blacklist file(s).
                The actual regular expression mask used for matching is also user-specified,
                so this can be used with any arbitrary log format (See examples below).
@@ -34,6 +33,7 @@ Console Scripts
 * logplot      - Render a plot of Successive values based on log parsing. Under Construction.
 
 * logplotserve - Start a compact webserver (WSGI-based) serving logplots. Under Construction.
+
 
 Configuration
 -------------

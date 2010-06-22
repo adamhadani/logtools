@@ -6,8 +6,8 @@ Author: Adam Ever-Hadani <adamhadani@gmail.com>
 logtools encompasses of a few easy-to-use, easy to configure command-line
 tools, typically used in conjunction with Apache logs.
 
-The idea is to standardize log parsing and filtering using a consistent
-configuration and UNIX command-line interface (STDIN input streaming, command piping etc)
+The idea is to standardize log parsing and filtering using a coherent
+configuration methodology and UNIX command-line interface (STDIN input streaming, command-line piping etc.)
 so as to create a consistent environment for creating reports, charts and other such
 log mining artifacts that are typically employed in a Website context.
 

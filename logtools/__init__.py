@@ -21,5 +21,5 @@ logging.basicConfig(
 
 from _config import *
 
-from filterbots import filterbots_parse_args, filterbots
-from geoip import geoip_parse_args, geoip
+from _filterbots import *
+from _geoip import *

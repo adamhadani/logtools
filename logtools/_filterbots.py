@@ -35,18 +35,18 @@ def filterbots_parse_args():
 
     options, args = parser.parse_args()
 
-    # Interpolate from configuration
-    options.bots_ua  = interpolate_config(options.bots_ua, 'filterbots', 'bots_ua')
-    options.bots_ips = interpolate_config(options.bots_ips, 'filterbots', 'bots_ips')
+    # Interpolate from configuration and open filehandle
+    options.bots_ua  = open(interpolate_config(options.bots_ua, 'filterbots', 'bots_ua'), "r")
+    options.bots_ips = open(interpolate_config(options.bots_ips, 'filterbots', 'bots_ips'), "r")
     options.ip_ua_re  = interpolate_config(options.ip_ua_re, 'filterbots', 'ip_ua_re')
     
     return options, args
 
-def filterbots(options, args,fh):
+def filterbots(options, args, fh):
     """Filter bots from a log stream using
     ip/useragent blacklists"""
-    bots_ua = dict.fromkeys([l.strip() for l in open(options.bots_ua, "r")])
-    bots_ips = dict.fromkeys([l.strip() for l in open(options.bots_ips, "r")])
+    bots_ua = dict.fromkeys([l.strip() for l in options.bots_ua])
+    bots_ips = dict.fromkeys([l.strip() for l in options.bots_ips])
 
     ua_ip_re = re.compile(options.ip_ua_re)
 
@@ -57,10 +57,11 @@ def filterbots(options, args,fh):
         if not match:
             logging.warn("No match for line: %s", line)
             continue
-
+    
         matchgroups = match.groupdict()
-        if options.reverse ^ (matchgroups['ua'] in bots_ua or \
-           matchgroups['ip'] in bots_ips):
+
+        if options.reverse ^ (matchgroups.get('ua', None) in bots_ua or \
+           matchgroups.get('ip', None) in bots_ips):
             logging.debug("Filtering line: %s", line)
             num_filtered+=1
             continue
@@ -72,8 +73,11 @@ def filterbots(options, args,fh):
     logging.info("Number of lines after filtering: %s", num_lines)
     logging.info("Number of lines filtered: %s", num_filtered)
 
-def main():
+    return num_filtered, num_lines
+
+def filterbots_main():
     """Console entry-point"""
     options, args = filterbots_parse_args()
-    return filterbots(options, args, fh=sys.stdin.readlines())
+    filterbots(options, args, fh=sys.stdin.readlines())
+    return 0
 

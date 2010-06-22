@@ -56,8 +56,8 @@ def geoip(options, args, fh):
                 logging.debug("No Geocode for IP: %s", ip)
             print "{0}\t{1}".format(ip, geocode)
 
-def main():
+def geoip_main():
     """Console entry-point"""
     options, args = geoip_parse_args()
-    return geoip(options, args, fh=sys.stdin.readlines())
-
+    geoip(options, args, fh=sys.stdin.readlines())
+    return 0

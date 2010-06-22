@@ -33,8 +33,8 @@ setup(
 
     entry_points = {
         'console_scripts': [
-            'filterbots = logtools.filterbots:main',
-            'geoip = logtools.geoip:main',
+            'filterbots = logtools:filterbots_main',
+            'geoip = logtools:geoip_main',
         ]
     },
 

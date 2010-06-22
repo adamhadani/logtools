@@ -8,7 +8,7 @@ in /etc/logtools.cfg or ~/.logtoolsrc.
 
 import os
 import sys
-from ConfigParser import SafeConfigParser, NoOptionError
+from ConfigParser import SafeConfigParser, NoOptionError, NoSectionError
 
 __all__ = ['logtools_config', 'interpolate_config']
 
@@ -21,7 +21,7 @@ def interpolate_config(var, section, key):
     If fails, can raise Exception / issue warning"""
     try:
         return var or logtools_config.get(section, key)
-    except NoOptionError:
+    except (NoOptionError, NoSectionError):
         raise KeyError("Missing parameter: '{0}'".format(key))
     
 

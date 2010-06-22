@@ -1,6 +1,8 @@
 logtools
 A log files analysis / filtering framework.
 
+Author: Adam Ever-Hadani <adamhadani@gmail.com>
+
 logtools encompasses of a few easy-to-use, easy to configure command-line
 tools, typically used in conjunction with Apache logs.
 
@@ -10,6 +12,7 @@ Console Scripts
 * filterbots - used to filter bots based on an ip blacklist and a useragent blacklist file(s).
                The actual regular expression mask used for matching is also user-specified,
                so this can be used with any arbitrary log format (See examples below).
+
 * geoip      - Simple helper utility for using the GeoIP tool to tag log lines by the IP's country.
                The regular expression mask used for matching the IP in the log line is user-specified.
 

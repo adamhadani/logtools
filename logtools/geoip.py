@@ -25,11 +25,6 @@ from optparse import OptionParser
 
 from _config import logtools_config, interpolate_config
 
-try:
-    import GeoIP
-except ImportError:
-    logging.warn("GeoIP Python package must be installed to use logtools geoip command")
-
 def geoip_parse_args():
     parser = OptionParser()
     parser.add_option("-r", "--re", dest="ip_re", default=None, 
@@ -43,6 +38,12 @@ def geoip_parse_args():
     return options, args
 
 def geoip():
+    try:
+        import GeoIP
+    except ImportError:
+        logging.error("GeoIP Python package must be installed to use logtools geoip command")
+        sys.exit(-1)
+
     options, args = geoip_parse_args()
     gi = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
     ip_re = re.compile(options.ip_re)

@@ -37,9 +37,9 @@ Console Scripts
 
 Configuration
 -------------
-All tools' command-line parameters can assume a default value using interpolating
+All tools' command-line parameters can assume a default value using parameter interpolation
 from /etc/logtools.cfg and ~/.logtoolsrc, if these exist.
-This allows for convenient operation where these options rarely change.
+This allows for convenient operation in the usual case where these rarely change.
 The configuration file format is of the form:
 
 [script_name]

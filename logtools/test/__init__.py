@@ -12,14 +12,3 @@
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
 
-import logging
-
-logging.basicConfig(
-    level = logging.INFO,
-    format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-
-from _config import *
-
-from filterbots import *
-from geoip import *

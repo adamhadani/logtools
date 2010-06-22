@@ -80,4 +80,10 @@ Notice that its easy to reverse the filtermask simply by adding the --reverse fl
 4. All tools admit a --help command-line option that will print out detailed information about the different
    options available.
 
+Unit-testing
+------------
+A test suite is included in the package. Simplest way to run would be using nose. From package root directory, issue:
 
+	nosetests
+
+~~

@@ -6,6 +6,9 @@ Author: Adam Ever-Hadani <adamhadani@gmail.com>
 logtools encompasses of a few easy-to-use, easy to configure command-line
 tools, typically used in conjunction with Apache logs.
 
+This software is distributed under the Apache 2.0 license.
+
+
 Installation
 ------------
 To install this package and associated console scripts, unpack the distributable tar file,

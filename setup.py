@@ -35,6 +35,7 @@ setup(
         'console_scripts': [
             'filterbots = logtools:filterbots_main',
             'geoip = logtools:geoip_main',
+            'logsample = logtools:logsample_main',
         ]
     },
 

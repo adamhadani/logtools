@@ -23,3 +23,4 @@ from _config import *
 
 from _filterbots import *
 from _geoip import *
+from _sample import *

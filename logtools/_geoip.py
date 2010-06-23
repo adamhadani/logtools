@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
 """
-logtools.geoip
+logtools._geoip
 GeoIP interoperability tool.
 Requires the GeoIP library and Python bindings
 """

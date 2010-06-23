@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
 """
-logtools.filterbots
+logtools._filterbots
 Filter bots from logrows based on an ip/host and useragent blacklists.
 """
 import re

@@ -25,6 +25,8 @@ from optparse import OptionParser
 
 from _config import logtools_config, interpolate_config
 
+__all__ = ['geoip_parse_args', 'geoip', 'geoip_main']
+
 def geoip_parse_args():
     parser = OptionParser()
     parser.add_option("-r", "--re", dest="ip_re", default=None, 

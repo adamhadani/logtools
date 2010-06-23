@@ -36,6 +36,7 @@ setup(
             'filterbots = logtools:filterbots_main',
             'geoip = logtools:geoip_main',
             'logsample = logtools:logsample_main',
+            'logplot = logtools:logplot_main',
         ]
     },
 

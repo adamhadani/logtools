@@ -23,6 +23,8 @@ from optparse import OptionParser
 
 from _config import logtools_config, interpolate_config
 
+__all__ = ['filterbots_parse_args', 'filterbots', 'filterbots_main']
+
 def filterbots_parse_args():
     parser = OptionParser(usage="%prog -u <useragents_blacklist_file> -i <ips_blacklist_file> -r <ip_useragent_regexp>")
     parser.add_option("-u", dest="bots_ua", default=None, help="Bots useragents blacklist file")

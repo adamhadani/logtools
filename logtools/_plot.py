@@ -12,8 +12,8 @@
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
 """
-logtools._sample
-Sampling tools for logfiles
+logtools._plot
+Plotting methods for logfiles
 """
 
 import os
@@ -26,44 +26,33 @@ from optparse import OptionParser
 
 from _config import logtools_config, interpolate_config
 
-__all__ = ['logsample_parse_args', 'logsample', 'logsample_main']
+__all__ = ['logplot_parse_args', 'logplot', 'logplot_main']
 
-def logsample_parse_args():
+def logplot_parse_args():
     parser = OptionParser()
-    parser.add_option("-n", "--num-samples", dest="num_samples", type=int, 
-                      help="Number of samples to produce")
-
+    parser.add_option("-b", "--backend", dest="backend",  
+                      help="Backend to use for plotting. See --help for available backends.")
+    parser.add_option("-f", "--field", dest="field", type=int,
+                      help="Index of field to use as input for generating plot")
+    parser.add_option("-d", "--delimiter", dest="delimiter",
+                      help="Delimiter character for field-separation.")
+    
     options, args = parser.parse_args()
 
     # Interpolate from configuration
-    options.num_samples  = int(interpolate_config(options.num_samples, 
-                                                  'logsample', 'num_samples'))
+    options.backend  = interpolate_config(options.backend, 'logplot', 'backend')
+    options.field  = int(interpolate_config(options.field, 'logplot', 'field'))
+    options.delimiter  = interpolate_config(options.delimiter, 'logplot', 'delimiter')
 
     return options, args
 
-def logsample(options, args, fh):
-    """Use a Reservoir Sampling algorithm
-    to sample uniformly random lines from input stream."""
-    R = []
-    N = options.num_samples
-    
-    for i, k in enumerate(imap(lambda x: x.strip(), fh)):
-        if i < N:
-            R.append(k)
-        else:
-            r = randint(0,i)
-            if r < N:
-                R[r] = k
+def logplot(options, args, fh):
+    """Plot some index defined over the logstream,
+    using user-specified backend"""
 
-    # Emit output
-    for r in R:
-        print r
-        
-    return R
 
-def logsample_main():
+def logplot_main():
     """Console entry-point"""
-    options, args = logsample_parse_args()
+    options, args = logplot_parse_args()
     logsample(options, args, fh=sys.stdin.readlines())
     return 0
-

@@ -28,7 +28,43 @@ setup(
     description  = 'Log analysis and filtering tools',
     author       = 'Adam Ever-Hadani',
     author_email = 'adamhadani@gmail.com',
+    url          = 'http://github.com/adamhadani/logtools',
+    keywords     = ['logging', 'sampling', 'geoip', 'filter'],
+    classifiers = [
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2.6",        
+        "Development Status :: 5 - Production/Stable",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: POSIX",
+        "Topic :: Internet :: Log Analysis",
+        "Topic :: Scientific/Engineering :: Information Analysis",
+        "Topic :: Text Processing :: Filters",
+        "Topic :: Utilities",
+        "Intended Audience :: Developers",
+        "Intended Audience :: System Administrators"        
+        ],
+    long_description = """\
+logtools
+A log files analysis / filtering framework.
 
+logtools encompasses of a few easy-to-use, easy to configure command-line
+tools, typically used in conjunction with Apache logs.
+
+The idea is to standardize log parsing and filtering using a coherent
+configuration methodology and UNIX command-line interface (STDIN input streaming, command-line piping etc.)
+so as to create a consistent environment for creating reports, charts and other such
+log mining artifacts that are typically employed in a Website context.
+
+Use case examples (Assuming a configured ~/.logtoolsrc, see Documentation):
+* Get aggregated (IP, Country) count for all Bot visits:
+
+  cat access_log.2010-05-15 | filterbots --print --reverse | geoip | sort | uniq -c | sort -k1,1nr
+
+* Get a random sampling of 50 lines from an arbitrarily large input log stream:
+
+  cat error_log.1 | filterbots --print | logsample -n50
+""",
+    
     packages = find_packages(),
 
     entry_points = {

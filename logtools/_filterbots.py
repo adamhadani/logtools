@@ -46,9 +46,9 @@ def filterbots_parse_args():
     options.bots_ua  = open(interpolate_config(options.bots_ua, 'filterbots', 'bots_ua'), "r")
     options.bots_ips = open(interpolate_config(options.bots_ips, 'filterbots', 'bots_ips'), "r")
     options.ip_ua_re  = interpolate_config(options.ip_ua_re, 'filterbots', 'ip_ua_re')    
-    options.reverse  = interpolate_config(options.reverse, 'filterbots', 'reverse', 
+    options.reverse   = interpolate_config(options.reverse, 'filterbots', 'reverse', 
                                           default=False, type=bool)
-    options.printlines  = interpolate_config(options.printlines, 'filterbots', 'printlines', 
+    options.printlines  = interpolate_config(options.printlines, 'filterbots', 'printlines',
                                              default=False, type=bool)    
     
     return options, args

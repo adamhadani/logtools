@@ -19,7 +19,7 @@ import unittest
 import logging
 from StringIO import StringIO
 
-from logtools import filterbots, geoip
+from logtools import filterbots, geoip, logsample
 from logtools import logtools_config, interpolate_config
 
 logging.basicConfig(level=logging.INFO)
@@ -76,6 +76,20 @@ class GeoIPTestCase(unittest.TestCase):
 
         ret = geoip(self.options, None, self.fh)
 
+class SamplingTestCase(unittest.TestCase):
+    def setUp(self):
+        self.options = AttrDict()
+        self.options.num_samples = 1
+        
+        self.fh = StringIO(
+            "127.0.0.1 - USER_AGENT:'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' - ...\n" \
+            "255.255.255.255 - USER_AGENT:'Mozilla' - ...\n"
+        )
+
+    def testSampling(self):
+        ret = logsample(self.options, None, self.fh)
+        self.assertEquals(len(ret), self.options.num_samples, 
+                          "logsample output different than expected: %s" % str(ret))
 
 if __name__ == "__main__":
     unittest.main()

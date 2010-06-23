@@ -27,13 +27,21 @@ __all__ = ['logtools_config', 'interpolate_config']
 logtools_config = SafeConfigParser() 
 logtools_config.read(['/etc/logtools.cfg', os.path.expanduser('~/.logtoolsrc')])
 
-def interpolate_config(var, section, key):
+def interpolate_config(var, section, key, default=None, type=str):
     """Interpolate a parameter. if var is None,
     try extracting value from section.key in configuration file.
     If fails, can raise Exception / issue warning"""
     try:
-        return var or logtools_config.get(section, key)
+        return var or {
+            str: logtools_config.get,
+            bool: logtools_config.getboolean
+        }.get(type, str)(section, key)
+    except KeyError:
+        raise KeyError("Invalid parameter type: '{0}'".format(type))    
     except (NoOptionError, NoSectionError):
+        if default is not None:
+            return default
         raise KeyError("Missing parameter: '{0}'".format(key))
+    
     
 

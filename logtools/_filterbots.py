@@ -26,21 +26,30 @@ from _config import logtools_config, interpolate_config
 __all__ = ['filterbots_parse_args', 'filterbots', 'filterbots_main']
 
 def filterbots_parse_args():
-    parser = OptionParser(usage="%prog -u <useragents_blacklist_file> -i <ips_blacklist_file> -r <ip_useragent_regexp>")
-    parser.add_option("-u", dest="bots_ua", default=None, help="Bots useragents blacklist file")
-    parser.add_option("-i", dest="bots_ips", default=None, help="Bots ips blacklist file")
+    usage = "%prog -u <useragents_blacklist_file> -i <ips_blacklist_file> -r <ip_useragent_regexp>"
+    parser = OptionParser(usage=usage)
+    
+    parser.add_option("-u", dest="bots_ua", default=None, 
+                      help="Bots useragents blacklist file")
+    parser.add_option("-i", dest="bots_ips", default=None, 
+                      help="Bots ips blacklist file")
     parser.add_option("-r", dest="ip_ua_re", default=None, 
-                        help="Regular expression to match IP and useragent field. Should have a 'ip' and 'ua' named groups")
-    parser.add_option("-p", "--print", dest="printlines", action="store_true", default=False, 
-                        help="Print non-filtered lines")
-    parser.add_option("-R", "--reverse", dest="reverse", action="store_true", default=False, help="Reverse filtering")
+                      help="Regular expression to match IP and useragent field. Should have a 'ip' and 'ua' named groups")
+    parser.add_option("-p", "--print", dest="printlines", action="store_true",
+                      help="Print non-filtered lines")
+    parser.add_option("-R", "--reverse", dest="reverse", action="store_true",
+                      help="Reverse filtering")
 
     options, args = parser.parse_args()
 
     # Interpolate from configuration and open filehandle
     options.bots_ua  = open(interpolate_config(options.bots_ua, 'filterbots', 'bots_ua'), "r")
     options.bots_ips = open(interpolate_config(options.bots_ips, 'filterbots', 'bots_ips'), "r")
-    options.ip_ua_re  = interpolate_config(options.ip_ua_re, 'filterbots', 'ip_ua_re')
+    options.ip_ua_re  = interpolate_config(options.ip_ua_re, 'filterbots', 'ip_ua_re')    
+    options.reverse  = interpolate_config(options.reverse, 'filterbots', 'reverse', 
+                                          default=False, type=bool)
+    options.printlines  = interpolate_config(options.printlines, 'filterbots', 'printlines', 
+                                             default=False, type=bool)    
     
     return options, args
 

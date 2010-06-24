@@ -32,10 +32,10 @@ Console Scripts
 
 * logmerge   - Merge multiple input logstreams and stream them out in (combined) sorted order			   
 
-* logsample  - Produce a (uniform) random sample from log stream. This uses Reservoir Sampling to
+* logsample  - Produce a (uniform or weighted) random sample from log stream. This uses Reservoir Sampling to
 			   efficiently produce a random sampling over an arbitrary large input stream.
 			   
-* logplot      - Render a plot of Successive values based on log parsing. Can use one of several backends (e.g Google Chart API)
+* logplot      - Render a plot of parsed aggregate counts log. Can use one of several backends (e.g Google Chart API)
 
 * logplotserve - Start a compact webserver (WSGI-based) serving logplots. Under Construction.
 

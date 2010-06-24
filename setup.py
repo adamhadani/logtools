@@ -49,6 +49,10 @@ setup(
     
     packages = find_packages(),
 
+    install_requires = [
+        "pygooglechart>=0.2.1"
+    ],
+
     entry_points = {
         'console_scripts': [
             'filterbots = logtools:filterbots_main',

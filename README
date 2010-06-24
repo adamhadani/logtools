@@ -88,7 +88,7 @@ Notice that its easy to reverse the filtermask simply by adding the --reverse fl
 	
 5. Use a custom parser for sort/merge. In this example, parse Apache access_log and sort by date:
 
-	logmerge --parser AccessLog -f 1 access_log.*
+	logmerge --parser AccessLog -f1 access_log.*
 	
 4. Naturally, piping between utilities is useful:
 	

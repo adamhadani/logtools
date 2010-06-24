@@ -26,7 +26,7 @@ readme = "".join((l for l in open("README", "r")))
 
 setup(  
     name         = 'logtools',
-    version      = '0.1',
+    version      = '0.2',
     description  = 'Log analysis and filtering tools',
     author       = 'Adam Ever-Hadani',
     author_email = 'adamhadani@gmail.com',

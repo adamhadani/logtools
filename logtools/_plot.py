@@ -51,7 +51,7 @@ def logplot_parse_args():
     options.backend  = interpolate_config(options.backend, 'logplot', 'backend')
     options.field  = interpolate_config(options.field, 'logplot', 'field', type=int)
     options.delimiter  = interpolate_config(options.delimiter, 'logplot', 'delimiter')
-    options.output = interpolate_config(options.output, 'logplot', 'output')
+    options.output = interpolate_config(options.output, 'logplot', 'output', default=False)
     options.width = interpolate_config(options.width, 'logplot', 'width', type=int)
     options.height = interpolate_config(options.height, 'logplot', 'height', type=int)    
     options.limit = interpolate_config(options.limit, 'logplot', 'limit', type=int, default=False) 
@@ -69,11 +69,7 @@ def logplot(options, args, fh):
 
 def logplot_gchart(options, args, fh):
     """Plot using google charts api"""
-    try:
-        import pygooglechart
-    except ImportError:
-        logging.error("Must have pygooglechart package to use gchart")
-        return
+    import pygooglechart
     from pygooglechart import PieChart3D, PieChart2D
     
     delimiter = options.delimiter
@@ -95,7 +91,11 @@ def logplot_gchart(options, args, fh):
     chart.set_pie_labels(labels)
     if options.legend is True:
         chart.set_legend(map(str, legend))
-    chart.download(options.output)
+        
+    if options.output:
+        chart.download(options.output)
+        
+    return chart
     
 def logplot_main():
     """Console entry-point"""

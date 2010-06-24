@@ -17,9 +17,12 @@ import os
 import sys
 import unittest
 import logging
+from tempfile import mkstemp
 from StringIO import StringIO
+from operator import itemgetter
 
-from logtools import filterbots, geoip, logsample, logsample_weighted
+from logtools import (filterbots, geoip, logsample, logsample_weighted, 
+                      logmerge, logplot)
 from logtools import logtools_config, interpolate_config
 
 logging.basicConfig(level=logging.INFO)
@@ -98,6 +101,71 @@ class SamplingTestCase(unittest.TestCase):
     def testWeightedSampling(self):
         ret = logsample_weighted(self.weighted_opts, None, self.fh)
 
+class MergeTestCase(unittest.TestCase):
+    def setUp(self):
+        self.tempfiles = [mkstemp(), mkstemp(), mkstemp()]
+        self.args = [fname for fh, fname in self.tempfiles]
+
+    def tearDown(self):
+        """Cleanup temporary files created by test"""
+        for fh, fname in self.tempfiles:
+            os.remove(fname)
+            
+    def testNumericMerge(self):
+        os.write(self.tempfiles[0][0], "\n".join(['1 one', '5 five', '300 threehundred', 
+                                            '500 fivehundred']))
+        os.write(self.tempfiles[1][0], "\n".join(['-1 minusone', '0 zero',
+                                            '670 sixhundredseventy' ,'1000 thousand']))
+        os.write(self.tempfiles[2][0], "\n".join(['3 three', '22 twentytwo', '80 eighty']))
+        
+        options = AttrDict({'delimiter': ' ', 'field': 1, 'numeric': True })
+        output = [(k, l) for k, l in logmerge(options, self.args)]
+        
+        self.assertEquals(len(output), 11, "Output size was not equal to input size!")
+        self.assertEquals(map(itemgetter(0), output), sorted(map(lambda x: int(x[0]), output)), 
+                          "Output was not numerically sorted!")
+        
+    def testLexicalMerge(self):
+        os.write(self.tempfiles[0][0], "\n".join(['1 one', '300 threehundred', '5 five', 
+                                            '500 fivehundred']))
+        os.write(self.tempfiles[1][0], "\n".join(['-1 minusone', '0 zero', '1000 thousand',
+                                            '670 sixhundredseventy']))
+        os.write(self.tempfiles[2][0], "\n".join(['22 twentytwo', '3 three', 
+                                            '80 eighty']))
+        
+        options = AttrDict({ 'delimiter': ' ', 'field': 1, 'numeric': False })
+        output = [(k, l) for k, l in logmerge(options, self.args)]
+        
+        self.assertEquals(len(output), 11, "Output size was not equal to input size!")
+        self.assertEquals(map(itemgetter(0), output), sorted(map(itemgetter(0), output)), 
+                          "Output was not lexically sorted!")
+        
+        
+class PlotTestCase(unittest.TestCase):
+    def setUp(self):
+        self.fh = StringIO("\n".join([
+            '5 five', '1 one', '300 threehundred', '500 fivehundred',
+            '0 zero', '-1 minusone', '670 sixhundredseventy', '1000 thousand',
+            '22 twentytwo', '80 eighty', '3 three'
+        ]))
+
+    def testGChart(self):
+        options = AttrDict({
+            'backend': 'gchart',
+            'output': False,
+            'limit': 10,
+            'field': 1,
+            'delimiter': ' ',
+            'legend': True,
+            'width': 600,
+            'height': 300
+        })        
+        ret = logplot(options, None, self.fh)
+        tmp_fh, tmp_fname = mkstemp()
+        ret.download(tmp_fname)
+        self.assertNotEquals(ret, None, "logplot returned None. Expected a Plot object")
+        os.remove(tmp_fname)
+    
 
 if __name__ == "__main__":
     unittest.main()

@@ -57,7 +57,7 @@ def logmerge_parse_args():
     options.numeric = interpolate_config(options.numeric, options.profile, 
                                     'numeric', default=False, type=bool)    
     options.parser = interpolate_config(options.parser, 
-                                    options.profile, 'parser')    
+                                    options.profile, 'parser', default=None)    
 
     return options, args
 
@@ -68,9 +68,9 @@ def logmerge(options, args):
     delimiter = options.delimiter
     field = options.field-1
     
-    if options.numeric is True:
+    if options.get('numeric', None) is True:
         key_func = lambda x: (int(x.strip().split(delimiter)[field]), x)
-    elif options.parser is not None:
+    elif options.get('parser', None) is not None:
         parser = eval(options.parser, vars(logtools.parsers), {})()
         key_func = lambda x: (parser(x.strip()).by_index(field), x)
     else:
@@ -79,10 +79,11 @@ def logmerge(options, args):
     iters = (imap(key_func, open(filename, "r")) for filename in args)
     
     for k, line in merge(*iters):
-        print line.strip()
+        yield k, line.strip()
     
 def logmerge_main():
     """Console entry-point"""
     options, args = logmerge_parse_args()
-    logmerge(options, args)
+    for key, line in logmerge(options, args):
+        print line
     return 0

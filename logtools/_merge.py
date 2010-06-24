@@ -15,7 +15,7 @@
 logtools._merge
 Logfile merging utilities.
 These typically help in streaming multiple 
-input logfiles through, outputting them in
+individually sorted input logfiles through, outputting them in
 combined sorted order (typically by date field)
 """
 import os

@@ -78,7 +78,7 @@ Notice that its easy to reverse the filtermask simply by adding the --reverse fl
 
 	cat access_log.1 | geoip -r '.*client (.*?)\]'
 
-3. Merge log files from multiple webapps and output combined and (lexically) sorted stream:
+3. Merge (individually sorted) log files from multiple webapps and output combined and (lexically) sorted stream:
 	
 	logmerge -d' ' -f1 app_log.1 app_log.2
 	
@@ -86,9 +86,9 @@ Notice that its easy to reverse the filtermask simply by adding the --reverse fl
 
 	logmerge -d' ' -f3 --numeric app_log.*
 	
-5. Use a custom parser for sort/merge. In this example, parse Apache access_log and sort by date:
+5. Use a custom parser for sort/merge. In this example, parse CommonLogFormat and sort by date:
 
-	logmerge --parser AccessLog -f1 access_log.*
+	logmerge --parser CommonLogFormat -f4 access_log.*
 	
 4. Naturally, piping between utilities is useful:
 	

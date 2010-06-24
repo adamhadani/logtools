@@ -97,7 +97,6 @@ class SamplingTestCase(unittest.TestCase):
         
     def testWeightedSampling(self):
         ret = logsample_weighted(self.weighted_opts, None, self.fh)
-        print >> sys.stderr, ret
 
 
 if __name__ == "__main__":

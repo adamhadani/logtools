@@ -23,7 +23,7 @@ import logging
 from itertools import imap
 from random import randint, random
 from optparse import OptionParser
-from heapq import heappush, heappop
+from heapq import heappush, heappop, heapreplace
 
 from _config import logtools_config, interpolate_config
 
@@ -95,8 +95,7 @@ def logsample_weighted(options, args, fh):
         else:
             if k > min_val:
                 # Replace smallest item in record list
-                heappop(R)
-                heappush(R, (k, line))
+                heapreplace(R, (k, line))
         i+=1
                 
     # Emit output

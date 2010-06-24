@@ -1,8 +1,9 @@
 
-2010-06-23
+version 0.2
 	Added support for configuration profiles (-P <profile_name>)
-	Added to PyPI Python Package Index
+	Added logmerge utility
 	
-2010-06-22
+version 0.1
+	Added to PyPI Python Package Index
 	Initial check-in of project.
 	Version 0.1 Tag

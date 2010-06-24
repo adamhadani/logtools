@@ -22,6 +22,8 @@ except ImportError:
 import sys
 import os
 
+readme = "".join((l for l in open("README", "r")))
+
 setup(  
     name         = 'logtools',
     version      = '0.1',
@@ -43,28 +45,7 @@ setup(
         "Intended Audience :: Developers",
         "Intended Audience :: System Administrators"        
         ],
-    long_description = """\
-logtools
-A log files analysis / filtering framework.
-
-logtools encompasses of a few easy-to-use, easy to configure command-line
-tools, typically used in conjunction with Apache logs.
-
-The idea is to standardize log parsing and filtering using a coherent
-configuration methodology and UNIX command-line interface (STDIN input streaming, command-line piping etc.)
-so as to create a consistent environment for creating reports, charts and other such
-log mining artifacts that are typically employed in a Website context.
-
-Use case examples (Assuming a configured ~/.logtoolsrc, see Documentation):
-
-* Get aggregated (IP, Country) count for all Bot visits:
-
-  cat access_log.2010-05-15 | filterbots --print --reverse | geoip | sort | uniq -c | sort -k1,1nr
-
-* Get a random sampling of 50 lines from an arbitrarily large input log stream:
-
-  cat error_log.1 | filterbots --print | logsample -n50
-""",
+    long_description = readme,
     
     packages = find_packages(),
 
@@ -72,8 +53,9 @@ Use case examples (Assuming a configured ~/.logtoolsrc, see Documentation):
         'console_scripts': [
             'filterbots = logtools:filterbots_main',
             'geoip = logtools:geoip_main',
-            'logsample = logtools:logsample_main',
+            'logmerge = logtools:logmerge_main',
             'logplot = logtools:logplot_main',
+            'logsample = logtools:logsample_main',            
         ]
     },
 

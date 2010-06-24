@@ -31,6 +31,7 @@ Console Scripts
                The regular expression mask used for matching the IP in the log line is user-specified.
 
 * logmerge   - Merge multiple input logstreams and stream them out in (combined) sorted order			   
+
 * logsample  - Produce a (uniform) random sample from log stream. This uses Reservoir Sampling to
 			   efficiently produce a random sampling over an arbitrary large input stream.
 			   
@@ -77,9 +78,17 @@ Notice that its easy to reverse the filtermask simply by adding the --reverse fl
 
 	cat access_log.1 | geoip -r '.*client (.*?)\]'
 
-3. Merge log files from multiple webapps and output combined and sorted stream:
+3. Merge log files from multiple webapps and output combined and (lexically) sorted stream:
 	
-	logmerge -d' ' -f1 --keyformat access_log.1 access_log.2
+	logmerge -d' ' -f1 app_log.1 app_log.2
+	
+4. Merge and sort numerically on some numeric field:
+
+	logmerge -d' ' -f3 --numeric app_log.*
+	
+5. Use a custom parser for sort/merge. In this example, parse Apache access_log and sort by date:
+
+	logmerge --parser AccessLog -f 1 access_log.*
 	
 4. Naturally, piping between utilities is useful:
 	

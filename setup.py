@@ -56,6 +56,7 @@ so as to create a consistent environment for creating reports, charts and other 
 log mining artifacts that are typically employed in a Website context.
 
 Use case examples (Assuming a configured ~/.logtoolsrc, see Documentation):
+
 * Get aggregated (IP, Country) count for all Bot visits:
 
   cat access_log.2010-05-15 | filterbots --print --reverse | geoip | sort | uniq -c | sort -k1,1nr

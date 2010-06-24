@@ -21,23 +21,29 @@ import re
 import sys
 import logging
 from itertools import imap
-from random import randint
+from random import randint, random
 from optparse import OptionParser
+from heapq import heappush, heappop
 
 from _config import logtools_config, interpolate_config
 
-__all__ = ['logsample_parse_args', 'logsample', 'logsample_main']
+__all__ = ['logsample_parse_args', 'logsample', 'logsample_weighted', 'logsample_main']
 
 def logsample_parse_args():
     parser = OptionParser()
     parser.add_option("-n", "--num-samples", dest="num_samples", type=int, 
                       help="Number of samples to produce")
+    parser.add_option("-w", "--weighted", dest="weighted", action="store_true",
+                      help="Use Weighted Reservoir Sampling (needs -f and -d parameters)")
 
+    parser.add_option("-P", "--profile", dest="profile", default='logsample',
+                      help="Configuration profile (section in configuration file)")
+    
     options, args = parser.parse_args()
 
     # Interpolate from configuration
-    options.num_samples  = int(interpolate_config(options.num_samples, 
-                                                  'logsample', 'num_samples'))
+    options.num_samples  = interpolate_config(options.num_samples, 
+                                options.profile, 'num_samples', type=int)
 
     return options, args
 
@@ -47,7 +53,7 @@ def logsample(options, args, fh):
     R = []
     N = options.num_samples
     
-    for i, k in enumerate(imap(lambda x: x.strip(), fh)):
+    for i, k in enumerate(fh):
         if i < N:
             R.append(k)
         else:
@@ -56,14 +62,57 @@ def logsample(options, args, fh):
                 R[r] = k
 
     # Emit output
-    for r in R:
-        print r
+    for record in R:
+        print record.strip()
         
     return R
 
+def logsample_weighted(options, args, fh):
+    """Implemented Weighted Reservoir Sampling, assuming integer weights.
+    See Weighted random sampling with a reservoir, Efraimidis et al."""
+    
+    N = options.num_samples
+    delimiter = options.delimiter
+    # NOTE: Convert to 0-based indexing since we expose as 1-based
+    field = options.field-1
+    
+    R = []
+    min_val = float("inf")
+    i = 0
+    
+    for line in fh:
+        w = int(line.split(delimiter)[field])
+        if w < 1: 
+            continue
+        
+        r = random()
+        k = r ** (1./w)            
+        
+        if i < N:
+            heappush(R, (k, line))
+            if k < min_val:
+                min_val = k
+        else:
+            if k > min_val:
+                # Replace smallest item in record list
+                heappop(R)
+                heappush(R, (k, line))
+        i+=1
+                
+    # Emit output
+    for key, record in R:
+        print record.split()
+        
+    return R
+        
 def logsample_main():
     """Console entry-point"""
     options, args = logsample_parse_args()
-    logsample(options, args, fh=sys.stdin.readlines())
+    
+    if options.weighted is True:
+        logsample_weighted(options, args, fh=sys.stdin.readlines())
+    else:
+        logsample(options, args, fh=sys.stdin.readlines())
+        
     return 0
 

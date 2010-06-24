@@ -32,10 +32,13 @@ def geoip_parse_args():
     parser.add_option("-r", "--re", dest="ip_re", default=None, 
                     help="Regular expression to lookup IP in logrow")
 
+    parser.add_option("-P", "--profile", dest="profile", default='geoip',
+                      help="Configuration profile (section in configuration file)")
+    
     options, args = parser.parse_args()
     
     # Interpolate from configuration
-    options.ip_re  = interpolate_config(options.ip_re, 'geoip', 'ip_re')
+    options.ip_re  = interpolate_config(options.ip_re, options.profile, 'ip_re')
 
     return options, args
 

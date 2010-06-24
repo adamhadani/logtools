@@ -1,4 +1,8 @@
 
+2010-06-23
+	Added support for configuration profiles (-P <profile_name>)
+	Added to PyPI Python Package Index
+	
 2010-06-22
 	Initial check-in of project.
 	Version 0.1 Tag

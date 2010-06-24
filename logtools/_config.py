@@ -34,7 +34,9 @@ def interpolate_config(var, section, key, default=None, type=str):
     try:
         return var or {
             str: logtools_config.get,
-            bool: logtools_config.getboolean
+            bool: logtools_config.getboolean,
+            int:  logtools_config.getint,
+            float: logtools_config.getfloat
         }.get(type, str)(section, key)
     except KeyError:
         raise KeyError("Invalid parameter type: '{0}'".format(type))    

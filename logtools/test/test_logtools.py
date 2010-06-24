@@ -19,7 +19,7 @@ import unittest
 import logging
 from StringIO import StringIO
 
-from logtools import filterbots, geoip, logsample
+from logtools import filterbots, geoip, logsample, logsample_weighted
 from logtools import logtools_config, interpolate_config
 
 logging.basicConfig(level=logging.INFO)
@@ -38,15 +38,15 @@ class ConfigurationTestCase(unittest.TestCase):
 
 class FilterBotsTestCase(unittest.TestCase):
     def setUp(self):
-        self.options = AttrDict()
-        self.options.reverse = False
-        self.options.printlines = False
-        self.options.ip_ua_re = "^(?P<ip>.*?) - USER_AGENT:'(?P<ua>.*?)'"
-        self.options.bots_ips = StringIO()
-        self.options.bots_ua = StringIO(
-            "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)\n"
-        )
-
+        self.options = AttrDict({
+            "reverse": False,
+            "printlines": False,
+            "ip_ua_re": "^(?P<ip>.*?) - USER_AGENT:'(?P<ua>.*?)'",
+            "bots_ips": StringIO(),
+            "bots_ua": StringIO(
+                "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)\n"
+            )
+        })
         self.fh = StringIO(
             "127.0.0.1 - USER_AGENT:'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' - ...\n" \
             "255.255.255.255 - USER_AGENT:'Mozilla' - ...\n"
@@ -59,8 +59,7 @@ class FilterBotsTestCase(unittest.TestCase):
 
 class GeoIPTestCase(unittest.TestCase):
     def setUp(self):
-        self.options = AttrDict()
-        self.options.ip_re = "^(.*?) -"
+        self.options = AttrDict({ 'ip_re': '^(.*?) -' })
         
         self.fh = StringIO(
             "127.0.0.1 - USER_AGENT:'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' - ...\n" \
@@ -76,20 +75,30 @@ class GeoIPTestCase(unittest.TestCase):
 
         ret = geoip(self.options, None, self.fh)
 
+        
 class SamplingTestCase(unittest.TestCase):
     def setUp(self):
-        self.options = AttrDict()
-        self.options.num_samples = 1
-        
-        self.fh = StringIO(
-            "127.0.0.1 - USER_AGENT:'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' - ...\n" \
-            "255.255.255.255 - USER_AGENT:'Mozilla' - ...\n"
-        )
+        self.options = AttrDict({ 'num_samples': 1 })
+        self.weighted_opts = AttrDict({
+            'num_samples': 5,
+            'field': 1,
+            'delimiter': ' '
+        })
+        self.fh = StringIO("\n".join([
+            '5 five', '1 one', '300 threehundred', '500 fivehundred',
+            '0 zero', '-1 minusone', '670 sixhundredseventy', '1000 thousand',
+            '22 twentytwo', '80 eighty', '3 three'
+        ]))
 
-    def testSampling(self):
+    def testUniformSampling(self):
         ret = logsample(self.options, None, self.fh)
         self.assertEquals(len(ret), self.options.num_samples, 
                           "logsample output different than expected: %s" % str(ret))
+        
+    def testWeightedSampling(self):
+        ret = logsample_weighted(self.weighted_opts, None, self.fh)
+        print >> sys.stderr, ret
+
 
 if __name__ == "__main__":
     unittest.main()

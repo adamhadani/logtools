@@ -35,7 +35,7 @@ Console Scripts
 * logsample  - Produce a (uniform) random sample from log stream. This uses Reservoir Sampling to
 			   efficiently produce a random sampling over an arbitrary large input stream.
 			   
-* logplot      - Render a plot of Successive values based on log parsing. Under Construction.
+* logplot      - Render a plot of Successive values based on log parsing. Can use one of several backends (e.g Google Chart API)
 
 * logplotserve - Start a compact webserver (WSGI-based) serving logplots. Under Construction.
 
@@ -74,7 +74,7 @@ Notice that its easy to reverse the filtermask simply by adding the --reverse fl
 
 	cat error_log.1 | filterbots -r ".*\[client (?P<ip>.*?)\].*USER_AGENT:(?P<ua>.*?)\'" --print --reverse
 
-2. The following example demonstrates using the geoip wrapper. Pretty self-explanatory:
+2. The following example demonstrates using the geoip wrapper (Uses Maxmind GeoIP package). Pretty self-explanatory:
 
 	cat access_log.1 | geoip -r '.*client (.*?)\]'
 
@@ -90,11 +90,15 @@ Notice that its easy to reverse the filtermask simply by adding the --reverse fl
 
 	logmerge --parser CommonLogFormat -f4 access_log.*
 	
-4. Naturally, piping between utilities is useful:
+6. Generate a pie chart of Country distributions in Apache access_log using Maxmind GeoIP and GoogleChart API. requires pygooglechart package:
+
+	cat access_log.1 | geoip -r '^(.*?) -' | cut -d$'\t' -f2 | sort | uniq -c | logplot -d' ' -f1 --backend gchart -W600 -H300 --limit 10 --output plot.png
+	
+7. Naturally, piping between utilities is useful:
 	
 	cat access_log.1 | filterbots -r "^(?P<ip>.*?) -.*(?P<ua>.*?)" --print | geoip -r '.*client (.*?)\]'
 
-5. All tools admit a --help command-line option that will print out detailed information about the different
+8. All tools admit a --help command-line option that will print out detailed information about the different
    options available.
 
 Unit-testing

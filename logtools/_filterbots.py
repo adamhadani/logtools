@@ -59,7 +59,7 @@ def filterbots_parse_args():
     options.reverse   = interpolate_config(options.reverse, 
                     options.profile, 'reverse', default=False, type=bool)
     options.printlines  = interpolate_config(options.printlines, 
-                    options.profile, 'printlines', default=False, type=bool)    
+                    options.profile, 'print', default=False, type=bool)    
     
     return options, args
 

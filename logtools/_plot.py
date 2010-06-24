@@ -32,7 +32,7 @@ __all__ = ['logplot_parse_args', 'logplot', 'logplot_main']
 def logplot_parse_args():
     parser = OptionParser()
     parser.add_option("-b", "--backend", dest="backend",  
-                      help="Backend to use for plotting. See --help for available backends")
+                      help="Backend to use for plotting. Currently available backends: 'gchart'")
     parser.add_option("-f", "--field", dest="field", type=int,
                       help="Index of field to use as input for generating plot")
     parser.add_option("-d", "--delimiter", dest="delimiter",
@@ -45,17 +45,20 @@ def logplot_parse_args():
     parser.add_option("-l", "--legend", dest="legend", action="store_true", 
                       help="Render Plot Legend")       
     
+    parser.add_option("-P", "--profile", dest="profile", default='logmerge',
+                      help="Configuration profile (section in configuration file)")
+    
     options, args = parser.parse_args()
 
     # Interpolate from configuration
-    options.backend  = interpolate_config(options.backend, 'logplot', 'backend')
-    options.field  = interpolate_config(options.field, 'logplot', 'field', type=int)
-    options.delimiter  = interpolate_config(options.delimiter, 'logplot', 'delimiter')
-    options.output = interpolate_config(options.output, 'logplot', 'output', default=False)
-    options.width = interpolate_config(options.width, 'logplot', 'width', type=int)
-    options.height = interpolate_config(options.height, 'logplot', 'height', type=int)    
-    options.limit = interpolate_config(options.limit, 'logplot', 'limit', type=int, default=False) 
-    options.legend = interpolate_config(options.legend, 'logplot', 'legend', type=bool, default=False) 
+    options.backend  = interpolate_config(options.backend, options.profile, 'backend')
+    options.field  = interpolate_config(options.field, options.profile, 'field', type=int)
+    options.delimiter = interpolate_config(options.delimiter, options.profile, 'delimiter')
+    options.output = interpolate_config(options.output, options.profile, 'output', default=False)
+    options.width = interpolate_config(options.width, options.profile, 'width', type=int)
+    options.height = interpolate_config(options.height, options.profile, 'height', type=int)    
+    options.limit = interpolate_config(options.limit, options.profile, 'limit', type=int, default=False) 
+    options.legend = interpolate_config(options.legend, options.profile, 'legend', type=bool, default=False) 
 
     return options, args
 
@@ -69,7 +72,11 @@ def logplot(options, args, fh):
 
 def logplot_gchart(options, args, fh):
     """Plot using google charts api"""
-    import pygooglechart
+    try:
+        import pygooglechart
+    except ImportError:
+        logging.error("pygooglechart Python package must be installed to use the 'gchart' backend")
+        sys.exit(-1)
     from pygooglechart import PieChart3D, PieChart2D
     
     delimiter = options.delimiter
@@ -82,17 +89,17 @@ def logplot_gchart(options, args, fh):
         k = int(splitted_line.pop(field-1))
         pts.append((k, ' '.join(splitted_line), k))
         
-    if options.limit:
+    if options.get('limit', None):
         # Only wanna use top N samples by key, sort and truncate
         pts = sorted(pts, key=itemgetter(0), reverse=True)[:options.limit]
         
     data, labels, legend = zip(*pts)
     chart.add_data(data)
     chart.set_pie_labels(labels)
-    if options.legend is True:
+    if options.get('legend', None) is True:
         chart.set_legend(map(str, legend))
         
-    if options.output:
+    if options.get('output', None):
         chart.download(options.output)
         
     return chart

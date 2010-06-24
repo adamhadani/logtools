@@ -150,6 +150,11 @@ class PlotTestCase(unittest.TestCase):
         ]))
 
     def testGChart(self):
+        try:
+            import pygooglechart
+        except ImportError:
+            print >> sys.stderr, "pygooglechart Python package not available - skipping logplot gchart unittest."
+            return        
         options = AttrDict({
             'backend': 'gchart',
             'output': False,

@@ -35,6 +35,7 @@ __all__ = ['logmerge_parse_args', 'logmerge', 'logmerge_main']
 def logmerge_parse_args():
     usage = "%prog -f <field> -d <delimiter> filename1 filename2 ..."
     parser = OptionParser(usage=usage)
+    
     parser.add_option("-f", "--field", dest="field", default=None, type=int,
                     help="Field index to use as key for sorting by (1-based)")
     parser.add_option("-d", "--delimiter", dest="delimiter", default=None, 

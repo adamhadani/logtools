@@ -2,6 +2,7 @@
 version 0.2
 	Added support for configuration profiles (-P <profile_name>)
 	Added logmerge utility
+	Added logplot utility with initial Google Chart API support
 	
 version 0.1
 	Added to PyPI Python Package Index

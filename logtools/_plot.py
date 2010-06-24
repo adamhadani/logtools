@@ -40,8 +40,10 @@ def logplot_parse_args():
     parser.add_option("-o", "--output", dest="output", help="Output filename")    
     parser.add_option("-W", "--width", dest="width", type=int, help="Plot Width")   
     parser.add_option("-H", "--height", dest="height", type=int, help="Plot Height")       
-    parser.add_option("-l", "--limit", dest="limit", type=int, 
+    parser.add_option("-L", "--limit", dest="limit", type=int, 
                       help="Only plot the top N rows, sorted decreasing by key")        
+    parser.add_option("-l", "--legend", dest="legend", action="store_true", 
+                      help="Render Plot Legend")       
     
     options, args = parser.parse_args()
 
@@ -52,7 +54,8 @@ def logplot_parse_args():
     options.output = interpolate_config(options.output, 'logplot', 'output')
     options.width = interpolate_config(options.width, 'logplot', 'width', type=int)
     options.height = interpolate_config(options.height, 'logplot', 'height', type=int)    
-    options.limit = interpolate_config(options.limit, 'logplot', 'limit', type=int, default=None) 
+    options.limit = interpolate_config(options.limit, 'logplot', 'limit', type=int, default=False) 
+    options.legend = interpolate_config(options.legend, 'logplot', 'legend', type=bool, default=False) 
 
     return options, args
 
@@ -81,15 +84,17 @@ def logplot_gchart(options, args, fh):
     for l in imap(lambda x: x.strip(), fh):
         splitted_line = l.split(delimiter)
         k = int(splitted_line.pop(field-1))
-        pts.append((k, ' '.join(splitted_line)))
+        pts.append((k, ' '.join(splitted_line), k))
         
     if options.limit:
         # Only wanna use top N samples by key, sort and truncate
         pts = sorted(pts, key=itemgetter(0), reverse=True)[:options.limit]
         
-    data, labels = zip(*pts)
+    data, labels, legend = zip(*pts)
     chart.add_data(data)
-    chart.set_pie_labels(labels)    
+    chart.set_pie_labels(labels)
+    if options.legend is True:
+        chart.set_legend(map(str, legend))
     chart.download(options.output)
     
 def logplot_main():

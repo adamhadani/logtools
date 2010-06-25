@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# aggregate
+#
+# Shortcut for a common aggregation operation over logs of this form:
+#
+#	cat access_log.* | cut -d' ' -f1 | sort | uniq -c | sort -k1,1nr
+#
+
+DELIM=' '
+FIELD=1
+
+usage() {
+	printf "Usage: $(basename $0) -d <delimiter> -f <field>\n" >&2
+	exit -1
+}
+
+#while getopt "d:f:h" OPT
+#do
+#	case $OPT in
+#		d)	DELIM="$OPTARG"
+#			;;
+#		f)	FIELD="$OPTARG"
+#			;;
+#		h)	usage
+#			;;
+#	esac
+#done
+#shift $((OPTIND-1))
+
+export LC_ALL=C
+cat | cut -d "$DELIM" -f "$FIELD" | sort | uniq -c | sort -k1,1nr
+

@@ -30,6 +30,8 @@ Console Scripts
 * geoip      - Simple helper utility for using the GeoIP tool to tag log lines by the IP's country.
                The regular expression mask used for matching the IP in the log line is user-specified.
 
+* logparse   - use the logtools.parsers module to intelligibly parse the log, possibly emitting selected field(s)
+
 * logmerge   - Merge multiple input logstreams and stream them out in (combined) sorted order			   
 
 * logsample  - Produce a (uniform or weighted) random sample from log stream. This uses Reservoir Sampling to
@@ -87,20 +89,24 @@ Notice that its easy to reverse the filtermask simply by adding the --reverse fl
 4. Merge and sort numerically on some numeric field:
 
 	logmerge -d' ' -f3 --numeric app_log.*
-	
+		
 5. Use a custom parser for sort/merge. In this example, parse CommonLogFormat and sort by date:
 
 	logmerge --parser CommonLogFormat -f4 access_log.*
 	
-6. Generate a pie chart of Country distributions in Apache access_log using Maxmind GeoIP and GoogleChart API. requires pygooglechart package:
+6. Use logparse to parse a CommonLogFormat log (e.g Apache access_log) and print only the date field:
+
+	cat access_log | logparse --parser CommonLogFormat -f4
+	
+7. Generate a pie chart of Country distributions in Apache access_log using Maxmind GeoIP and GoogleChart API. requires pygooglechart package:
 
 	cat access_log.1 | geoip -r '^(.*?) -' | cut -d$'\t' -f2 | sort | uniq -c | logplot -d' ' -f1 --backend gchart -W600 -H300 --limit 10 --output plot.png
 
-7. Filter bots and aggregate IP address values to show IPs of visitors with counts and sorted from most frequent to least:
+8. Filter bots and aggregate IP address values to show IPs of visitors with counts and sorted from most frequent to least:
 
 	cat access_log.1 | filterbots --print | aggregate -d' ' -f1
 	
-8. Naturally, piping between utilities is useful:
+9. Naturally, piping between utilities is useful:
 	
 	cat access_log.1 | filterbots -r "^(?P<ip>.*?) -.*(?P<ua>.*?)" --print | geoip -r '.*client (.*?)\]'
 

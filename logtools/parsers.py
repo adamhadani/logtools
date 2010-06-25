@@ -51,12 +51,16 @@ class AccessLogLine(dict):
     def __init__(self, fieldnames):
         self._fieldnames = dict(enumerate(fieldnames))
         
-    def by_index(self, i):
-        return self.by_key(self._fieldnames[i])
+    def by_index(self, i, raw=False):
+        return self.by_key(self._fieldnames[i], raw=raw)
     
-    def by_key(self, key):
+    def by_key(self, key, raw=False):
         """Return the i-th field parsed"""
         val = None
+        
+        if raw is True:
+            return self[key]
+        
         if key == '%t':
             val = datetime.strptime(self[key][1:-7], '%d/%b/%Y:%H:%M:%S')
         else:

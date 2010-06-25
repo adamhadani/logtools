@@ -31,7 +31,8 @@ setup(
     author       = 'Adam Ever-Hadani',
     author_email = 'adamhadani@gmail.com',
     url          = 'http://github.com/adamhadani/logtools',
-    keywords     = ['logging', 'sampling', 'geoip', 'filter'],
+    keywords     = ['logging', 'sampling', 'geoip', 'filterbots', 
+                    'logparse', 'logmerge', 'logplot', 'filter'],
     classifiers = [
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.6",        
@@ -73,6 +74,7 @@ This software is distributed under the Apache 2.0 license.
         'console_scripts': [
             'filterbots = logtools:filterbots_main',
             'geoip = logtools:geoip_main',
+            'logparse = logtools:logparse_main',
             'logmerge = logtools:logmerge_main',
             'logplot = logtools:logplot_main',
             'logsample = logtools:logsample_main',            

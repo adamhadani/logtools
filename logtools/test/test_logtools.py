@@ -22,7 +22,7 @@ from StringIO import StringIO
 from operator import itemgetter
 
 from logtools import (filterbots, geoip, logsample, logsample_weighted, 
-                      logmerge, logplot)
+                      logparse, logmerge, logplot)
 from logtools.parsers import *
 from logtools import logtools_config, interpolate_config, AttrDict
 
@@ -57,6 +57,12 @@ class ParsingTestCase(unittest.TestCase):
             parsed = parser(logrow)
             self.assertNotEquals(parsed, None, "Could not parse line: %s" % str(logrow))        
         
+        
+    def testLogParse(self):
+        options = AttrDict({'parser': 'CommonLogFormat', 'field': 4})
+        fh = StringIO('\n'.join(self.clf_rows))
+        output = [l for l in logparse(options, None, fh)]
+        self.assertEquals(len(output), len(self.clf_rows), "Output size was not equal to input size!")
         
             
 class FilterBotsTestCase(unittest.TestCase):

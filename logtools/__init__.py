@@ -24,5 +24,6 @@ from _config import *
 from _filterbots import *
 from _geoip import *
 from _merge import *
+from _parse import *
 from _plot import *
 from _sample import *

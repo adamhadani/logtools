@@ -41,6 +41,9 @@ class GChartBackend(PlotBackend):
     """Google Chart API plotting backend.
     uses the pygooglechart python package"""
     
+    def __init__(self):
+        PlotBackend.__init__(self)
+        
     def plot(self, options, args, fh):
         """Plot using google charts api"""
         try:
@@ -49,8 +52,59 @@ class GChartBackend(PlotBackend):
             logging.error("pygooglechart Python package must be installed to use the 'gchart' backend")
             sys.exit(-1)
 
-        if options.type == 'pie':
-            return self._plot_pie(options, args, fh)
+        try:
+            chart = {
+                'pie': self._plot_pie,
+                'line': self._plot_line
+            }[options.type](options, args, fh)
+        except KeyError:
+            raise KeyError("Invalid plot type: '%s'" % options.type)
+        else:
+            if options.get('title', None):
+                chart.set_title(options.title)
+            if options.get('output', None):
+                chart.download(options.output)
+                
+            return chart
+
+    def _plot_line(self, options, args, fh):
+        """Plot a line chart"""
+        from pygooglechart import Chart, SimpleLineChart, Axis
+        
+        delimiter = options.delimiter
+        field = options.field
+        
+        pts = []
+        for l in imap(lambda x: x.strip(), fh):
+            splitted_line = l.split(delimiter)
+            k = int(splitted_line.pop(field-1))
+            pts.append((k, ' '.join(splitted_line)))
+        
+        if options.get('limit', None):
+            # Only wanna use top N samples by key, sort and truncate
+            pts = sorted(pts, key=itemgetter(0), reverse=True)[:options.limit]
+                      
+        if not pts:
+            raise ValueError("No data to plot")
+                        
+        max_y = max((v for v, label in pts))  
+        chart = SimpleLineChart(options.width, options.height,y_range=[0, max_y])
+        
+        # Styling
+        chart.set_colours(['0000FF'])
+        chart.fill_linear_stripes(Chart.CHART, 0, 'CCCCCC', 0.2, 'FFFFFF', 0.2)        
+        chart.set_grid(0, 25, 5, 5)
+        
+        data, labels = zip(*pts)
+        chart.add_data(data)
+        
+        # Axis labels
+        chart.set_axis_labels(Axis.BOTTOM, labels)
+        left_axis = range(0, max_y + 1, 25)
+        left_axis[0] = ''
+        chart.set_axis_labels(Axis.LEFT, left_axis)
+        
+        return chart
         
     def _plot_pie(self, options, args, fh):
         """Plot a pie chart"""
@@ -70,15 +124,15 @@ class GChartBackend(PlotBackend):
             # Only wanna use top N samples by key, sort and truncate
             pts = sorted(pts, key=itemgetter(0), reverse=True)[:options.limit]
             
+        if not pts:
+            raise ValueError("No data to plot")
+        
         data, labels, legend = zip(*pts)
         chart.add_data(data)
         chart.set_pie_labels(labels)
         if options.get('legend', None) is True:
             chart.set_legend(map(str, legend))
-            
-        if options.get('output', None):
-            chart.download(options.output)
-            
+                        
         return chart
     
 
@@ -86,7 +140,7 @@ def logplot_parse_args():
     parser = OptionParser()
     parser.add_option("-b", "--backend", dest="backend",  
                       help="Backend to use for plotting. Currently available backends: 'gchart'")
-    parser.add_option("-t", "--type", dest="type",  
+    parser.add_option("-T", "--type", dest="type",  
                       help="Chart type. Available types: 'pie', 'histogram', 'line'." \
                       "Availability might differ due to backend.")    
     parser.add_option("-f", "--field", dest="field", type=int,
@@ -99,9 +153,11 @@ def logplot_parse_args():
     parser.add_option("-L", "--limit", dest="limit", type=int, 
                       help="Only plot the top N rows, sorted decreasing by key")        
     parser.add_option("-l", "--legend", dest="legend", action="store_true", 
-                      help="Render Plot Legend")       
+                      help="Render Plot Legend")
+    parser.add_option("-t", "--title", dest="title",
+                      help="Plot Title")     
     
-    parser.add_option("-P", "--profile", dest="profile", default='logmerge',
+    parser.add_option("-P", "--profile", dest="profile", default='logplot',
                       help="Configuration profile (section in configuration file)")
     
     options, args = parser.parse_args()
@@ -116,12 +172,13 @@ def logplot_parse_args():
     options.height = interpolate_config(options.height, options.profile, 'height', type=int)    
     options.limit = interpolate_config(options.limit, options.profile, 'limit', type=int, default=False) 
     options.legend = interpolate_config(options.legend, options.profile, 'legend', type=bool, default=False) 
+    options.title = interpolate_config(options.title, options.profile, 'title', default=False)
 
     return AttrDict(options.__dict__), args
 
 def logplot(options, args, fh):
     """Plot some index defined over the logstream,
-    using user-specified backend"""
+    using user-specified backend"""            
     return {
         "gchart":  GChartBackend()
     }[options.backend].plot(options, args, fh)

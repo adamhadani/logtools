@@ -26,7 +26,7 @@ import os
 
 setup(  
     name         = 'logtools',
-    version      = '0.3',
+    version      = '0.4',
     description  = 'Log analysis and filtering tools',
     author       = 'Adam Ever-Hadani',
     author_email = 'adamhadani@gmail.com',

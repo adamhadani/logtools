@@ -182,7 +182,6 @@ class PlotTestCase(unittest.TestCase):
             return        
         options = AttrDict({
             'backend': 'gchart',
-            'type': 'pie',
             'output': False,
             'limit': 10,
             'field': 1,
@@ -191,10 +190,18 @@ class PlotTestCase(unittest.TestCase):
             'width': 600,
             'height': 300
         })        
-        ret = logplot(options, None, self.fh)
+        chart = None
+        for plot_type in ('pie', 'line'):
+            self.fh.seek(0)
+            options['type'] = plot_type
+            chart = logplot(options, None, self.fh)
+            self.assertNotEquals(chart, None, "logplot returned None. Expected a Plot object")
+            
+        # Should raise ValueError here due to fh being at EOF
+        self.assertRaises(ValueError, logplot, options, None, self.fh)
+        
         tmp_fh, tmp_fname = mkstemp()
-        ret.download(tmp_fname)
-        self.assertNotEquals(ret, None, "logplot returned None. Expected a Plot object")
+        chart.download(tmp_fname)
         os.remove(tmp_fname)
     
 

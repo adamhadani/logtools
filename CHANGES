@@ -2,6 +2,9 @@
 version 0.4
 	Added unit-testing for logtools.parsers module
 	Fixed small bug in GeoIP unit-testing
+	Fixed small bug in logplot option parsing from configuration file
+	Added logplot gchart backend 'line' chart type 
+	Improved coverage of unit-testing for the plotting module
 	
 version 0.3
 	Some bugfixes to command-line/options parsing

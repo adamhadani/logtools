@@ -24,15 +24,71 @@ from itertools import imap
 from random import randint
 from operator import itemgetter
 from optparse import OptionParser
+from abc import ABCMeta, abstractmethod
 
 from _config import logtools_config, interpolate_config
 
 __all__ = ['logplot_parse_args', 'logplot', 'logplot_main']
 
+class PlotBackend(object):
+    __metaclass__ = ABCMeta
+    
+    @abstractmethod
+    def plot(self, options, args, fh):
+        """Plot using backend implementation"""
+        
+class GChartBackend(PlotBackend):
+    """Google Chart API plotting backend.
+    uses the pygooglechart python package"""
+    
+    def plot(self, options, args, fh):
+        """Plot using google charts api"""
+        try:
+            import pygooglechart
+        except ImportError:
+            logging.error("pygooglechart Python package must be installed to use the 'gchart' backend")
+            sys.exit(-1)
+
+        if options.type == 'pie':
+            return self._plot_pie(options, args, fh)
+        
+    def _plot_pie(self, options, args, fh):
+        """Plot a pie chart"""
+        from pygooglechart import PieChart3D, PieChart2D
+
+        delimiter = options.delimiter
+        field = options.field
+                
+        chart = PieChart2D(options.width, options.height)
+        pts = []
+        for l in imap(lambda x: x.strip(), fh):
+            splitted_line = l.split(delimiter)
+            k = int(splitted_line.pop(field-1))
+            pts.append((k, ' '.join(splitted_line), k))
+            
+        if options.get('limit', None):
+            # Only wanna use top N samples by key, sort and truncate
+            pts = sorted(pts, key=itemgetter(0), reverse=True)[:options.limit]
+            
+        data, labels, legend = zip(*pts)
+        chart.add_data(data)
+        chart.set_pie_labels(labels)
+        if options.get('legend', None) is True:
+            chart.set_legend(map(str, legend))
+            
+        if options.get('output', None):
+            chart.download(options.output)
+            
+        return chart
+    
+
 def logplot_parse_args():
     parser = OptionParser()
     parser.add_option("-b", "--backend", dest="backend",  
                       help="Backend to use for plotting. Currently available backends: 'gchart'")
+    parser.add_option("-t", "--type", dest="type",  
+                      help="Chart type. Available types: 'pie', 'histogram', 'line'." \
+                      "Availability might differ due to backend.")    
     parser.add_option("-f", "--field", dest="field", type=int,
                       help="Index of field to use as input for generating plot")
     parser.add_option("-d", "--delimiter", dest="delimiter",
@@ -52,6 +108,7 @@ def logplot_parse_args():
 
     # Interpolate from configuration
     options.backend  = interpolate_config(options.backend, options.profile, 'backend')
+    options.type = interpolate_config(options.type, options.profile, 'type')
     options.field  = interpolate_config(options.field, options.profile, 'field', type=int)
     options.delimiter = interpolate_config(options.delimiter, options.profile, 'delimiter')
     options.output = interpolate_config(options.output, options.profile, 'output', default=False)
@@ -66,44 +123,9 @@ def logplot(options, args, fh):
     """Plot some index defined over the logstream,
     using user-specified backend"""
     return {
-        "gchart":  logplot_gchart
-    }[options.backend](options, args, fh)
+        "gchart":  GChartBackend()
+    }[options.backend].plot(options, args, fh)
 
-
-def logplot_gchart(options, args, fh):
-    """Plot using google charts api"""
-    try:
-        import pygooglechart
-    except ImportError:
-        logging.error("pygooglechart Python package must be installed to use the 'gchart' backend")
-        sys.exit(-1)
-    from pygooglechart import PieChart3D, PieChart2D
-    
-    delimiter = options.delimiter
-    field = options.field
-    
-    chart = PieChart2D(options.width, options.height)
-    pts = []
-    for l in imap(lambda x: x.strip(), fh):
-        splitted_line = l.split(delimiter)
-        k = int(splitted_line.pop(field-1))
-        pts.append((k, ' '.join(splitted_line), k))
-        
-    if options.get('limit', None):
-        # Only wanna use top N samples by key, sort and truncate
-        pts = sorted(pts, key=itemgetter(0), reverse=True)[:options.limit]
-        
-    data, labels, legend = zip(*pts)
-    chart.add_data(data)
-    chart.set_pie_labels(labels)
-    if options.get('legend', None) is True:
-        chart.set_legend(map(str, legend))
-        
-    if options.get('output', None):
-        chart.download(options.output)
-        
-    return chart
-    
 def logplot_main():
     """Console entry-point"""
     options, args = logplot_parse_args()

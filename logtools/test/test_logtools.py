@@ -157,6 +157,7 @@ class PlotTestCase(unittest.TestCase):
             return        
         options = AttrDict({
             'backend': 'gchart',
+            'type': 'pie',
             'output': False,
             'limit': 10,
             'field': 1,

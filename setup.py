@@ -26,7 +26,7 @@ readme = "".join((l for l in open("README", "r")))
 
 setup(  
     name         = 'logtools',
-    version      = '0.2',
+    version      = '0.3',
     description  = 'Log analysis and filtering tools',
     author       = 'Adam Ever-Hadani',
     author_email = 'adamhadani@gmail.com',
@@ -45,7 +45,19 @@ setup(
         "Intended Audience :: Developers",
         "Intended Audience :: System Administrators"        
         ],
-    long_description = readme,
+    long_description = """\
+A log files analysis / filtering framework.
+
+logtools encompasses of a few easy-to-use, easy to configure command-line
+tools, typically used in conjunction with Apache logs.
+
+The idea is to standardize log parsing and filtering using a coherent
+configuration methodology and UNIX command-line interface (STDIN input streaming, command-line piping etc.)
+so as to create a consistent environment for creating reports, charts and other such
+log mining artifacts that are typically employed in a Website context.
+
+This software is distributed under the Apache 2.0 license.
+""",
     
     packages = find_packages(),
 

@@ -1,4 +1,8 @@
 
+version 0.3
+	setup.py long_description documentation
+	Added logplot gchart backend chart type support (pie, histogram, line)
+	
 version 0.2
 	Added support for configuration profiles (-P <profile_name>)
 	Added logmerge utility and unittest

@@ -26,7 +26,7 @@ from itertools import imap
 from optparse import OptionParser
 from heapq import heappush, heappop, merge
 
-from _config import logtools_config, interpolate_config
+from _config import logtools_config, interpolate_config, AttrDict
 import logtools.parsers
 
 __all__ = ['logmerge_parse_args', 'logmerge', 'logmerge_main']
@@ -58,9 +58,9 @@ def logmerge_parse_args():
     options.numeric = interpolate_config(options.numeric, options.profile, 
                                     'numeric', default=False, type=bool)    
     options.parser = interpolate_config(options.parser, 
-                                    options.profile, 'parser', default=None)    
+                                    options.profile, 'parser', default=False)    
 
-    return options, args
+    return AttrDict(options.__dict__), args
 
 def logmerge(options, args):
     """Perform merge on multiple input logfiles
@@ -71,7 +71,7 @@ def logmerge(options, args):
     
     if options.get('numeric', None) is True:
         key_func = lambda x: (int(x.strip().split(delimiter)[field]), x)
-    elif options.get('parser', None) is not None:
+    elif options.get('parser', None):
         parser = eval(options.parser, vars(logtools.parsers), {})()
         key_func = lambda x: (parser(x.strip()).by_index(field), x)
     else:

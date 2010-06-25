@@ -47,7 +47,7 @@ def logsample_parse_args():
     options.weighted  = interpolate_config(options.weighted, 
                                 options.profile, 'weighted', type=bool, default=False)    
 
-    return options, args
+    return AttrDict(options.__dict__), args
 
 def logsample(options, args, fh):
     """Use a Reservoir Sampling algorithm

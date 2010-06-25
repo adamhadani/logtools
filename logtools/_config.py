@@ -22,10 +22,16 @@ import os
 import sys
 from ConfigParser import SafeConfigParser, NoOptionError, NoSectionError
 
-__all__ = ['logtools_config', 'interpolate_config']
+__all__ = ['logtools_config', 'interpolate_config', 'AttrDict']
 
 logtools_config = SafeConfigParser() 
 logtools_config.read(['/etc/logtools.cfg', os.path.expanduser('~/.logtoolsrc')])
+
+
+class AttrDict(dict):
+    """Helper class for simulation OptionParser options object"""
+    def __getattr__(self, key):
+        return self[key]
 
 def interpolate_config(var, section, key, default=None, type=str):
     """Interpolate a parameter. if var is None,

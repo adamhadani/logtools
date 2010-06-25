@@ -23,15 +23,9 @@ from operator import itemgetter
 
 from logtools import (filterbots, geoip, logsample, logsample_weighted, 
                       logmerge, logplot)
-from logtools import logtools_config, interpolate_config
+from logtools import logtools_config, interpolate_config, AttrDict
 
 logging.basicConfig(level=logging.INFO)
-
-class AttrDict(dict):
-    """Helper class for simulation OptionParser options object"""
-    def __getattr__(self, key):
-        return self[key]
-
 
 class ConfigurationTestCase(unittest.TestCase):
     def testInterpolation(self):

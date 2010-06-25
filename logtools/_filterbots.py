@@ -61,7 +61,7 @@ def filterbots_parse_args():
     options.printlines  = interpolate_config(options.printlines, 
                     options.profile, 'print', default=False, type=bool)    
     
-    return options, args
+    return AttrDict(options.__dict__), args
 
 def filterbots(options, args, fh):
     """Filter bots from a log stream using

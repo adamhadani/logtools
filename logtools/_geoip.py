@@ -40,7 +40,7 @@ def geoip_parse_args():
     # Interpolate from configuration
     options.ip_re  = interpolate_config(options.ip_re, options.profile, 'ip_re')
 
-    return options, args
+    return AttrDict(options.__dict__), args
 
 def geoip(options, args, fh):
     try:

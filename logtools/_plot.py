@@ -117,7 +117,7 @@ def logplot_parse_args():
     options.limit = interpolate_config(options.limit, options.profile, 'limit', type=int, default=False) 
     options.legend = interpolate_config(options.legend, options.profile, 'legend', type=bool, default=False) 
 
-    return options, args
+    return AttrDict(options.__dict__), args
 
 def logplot(options, args, fh):
     """Plot some index defined over the logstream,

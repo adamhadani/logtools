@@ -63,12 +63,30 @@ def filterbots_parse_args():
     
     return AttrDict(options.__dict__), args
 
+def parse_bots_ua(bots_ua):
+    """Parse the bots useragents blacklist
+    and produce a dictionary for exact match
+    and set of regular expressions if any"""
+    bots_ua_dict = {}
+    bots_ua_re   = []
+    
+    for line in imap(lambda x: x.strip(), bots_ua):
+        if line.startswith("r'"):
+            # Regular expression
+            bots_ua_re.append(re.compile(eval(line, {}, {})))
+        else:
+            # Exact match
+            bots_ua_dict[line] = None
+            
+    return bots_ua_dict, bots_ua_re
+
 def filterbots(options, args, fh):
     """Filter bots from a log stream using
     ip/useragent blacklists"""
-    bots_ua = dict.fromkeys([l.strip() for l in options.bots_ua])
+    bots_ua_dict, bots_ua_re = parse_bots_ua(options.bots_ua)
     bots_ips = dict.fromkeys([l.strip() for l in options.bots_ips])
-
+    
+    reverse = options.reverse
     ua_ip_re = re.compile(options.ip_ua_re)
 
     num_lines=0
@@ -80,13 +98,24 @@ def filterbots(options, args, fh):
             continue
     
         matchgroups = match.groupdict()
-
-        if options.reverse ^ (matchgroups.get('ua', None) in bots_ua or \
+        is_bot = False
+        
+        if (matchgroups.get('ua', None) in bots_ua_dict or \
            matchgroups.get('ip', None) in bots_ips):
+            # Exact match hit for host or useragent
+            is_bot = True
+        else:
+            # Regular expression match for useragent
+            for ua_re in bots_ua_re:
+                if ua_re.match(line):
+                    is_bot = True
+                    break
+            
+        if is_bot ^ reverse:
             logging.debug("Filtering line: %s", line)
             num_filtered+=1
             continue
-
+        
         num_lines+=1
         yield line
 

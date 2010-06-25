@@ -72,13 +72,15 @@ class FilterBotsTestCase(unittest.TestCase):
             "printlines": False,
             "ip_ua_re": "^(?P<ip>.*?) - USER_AGENT:'(?P<ua>.*?)'",
             "bots_ips": StringIO(),
-            "bots_ua": StringIO(
-                "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)\n"
-            )
+            "bots_ua": StringIO("\n".join([
+                "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+                "r'.*MSIECrawler'"
+                ]) + "\n")
         })
         self.fh = StringIO(
             "127.0.0.1 - USER_AGENT:'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' - ...\n" \
-            "255.255.255.255 - USER_AGENT:'Mozilla' - ...\n"
+            "255.255.255.255 - USER_AGENT:'Mozilla' - ...\n" \
+            "1.1.1.1 - USER_AGENT:'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; MSIECrawler)'\n"
         )
 
     def testFiltering(self):

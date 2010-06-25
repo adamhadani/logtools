@@ -15,19 +15,19 @@ usage() {
 	exit -1
 }
 
-#while getopt "d:f:h" OPT
-#do
-#	case $OPT in
-#		d)	DELIM="$OPTARG"
-#			;;
-#		f)	FIELD="$OPTARG"
-#			;;
-#		h)	usage
-#			;;
-#	esac
-#done
-#shift $((OPTIND-1))
+while getopt "d:f:h" OPT
+do
+	case $OPT in
+		d)	DELIM="$OPTARG"
+			;;
+		f)	FIELD="$OPTARG"
+			;;
+		h)	usage
+			;;
+	esac
+done
+shift $((OPTIND-1))
 
 export LC_ALL=C
-cat | cut -d "$DELIM" -f "$FIELD" | sort | uniq -c | sort -k1,1nr
+cat /proc/$$/fd/0 | cut -d "$DELIM" -f "$FIELD" | sort | uniq -c | sort -k1,1nr
 

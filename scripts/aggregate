@@ -15,7 +15,7 @@ usage() {
 	exit -1
 }
 
-while getopt "d:f:h" OPT
+while getopts "d:f:h" OPT
 do
 	case $OPT in
 		d)	DELIM="$OPTARG"
@@ -29,5 +29,5 @@ done
 shift $((OPTIND-1))
 
 export LC_ALL=C
-cat /proc/$$/fd/0 | cut -d "$DELIM" -f "$FIELD" | sort | uniq -c | sort -k1,1nr
+cat | cut -d "$DELIM" -f "$FIELD" | sort | uniq -c | sort -k1,1nr
 

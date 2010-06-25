@@ -22,7 +22,7 @@ except ImportError:
 import sys
 import os
 
-readme = "".join((l for l in open("README", "r")))
+#readme = "".join((l for l in open("README", "r")))
 
 setup(  
     name         = 'logtools',

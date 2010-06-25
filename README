@@ -34,7 +34,9 @@ Console Scripts
 
 * logsample  - Produce a (uniform or weighted) random sample from log stream. This uses Reservoir Sampling to
 			   efficiently produce a random sampling over an arbitrary large input stream.
-			   
+			  
+* aggregate  - Convenient shortcut for aggregating values and sorting by frequency of appearance (see example below) 
+
 * logplot    - Render a plot of parsed aggregate counts log. Can use one of several backends (e.g Google Chart API)
 
 * logplotserve - Start a compact webserver (WSGI-based) serving logplots. Under Construction.
@@ -93,12 +95,16 @@ Notice that its easy to reverse the filtermask simply by adding the --reverse fl
 6. Generate a pie chart of Country distributions in Apache access_log using Maxmind GeoIP and GoogleChart API. requires pygooglechart package:
 
 	cat access_log.1 | geoip -r '^(.*?) -' | cut -d$'\t' -f2 | sort | uniq -c | logplot -d' ' -f1 --backend gchart -W600 -H300 --limit 10 --output plot.png
+
+7. Filter bots and aggregate IP address values to show IPs of visitors with counts and sorted from most frequent to least:
+
+	cat access_log.1 | filterbots --print | aggregate -d' ' -f1
 	
-7. Naturally, piping between utilities is useful:
+8. Naturally, piping between utilities is useful:
 	
 	cat access_log.1 | filterbots -r "^(?P<ip>.*?) -.*(?P<ua>.*?)" --print | geoip -r '.*client (.*?)\]'
 
-8. All tools admit a --help command-line option that will print out detailed information about the different
+9. All tools admit a --help command-line option that will print out detailed information about the different
    options available.
 
 Unit-testing

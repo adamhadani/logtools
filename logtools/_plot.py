@@ -26,7 +26,7 @@ from operator import itemgetter
 from optparse import OptionParser
 from abc import ABCMeta, abstractmethod
 
-from _config import logtools_config, interpolate_config
+from _config import logtools_config, interpolate_config, AttrDict
 
 __all__ = ['logplot_parse_args', 'logplot', 'logplot_main']
 

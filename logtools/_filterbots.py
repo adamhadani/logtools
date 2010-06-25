@@ -21,7 +21,7 @@ import logging
 from itertools import imap
 from optparse import OptionParser
 
-from _config import logtools_config, interpolate_config
+from _config import logtools_config, interpolate_config, AttrDict
 
 __all__ = ['filterbots_parse_args', 'filterbots', 'filterbots_main']
 

@@ -25,7 +25,7 @@ from random import randint, random
 from optparse import OptionParser
 from heapq import heappush, heappop, heapreplace
 
-from _config import logtools_config, interpolate_config
+from _config import logtools_config, interpolate_config, AttrDict
 
 __all__ = ['logsample_parse_args', 'logsample', 'logsample_weighted', 'logsample_main']
 

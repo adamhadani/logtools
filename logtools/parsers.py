@@ -26,6 +26,8 @@ import logging
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
 
+from _config import AttrDict
+
 __all__ = ['AccessLog', 'CommonLogFormat']
 
 

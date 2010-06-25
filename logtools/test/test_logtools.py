@@ -56,8 +56,10 @@ class FilterBotsTestCase(unittest.TestCase):
         )
 
     def testFiltering(self):
-        ret = filterbots(self.options, None, self.fh)
-        self.assertEquals(ret, (1,1), "filterbots output different than expected: %s" % str(ret))
+        i=0
+        for l in filterbots(self.options, None, self.fh): 
+            i+=1
+        self.assertEquals(i, 1, "filterbots output size different than expected: %s" % str(i))
 
 
 class GeoIPTestCase(unittest.TestCase):
@@ -76,7 +78,8 @@ class GeoIPTestCase(unittest.TestCase):
             print >> sys.stderr, "GeoIP Python package not available - skipping geoip unittest."
             return
 
-        ret = geoip(self.options, None, self.fh)
+        output = [(geocode, ip, line) for geocode, ip, line in geoip(self.options, None, self.fh)]
+        self.assertEquals(len(output), 2, "Output size was different than expected: %s", str(len(output)))
 
         
 class SamplingTestCase(unittest.TestCase):
@@ -94,12 +97,14 @@ class SamplingTestCase(unittest.TestCase):
         ]))
 
     def testUniformSampling(self):
-        ret = logsample(self.options, None, self.fh)
-        self.assertEquals(len(ret), self.options.num_samples, 
-                          "logsample output different than expected: %s" % str(ret))
+        output = [r for r in logsample(self.options, None, self.fh)]
+        self.assertEquals(len(output), self.options.num_samples, 
+                          "logsample output size different than expected: %s" % len(output))
         
     def testWeightedSampling(self):
-        ret = logsample_weighted(self.weighted_opts, None, self.fh)
+        output = [(k, r) for k, r in logsample_weighted(self.weighted_opts, None, self.fh)]
+        self.assertEquals(len(output), self.weighted_opts.num_samples, 
+                          "logsample output size different than expected: %s" % len(output))        
 
 class MergeTestCase(unittest.TestCase):
     def setUp(self):

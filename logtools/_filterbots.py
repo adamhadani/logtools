@@ -88,17 +88,22 @@ def filterbots(options, args, fh):
             continue
 
         num_lines+=1
-        if options.printlines:
-            print line
+        yield line
 
     logging.info("Number of lines after filtering: %s", num_lines)
-    logging.info("Number of lines filtered: %s", num_filtered)
-
-    return num_filtered, num_lines
+    logging.info("Number of lines filtered: %s", num_filtered)            
+    
+    return
 
 def filterbots_main():
     """Console entry-point"""
     options, args = filterbots_parse_args()
-    filterbots(options, args, fh=sys.stdin.readlines())
+    if options.printlines:
+        for line in filterbots(options, args, fh=sys.stdin.readlines()):
+            print line
+    else:
+        for line in filterbots(options, args, \
+                fh=sys.stdin.readlines()): pass;
+        
     return 0
 

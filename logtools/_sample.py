@@ -44,6 +44,8 @@ def logsample_parse_args():
     # Interpolate from configuration
     options.num_samples  = interpolate_config(options.num_samples, 
                                 options.profile, 'num_samples', type=int)
+    options.weighted  = interpolate_config(options.weighted, 
+                                options.profile, 'weighted', type=bool, default=False)    
 
     return options, args
 
@@ -63,9 +65,7 @@ def logsample(options, args, fh):
 
     # Emit output
     for record in R:
-        print record.strip()
-        
-    return R
+        yield record.strip()
 
 def logsample_weighted(options, args, fh):
     """Implemented Weighted Reservoir Sampling, assuming integer weights.
@@ -100,18 +100,19 @@ def logsample_weighted(options, args, fh):
                 
     # Emit output
     for key, record in R:
-        print record.split()
-        
-    return R
+        yield key, record.strip()
+
         
 def logsample_main():
     """Console entry-point"""
     options, args = logsample_parse_args()
     
     if options.weighted is True:
-        logsample_weighted(options, args, fh=sys.stdin.readlines())
+        for k, r in logsample_weighted(options, args, fh=sys.stdin.readlines()):
+            print r
     else:
-        logsample(options, args, fh=sys.stdin.readlines())
+        for r in logsample(options, args, fh=sys.stdin.readlines()):
+            print r
         
     return 0
 

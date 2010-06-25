@@ -59,10 +59,11 @@ def geoip(options, args, fh):
             geocode = gi.country_name_by_addr(ip)
             if geocode is None:
                 logging.debug("No Geocode for IP: %s", ip)
-            print "{0}\t{1}".format(ip, geocode)
+            yield geocode, ip, line
 
 def geoip_main():
     """Console entry-point"""
     options, args = geoip_parse_args()
-    geoip(options, args, fh=sys.stdin.readlines())
+    for geocode, ip, line in geoip(options, args, fh=sys.stdin.readlines()):
+        print "{0}\t{1}".format(ip, geocode)
     return 0

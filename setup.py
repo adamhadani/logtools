@@ -63,6 +63,8 @@ This software is distributed under the Apache 2.0 license.
 
     scripts = ['scripts/aggregate'],
 
+    include_package_data = False,    
+    
     install_requires = [
         "pygooglechart>=0.2.1"
     ],

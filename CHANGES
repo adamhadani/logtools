@@ -1,4 +1,8 @@
 
+version 0.4
+	Added unit-testing for logtools.parsers module
+	Fixed small bug in GeoIP unit-testing
+	
 version 0.3
 	Some bugfixes to command-line/options parsing
 	setup.py long_description documentation

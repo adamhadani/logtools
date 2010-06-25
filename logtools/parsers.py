@@ -104,7 +104,7 @@ class AccessLog(LogParser):
 
         findquotes = re.compile(r'^"')
         findreferreragent = re.compile('Referer|User-Agent')
-        findpercent = re.compile('^%.*t$')
+        findpercent = re.compile(r'^%.*t$')
         lstripquotes = re.compile(r'^"')
         rstripquotes = re.compile(r'"$')
         self.fieldnames = []
@@ -139,7 +139,6 @@ class AccessLog(LogParser):
         _pattern = '^' + ' '.join(subpatterns) + '$'
         _regex = re.compile(_pattern)
 
-        print _regex.pattern
         return _regex
 
     

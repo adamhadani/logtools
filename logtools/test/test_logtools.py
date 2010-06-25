@@ -23,6 +23,7 @@ from operator import itemgetter
 
 from logtools import (filterbots, geoip, logsample, logsample_weighted, 
                       logmerge, logplot)
+from logtools.parsers import *
 from logtools import logtools_config, interpolate_config, AttrDict
 
 logging.basicConfig(level=logging.INFO)
@@ -33,6 +34,31 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertRaises(KeyError, interpolate_config, None, 'bogus_sec', 'bogus_key')
 
 
+class ParsingTestCase(unittest.TestCase):
+    def setUp(self):
+        self.clf_rows = [
+            '127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326',
+            '127.0.0.2 - jay [10/Oct/2000:13:56:12 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326'
+            ]
+        
+    def testAccessLog(self):
+        """Test Apache access_log format parser"""
+        parser = AccessLog(format='%h %l %u %t "%r" %>s %b')
+        self.assertRaises(ValueError, parser, 'example for invalid format')
+        for logrow in self.clf_rows:
+            parsed = parser(logrow)
+            self.assertNotEquals(parsed, None, "Could not parse line: %s" % str(logrow))
+            
+    def testCommonLogFormat(self):
+        """Test CLF Parser"""
+        parser = CommonLogFormat()
+        self.assertRaises(ValueError, parser, 'example for invalid format')
+        for logrow in self.clf_rows:
+            parsed = parser(logrow)
+            self.assertNotEquals(parsed, None, "Could not parse line: %s" % str(logrow))        
+        
+        
+            
 class FilterBotsTestCase(unittest.TestCase):
     def setUp(self):
         self.options = AttrDict({
@@ -73,7 +99,7 @@ class GeoIPTestCase(unittest.TestCase):
             return
 
         output = [(geocode, ip, line) for geocode, ip, line in geoip(self.options, None, self.fh)]
-        self.assertEquals(len(output), 2, "Output size was different than expected: %s", str(len(output)))
+        self.assertEquals(len(output), 2, "Output size was different than expected: %s" % str(len(output)))
 
         
 class SamplingTestCase(unittest.TestCase):

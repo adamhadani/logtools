@@ -81,9 +81,10 @@ This software is distributed under the Apache 2.0 license.
         ]
     },
 
-    test_requires = [
-        "Nose>=0.11.3"
-    ],
+    #tests_require = [
+    #    "Nose>=0.11.3"
+    #],
+
     test_suite = "nose.collector",
 
     zip_safe = True

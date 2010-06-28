@@ -12,12 +12,11 @@
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
 """
-logtools.parers
-Parsers for some common log formats, e.g 
-Common Log Format (CLF) etc.
-These parsers can be used both programmaticaly
-as well as by the logtools command-line tools to
-meaningfully parse log fields from standard formats.
+logtools.parsers
+Parsers for some common log formats, e.g Common Log Format (CLF).
+These parsers can be used both programmaticaly as well as by the 
+logtools command-line tools to meaningfully parse log fields 
+from standard formats.
 """
 import os
 import re
@@ -28,8 +27,8 @@ from abc import ABCMeta, abstractmethod
 
 from _config import AttrDict
 
-__all__ = ['AccessLog', 'CommonLogFormat']
-
+__all__ = ['LogParser', 'AccessLogLine', 'AccessLog', 
+           'CommonLogFormat']
 
 class LogParser(object):
     """Base class for all our parsers"""

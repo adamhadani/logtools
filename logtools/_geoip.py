@@ -41,7 +41,7 @@ def geoip_parse_args():
     
     # Interpolate from configuration
     options.ip_re  = interpolate_config(options.ip_re, options.profile, 'ip_re')
-    options.ip_re  = interpolate_config(options.printline, options.profile, 'print', 
+    options.printline  = interpolate_config(options.printline, options.profile, 'print', 
                                         type=bool, default=False)
 
     return AttrDict(options.__dict__), args
@@ -70,7 +70,7 @@ def geoip_main():
     options, args = geoip_parse_args()
     for geocode, ip, line in geoip(options, args, fh=sys.stdin.readlines()):
         if options.printline is True:
-            print "{0}\t{1}".format(line, geocode)
+            print "{0}\t{1}".format(geocode, line)
         else:
-            print "{0}\t{1}".format(ip, geocode)
+            print "{0}\t{1}".format(geocode, ip)
     return 0

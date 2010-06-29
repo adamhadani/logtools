@@ -41,6 +41,11 @@ class LogParser(object):
     @abstractmethod
     def parse(self, line):
         """Parse a logline"""
+        
+    def set_format(self, format):
+        """Set a format specifier for parser.
+        Some parsers can use this to specify
+        a format string"""
 
 class AccessLogLine(dict):
     """Instrumented dictionary that allows
@@ -72,14 +77,22 @@ class AccessLog(LogParser):
     consume arbitrary Apache log field directives. see
     http://httpd.apache.org/docs/1.3/logs.html#accesslog"""
 
-    def __init__(self, format):
+    def __init__(self, format=None):
         LogParser.__init__(self)
         
         self.fieldnames    = None
-        self.fieldselector = self._parse_log_format(format)
-        self._logline_wrapper = AccessLogLine(self.fieldnames)
+        self.fieldselector = None
+        self._logline_wrapper = None
         
+        if format:
+            self.fieldselector = self._parse_log_format(format)
+            self._logline_wrapper = AccessLogLine(self.fieldnames)     
 
+    def set_format(self, format):
+        """Set the access_log format"""
+        self.fieldselector = self._parse_log_format(format)
+        self._logline_wrapper = AccessLogLine(self.fieldnames)     
+        
     def parse(self, logline):
         """
         Parse log line into structured row.

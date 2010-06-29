@@ -32,6 +32,8 @@ def logparse_parse_args():
     parser = OptionParser()
     parser.add_option("-p", "--parser", dest="parser", default=None, 
                     help="Log format parser (e.g 'CommonLogFormat'). See documentation for available parsers.")
+    parser.add_option("-F", "--format", dest="format", default=None, 
+                    help="Format string. Used by the parser (e.g AccessLog format specifier)")    
     parser.add_option("-f", "--field", dest="field", default=None, type=int,
                     help="Parsed Field index to output")    
     
@@ -41,8 +43,8 @@ def logparse_parse_args():
     options, args = parser.parse_args()
     
     # Interpolate from configuration
-    options.parser = interpolate_config(options.parser, 
-                                    options.profile, 'parser', default=False) 
+    options.parser = interpolate_config(options.parser, options.profile, 'parser') 
+    options.format = interpolate_config(options.format, options.profile, 'format', default=False) 
     options.field = interpolate_config(options.field, options.profile, 'field', type=int)
     
 
@@ -53,7 +55,10 @@ def logparse(options, args, fh):
     parser class and emit specified field(s)"""
     field = options.field - 1
     parser = eval(options.parser, vars(logtools.parsers), {})()
-    key_func = lambda x: parser(x.strip()).by_index(field, raw=True)
+    if options.get('format', None):
+        parser.set_format(options.format)
+        
+    key_func = lambda x: parser(x.strip()).by_indices(field, raw=True)
     
     for line in fh:
         yield key_func(line)

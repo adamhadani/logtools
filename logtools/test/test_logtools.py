@@ -43,7 +43,8 @@ class ParsingTestCase(unittest.TestCase):
         
     def testAccessLog(self):
         """Test Apache access_log format parser"""
-        parser = AccessLog(format='%h %l %u %t "%r" %>s %b')
+        parser = AccessLog()
+        parser.set_format(format='%h %l %u %t "%r" %>s %b')
         self.assertRaises(ValueError, parser, 'example for invalid format')
         for logrow in self.clf_rows:
             parsed = parser(logrow)

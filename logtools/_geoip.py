@@ -31,6 +31,8 @@ def geoip_parse_args():
     parser = OptionParser()
     parser.add_option("-r", "--re", dest="ip_re", default=None, 
                     help="Regular expression to lookup IP in logrow")
+    parser.add_option("-p", "--print", dest="printline", default=None, action="store_true",
+                    help="Print original log line with the geolocation. By default we only print <country, ip>")    
 
     parser.add_option("-P", "--profile", dest="profile", default='geoip',
                       help="Configuration profile (section in configuration file)")
@@ -39,6 +41,8 @@ def geoip_parse_args():
     
     # Interpolate from configuration
     options.ip_re  = interpolate_config(options.ip_re, options.profile, 'ip_re')
+    options.ip_re  = interpolate_config(options.printline, options.profile, 'print', 
+                                        type=bool, default=False)
 
     return AttrDict(options.__dict__), args
 
@@ -65,5 +69,8 @@ def geoip_main():
     """Console entry-point"""
     options, args = geoip_parse_args()
     for geocode, ip, line in geoip(options, args, fh=sys.stdin.readlines()):
-        print "{0}\t{1}".format(ip, geocode)
+        if options.printline is True:
+            print "{0}\t{1}".format(line, geocode)
+        else:
+            print "{0}\t{1}".format(ip, geocode)
     return 0

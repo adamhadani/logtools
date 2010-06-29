@@ -6,7 +6,8 @@ version 0.4
 	Added logplot gchart backend 'line' chart type 
 	Improved coverage of unit-testing for the plotting module
 	Added support for regular expressions in bots useragents file. use r'<reg_ex>' syntax
-	
+	Added --format option for logparse, added set_format to Parser interface
+	Added --print option to geoip utility, will print the country along with original log line
 	
 version 0.3
 	Some bugfixes to command-line/options parsing

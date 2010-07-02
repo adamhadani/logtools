@@ -58,7 +58,7 @@ def logparse(options, args, fh):
     if options.get('format', None):
         parser.set_format(options.format)
         
-    key_func = lambda x: parser(x.strip()).by_indices(field, raw=True)
+    key_func = lambda x: parser(x.strip()).by_index(field, raw=True)
     
     for line in fh:
         yield key_func(line)

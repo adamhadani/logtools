@@ -26,5 +26,6 @@ from _geoip import *
 from _merge import *
 from _parse import *
 from _plot import *
+from _qps import *
 from _sample import *
 from _serve import *

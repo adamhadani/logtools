@@ -75,13 +75,18 @@ class FilterBotsTestCase(unittest.TestCase):
             "bots_ips": StringIO(),
             "bots_ua": StringIO("\n".join([
                 "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
-                "r'.*MSIECrawler'"
+                "r'.*crawler'",
+                "s'MSIECrawler)'",
+                "p'DotSpotsBot'"
                 ]) + "\n")
         })
         self.fh = StringIO(
             "127.0.0.1 - USER_AGENT:'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' - ...\n" \
             "255.255.255.255 - USER_AGENT:'Mozilla' - ...\n" \
-            "1.1.1.1 - USER_AGENT:'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; MSIECrawler)'\n"
+            "1.1.1.1 - USER_AGENT:'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; MSIECrawler)'\n" \
+            "2.2.2.2 - USER_AGENT:'Mozilla/4.0 (compatible; MSIE 6.0; Windows 98; Win 9x 4.90; .NET CLR 1.1.4322; MSIECrawler)'\n" \
+            "3.3.3.3 - USER_AGENT:'DotSpotsBot/0.2 (crawler; support at dotspots.com)'\n" \
+            "4.4.4.4 - USER_AGENT:'inagist.com url crawler'\n"
         )
 
     def testFiltering(self):

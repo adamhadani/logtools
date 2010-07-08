@@ -19,14 +19,9 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
-import sys
-import os
-
-#readme = "".join((l for l in open("README", "r")))
-
 setup(  
     name         = 'logtools',
-    version      = '0.4',
+    version      = '0.5',
     description  = 'Log analysis and filtering tools',
     author       = 'Adam Ever-Hadani',
     author_email = 'adamhadani@gmail.com',
@@ -77,7 +72,8 @@ This software is distributed under the Apache 2.0 license.
             'logparse = logtools:logparse_main',
             'logmerge = logtools:logmerge_main',
             'logplot = logtools:logplot_main',
-            'logsample = logtools:logsample_main',            
+            'logsample = logtools:logsample_main',
+            'qps = logtools:qps_main'
         ]
     },
 

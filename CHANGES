@@ -1,4 +1,8 @@
 
+version 0.5
+	Initial version of logserve - WSGI webserver delivering real-time stats using RRDTool format
+	Added --pattern to filterbots, uses pattern analysis to filter out bots. check documentation for usage.
+	
 version 0.4
 	Added unit-testing for logtools.parsers module
 	Fixed small bug in GeoIP unit-testing

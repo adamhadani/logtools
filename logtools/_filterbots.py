@@ -68,24 +68,31 @@ def parse_bots_ua(bots_ua):
     and produce a dictionary for exact match
     and set of regular expressions if any"""
     bots_ua_dict = {}
+    bots_ua_prefix_dict = {}
+    bots_ua_suffix_dict = {}
     bots_ua_re   = []
     
     for line in imap(lambda x: x.strip(), bots_ua):
         if line.startswith("r'"):
             # Regular expression
             bots_ua_re.append(re.compile(eval(line, {}, {})))
+        elif line.startswith("p'"):
+            bots_ua_prefix_dict[line[2:-1]] = True
+        elif line.startswith("s'"):
+            bots_ua_suffix_dict[line[2:-1]] = True
         else:
             # Exact match
-            bots_ua_dict[line] = None
+            bots_ua_dict[line] = True
             
-    return bots_ua_dict, bots_ua_re
+    return bots_ua_dict, bots_ua_prefix_dict, \
+           bots_ua_suffix_dict, bots_ua_re
 
 def filterbots(options, args, fh):
     """Filter bots from a log stream using
     ip/useragent blacklists"""
-    bots_ua_dict, bots_ua_re = parse_bots_ua(options.bots_ua)
+    bots_ua_dict, bots_ua_prefix_dict, bots_ua_suffix_dict, bots_ua_re = \
+                parse_bots_ua(options.bots_ua)
     bots_ips = dict.fromkeys([l.strip() for l in options.bots_ips])
-    
     reverse = options.reverse
     ua_ip_re = re.compile(options.ip_ua_re)
 
@@ -100,16 +107,31 @@ def filterbots(options, args, fh):
         matchgroups = match.groupdict()
         is_bot = False
         
-        if (matchgroups.get('ua', None) in bots_ua_dict or \
+        ua = matchgroups.get('ua', None)
+        
+        if (ua in bots_ua_dict or \
            matchgroups.get('ip', None) in bots_ips):
             # Exact match hit for host or useragent
             is_bot = True
-        else:
-            # Regular expression match for useragent
-            for ua_re in bots_ua_re:
-                if ua_re.match(line):
+            
+        elif ua:
+            # Try prefix matching on user agent
+            for prefix in bots_ua_prefix_dict:
+                if ua.startswith(prefix):
                     is_bot = True
                     break
+            else:
+                # Try suffix matching on user agent
+                for suffix in bots_ua_suffix_dict:
+                    if ua.endswith(suffix):
+                        is_bot = True
+                        break
+                else:
+                    # Try Regular expression matching on user agent
+                    for ua_re in bots_ua_re:
+                        if ua_re.match(ua):
+                            is_bot = True
+                            break
             
         if is_bot ^ reverse:
             logging.debug("Filtering line: %s", line)

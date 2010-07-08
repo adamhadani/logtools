@@ -113,7 +113,6 @@ def filterbots(options, args, fh):
            matchgroups.get('ip', None) in bots_ips):
             # Exact match hit for host or useragent
             is_bot = True
-            
         elif ua:
             # Try prefix matching on user agent
             for prefix in bots_ua_prefix_dict:

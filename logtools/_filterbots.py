@@ -41,6 +41,8 @@ def filterbots_parse_args():
                       "Should have an 'ip' and 'ua' named groups")
     parser.add_option("-p", "--print", dest="printlines", action="store_true",
                       help="Print non-filtered lines")
+    parser.add_option("-t", "--pattern", dest="pattern", action="store_true",
+                      help="Use pattern analysis to filter bots (See documentation for details)")    
     parser.add_option("-R", "--reverse", dest="reverse", action="store_true",
                       help="Reverse filtering")
     
@@ -55,7 +57,9 @@ def filterbots_parse_args():
     options.bots_ips = open(interpolate_config(options.bots_ips, 
                     options.profile, 'bots_ips'), "r")
     options.ip_ua_re  = interpolate_config(options.ip_ua_re, 
-                    options.profile, 'ip_ua_re')    
+                    options.profile, 'ip_ua_re')  
+    options.pattern   = interpolate_config(options.pattern, 
+                    options.profile, 'pattern', default=False, type=bool)    
     options.reverse   = interpolate_config(options.reverse, 
                     options.profile, 'reverse', default=False, type=bool)
     options.printlines  = interpolate_config(options.printlines, 
@@ -95,7 +99,8 @@ def filterbots(options, args, fh):
     ip/useragent blacklists"""
     bots_ua_dict, bots_ua_prefix_dict, bots_ua_suffix_dict, bots_ua_re = \
                 parse_bots_ua(options.bots_ua)
-    bots_ips = dict.fromkeys([l.strip() for l in options.bots_ips if not l.startswith("#")])
+    bots_ips = dict.fromkeys([l.strip() for l in options.bots_ips \
+                              if not l.startswith("#")])
     reverse = options.reverse
     ua_ip_re = re.compile(options.ip_ua_re)
 

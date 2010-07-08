@@ -74,6 +74,7 @@ class FilterBotsTestCase(unittest.TestCase):
             "ip_ua_re": "^(?P<ip>.*?) - USER_AGENT:'(?P<ua>.*?)'",
             "bots_ips": StringIO(),
             "bots_ua": StringIO("\n".join([
+                "## Example comment ##",
                 "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
                 "ssearch_bot/Nutch-1.0 (sSearch Crawler; http://www.semantissimo.de)",
                 "r'.*crawler'",

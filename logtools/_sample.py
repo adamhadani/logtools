@@ -108,7 +108,8 @@ def logsample_main():
     options, args = logsample_parse_args()
     
     if options.weighted is True:
-        for k, r in logsample_weighted(options, args, fh=sys.stdin.readlines()):
+        for k, r in logsample_weighted(options, args, \
+                                       fh=sys.stdin.readlines()):
             print r
     else:
         for r in logsample(options, args, fh=sys.stdin.readlines()):

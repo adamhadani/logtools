@@ -73,6 +73,9 @@ def parse_bots_ua(bots_ua):
     bots_ua_re   = []
     
     for line in imap(lambda x: x.strip(), bots_ua):
+        if line.startswith("#"):
+            # Comment line
+            continue
         if line.startswith("r'"):
             # Regular expression
             bots_ua_re.append(re.compile(eval(line, {}, {})))
@@ -92,7 +95,7 @@ def filterbots(options, args, fh):
     ip/useragent blacklists"""
     bots_ua_dict, bots_ua_prefix_dict, bots_ua_suffix_dict, bots_ua_re = \
                 parse_bots_ua(options.bots_ua)
-    bots_ips = dict.fromkeys([l.strip() for l in options.bots_ips])
+    bots_ips = dict.fromkeys([l.strip() for l in options.bots_ips if not l.startswith("#")])
     reverse = options.reverse
     ua_ip_re = re.compile(options.ip_ua_re)
 

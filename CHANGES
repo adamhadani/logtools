@@ -3,6 +3,7 @@ version 0.5
 	Initial version of logserve - WSGI webserver delivering real-time stats using RRDTool format
 	Added --pattern to filterbots, uses pattern analysis to filter out bots. check documentation for usage.
 	Added Prefix/Suffix matching to filterbots - Specify p'<prefix>' or s'<suffix>' in useragents file to use this feature
+	Added comment support for filterbots useragents/ips files - use '#' in start of line
 	Added qps utility - Parse timestamps from log stream and calculate qps over sliding time window
 	
 version 0.4

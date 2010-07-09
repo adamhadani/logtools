@@ -40,6 +40,16 @@ class ParsingTestCase(unittest.TestCase):
             '127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326',
             '127.0.0.2 - jay [10/Oct/2000:13:56:12 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326'
             ]
+        self.json_rows = [
+            '{"key1":"val1","key2":true,"key3":31337,"key4":null,"nested_key":[{"nested_key_1":"2"}]}'
+        ]
+        
+    def testJSONParser(self):
+        """Test JSON format parser"""
+        parser = JSONParser()
+        for logrow in self.json_rows:
+            parsed = parser(logrow)
+            self.assertNotEquals(parsed, None, "Could not parse line: %s" % str(logrow))
         
     def testAccessLog(self):
         """Test Apache access_log format parser"""

@@ -24,10 +24,11 @@ import sys
 import logging
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
+import json
 
 from _config import AttrDict
 
-__all__ = ['LogParser', 'AccessLogLine', 'AccessLog', 
+__all__ = ['LogParser', 'JSONParser', 'LogLine', 'AccessLog', 
            'CommonLogFormat']
 
 class LogParser(object):
@@ -46,13 +47,31 @@ class LogParser(object):
         """Set a format specifier for parser.
         Some parsers can use this to specify
         a format string"""
-
-class AccessLogLine(dict):
+        
+        
+class LogLine(dict):
     """Instrumented dictionary that allows
-    convenient access to a parsed access_log line,
+    convenient access to a parsed log lines,
     using key-based lookup / index-based / raw / parsed"""
     
-    def __init__(self, fieldnames):
+    def __init__(self, fieldnames=None):
+        """Initialize logline. This class can be reused
+        across multiple input lines by using the clear()
+        method after each invocation"""
+        
+        self._fieldnames = None
+        
+        if fieldnames:
+            self.fieldnames = fieldnames
+            
+    @property
+    def fieldnames(self):
+        """Getter method for the field names"""
+        return self._fieldnames
+            
+    @fieldnames.setter
+    def fieldnames(self, fieldnames):
+        """Set the log format field names"""
         self._fieldnames = dict(enumerate(fieldnames))
         
     def by_index(self, i, raw=False):
@@ -71,7 +90,29 @@ class AccessLogLine(dict):
             val = self[key]
         return val
         
+
+class JSONParser(LogParser):
+    """Parser implementation for JSON format logs"""
+    
+    def __init__(self):
+        LogParser.__init__(self)
+        self._logline_wrapper = LogLine()
         
+    def parse(self, line):
+        """Parse JSON line"""
+        parsed_row = json.loads(line)
+        
+        data = self._logline_wrapper
+        if not self._logline_wrapper.fieldnames:
+            self._logline_wrapper.fieldnames = parsed_row.keys()
+            
+        data.clear()
+        for k, v in parsed_row.iteritems():
+            data[k] = v
+
+        return data
+    
+
 class AccessLog(LogParser):
     """Apache access_log logfile parser. This can
     consume arbitrary Apache log field directives. see
@@ -86,12 +127,12 @@ class AccessLog(LogParser):
         
         if format:
             self.fieldselector = self._parse_log_format(format)
-            self._logline_wrapper = AccessLogLine(self.fieldnames)     
+            self._logline_wrapper = LogLine(self.fieldnames)     
 
     def set_format(self, format):
         """Set the access_log format"""
         self.fieldselector = self._parse_log_format(format)
-        self._logline_wrapper = AccessLogLine(self.fieldnames)     
+        self._logline_wrapper = LogLine(self.fieldnames)     
         
     def parse(self, logline):
         """

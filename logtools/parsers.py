@@ -103,8 +103,11 @@ class JSONParser(LogParser):
         parsed_row = json.loads(line)
         
         data = self._logline_wrapper
-        if not self._logline_wrapper.fieldnames:
-            self._logline_wrapper.fieldnames = parsed_row.keys()
+
+        # This is called for every log line - This is because
+        # JSON logs are generally schema-less and so fields
+        # can change between lines.
+        self._logline_wrapper.fieldnames = parsed_row.keys()
             
         data.clear()
         for k, v in parsed_row.iteritems():

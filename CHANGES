@@ -6,6 +6,8 @@ version 0.5
 	Added comment support for filterbots useragents/ips files - use '#' in start of line
 	Added qps utility - Parse timestamps from log stream and calculate qps over sliding time window
 	Added JSONParser to parsing module, can now use JSON-formatted logs e.g for logmerge, logparse etc.
+	Can now specify fields by field name in -f parameter for the logparse method/console script
+	Can specify multiple comma-separated fields in logparse method
 	
 version 0.4
 	Added unit-testing for logtools.parsers module

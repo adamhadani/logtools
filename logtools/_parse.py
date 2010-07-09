@@ -21,12 +21,27 @@ import re
 import sys
 import logging
 from itertools import imap
+from functools import partial
 from optparse import OptionParser
 
 import logtools.parsers
 from _config import logtools_config, interpolate_config, AttrDict
 
 __all__ = ['logparse_parse_args', 'logparse', 'logparse_main']
+
+
+def multikey_getter_gen(parser, keys, delimiter="\t"):
+    """Generator meta-function to return a function
+    parsing a logline and returning multiple keys (tab-delimited)"""
+    if not hasattr(keys, 'intersection'):
+        keys = set(keys)
+        
+    def multikey_getter(line, parser, keyset):
+        data = parser(line.strip())
+        return delimiter.join((data[k] for k in keyset.intersection(data)))
+
+    return partial(multikey_getter, parser=parser, keyset=keys)
+
 
 def logparse_parse_args():
     parser = OptionParser()
@@ -55,18 +70,28 @@ def logparse(options, args, fh):
     parser class and emit specified field(s)"""
 
     field = options.field
-    keyfunc = None
-    if isinstance(options.field, int) or \
-       (isinstance(options.field, basestring) and options.field.isdigit()):
-        field = int(options.field) - 1            
-        key_func = lambda x: parser(x.strip()).by_index(field, raw=True)
-    else:            
-        key_func = lambda x: parser(x.strip())[field]
-
+    
     parser = eval(options.parser, vars(logtools.parsers), {})()
     if options.get('format', None):
         parser.set_format(options.format)
-
+        
+    keyfunc = None
+    if isinstance(options.field, int) or \
+       (isinstance(options.field, basestring) and options.field.isdigit()):
+        # Field given as integer (index)
+        field = int(options.field) - 1            
+        key_func = lambda x: parser(x.strip()).by_index(field, raw=True)
+    else:
+        # Field given as string
+        
+        # Check how many fields are requested        
+        keys = options.field.split(",")
+        L = len(keys)
+        if L == 1:
+            key_func = lambda x: parser(x.strip())[field]
+        else:
+            # Multiple fields requested
+            key_func = multikey_getter_gen(parser, keys)
     
     for line in fh:
         yield key_func(line)

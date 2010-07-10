@@ -45,14 +45,12 @@ class ParsingTestCase(unittest.TestCase):
         ]
         
     def testJSONParser(self):
-        """Test JSON format parser"""
         parser = JSONParser()
         for logrow in self.json_rows:
             parsed = parser(logrow)
             self.assertNotEquals(parsed, None, "Could not parse line: %s" % str(logrow))
         
     def testAccessLog(self):
-        """Test Apache access_log format parser"""
         parser = AccessLog()
         parser.set_format(format='%h %l %u %t "%r" %>s %b')
         self.assertRaises(ValueError, parser, 'example for invalid format')
@@ -61,19 +59,24 @@ class ParsingTestCase(unittest.TestCase):
             self.assertNotEquals(parsed, None, "Could not parse line: %s" % str(logrow))
             
     def testCommonLogFormat(self):
-        """Test CLF Parser"""
         parser = CommonLogFormat()
         self.assertRaises(ValueError, parser, 'example for invalid format')
         for logrow in self.clf_rows:
             parsed = parser(logrow)
             self.assertNotEquals(parsed, None, "Could not parse line: %s" % str(logrow))        
         
-        
     def testLogParse(self):
         options = AttrDict({'parser': 'CommonLogFormat', 'field': 4})
         fh = StringIO('\n'.join(self.clf_rows))
         output = [l for l in logparse(options, None, fh)]
         self.assertEquals(len(output), len(self.clf_rows), "Output size was not equal to input size!")
+        
+    def testMultiKeyGetter(self):
+        parser = parser = CommonLogFormat()
+        func = multikey_getter_gen(parser, keys=(1,2), is_indices=True)
+        fh = StringIO('\n'.join(self.clf_rows))
+        output = [func(l) for l in fh]
+        self.assertEquals(len(output), len(self.clf_rows), "Output size was not equal to input size!")   
         
             
 class FilterBotsTestCase(unittest.TestCase):

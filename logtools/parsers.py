@@ -22,15 +22,42 @@ import os
 import re
 import sys
 import logging
+from functools import partial
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
 import json
 
 from _config import AttrDict
 
-__all__ = ['LogParser', 'JSONParser', 'LogLine', 'AccessLog', 
-           'CommonLogFormat']
+__all__ = ['multikey_getter_gen', 'LogParser', 'JSONParser', 'LogLine',
+           'AccessLog', 'CommonLogFormat']
 
+
+
+def multikey_getter_gen(parser, keys, is_indices=False, delimiter="\t"):
+    """Generator meta-function to return a function
+    parsing a logline and returning multiple keys (tab-delimited)"""
+    if is_indices:
+        keys = map(int, keys)
+    elif not hasattr(keys, 'intersection'):
+        keys = set(keys)
+        
+    def multikey_getter(line, parser, keyset):
+        data = parser(line.strip())
+        return delimiter.join((data[k] for k in keyset))
+    
+    def multiindex_getter(line, parser, keyset):
+        data = parser(line.strip())
+        return delimiter.join((data.by_index(idx-1, raw=True) for idx in keys))
+
+    if is_indices is True:
+        # Field indices
+        return partial(multiindex_getter, parser=parser, keyset=keys)
+    else:
+        # Field names
+        return partial(multikey_getter, parser=parser, keyset=keys)
+
+    
 class LogParser(object):
     """Base class for all our parsers"""
     __metaclass__ = ABCMeta

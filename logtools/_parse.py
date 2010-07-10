@@ -21,7 +21,6 @@ import re
 import sys
 import logging
 from itertools import imap
-from functools import partial
 from operator import and_
 from optparse import OptionParser
 
@@ -29,30 +28,6 @@ import logtools.parsers
 from _config import logtools_config, interpolate_config, AttrDict
 
 __all__ = ['logparse_parse_args', 'logparse', 'logparse_main']
-
-
-def multikey_getter_gen(parser, keys, is_indices=False, delimiter="\t"):
-    """Generator meta-function to return a function
-    parsing a logline and returning multiple keys (tab-delimited)"""
-    if is_indices:
-        keys = map(int, keys)
-    elif not hasattr(keys, 'intersection'):
-        keys = set(keys)
-        
-    def multikey_getter(line, parser, keyset):
-        data = parser(line.strip())
-        return delimiter.join((data[k] for k in keyset))
-    
-    def multiindex_getter(line, parser, keyset):
-        data = parser(line.strip())
-        return delimiter.join((data.by_index(idx-1, raw=True) for idx in keys))
-
-    if is_indices is True:
-        # Field indices
-        return partial(multiindex_getter, parser=parser, keyset=keys)
-    else:
-        # Field names
-        return partial(multikey_getter, parser=parser, keyset=keys)
 
 
 def logparse_parse_args():

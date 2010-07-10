@@ -33,7 +33,6 @@ __all__ = ['multikey_getter_gen', 'LogParser', 'JSONParser', 'LogLine',
            'AccessLog', 'CommonLogFormat']
 
 
-
 def multikey_getter_gen(parser, keys, is_indices=False, delimiter="\t"):
     """Generator meta-function to return a function
     parsing a logline and returning multiple keys (tab-delimited)"""

@@ -45,7 +45,7 @@ def multikey_getter_gen(parser, keys, is_indices=False, delimiter="\t"):
     
     def multiindex_getter(line, parser, keyset):
         data = parser(line.strip())
-        return delimiter.join((data.by_index(idx, raw=True) for idx in keys))
+        return delimiter.join((data.by_index(idx-1, raw=True) for idx in keys))
 
     if is_indices is True:
         # Field indices

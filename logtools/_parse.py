@@ -84,7 +84,8 @@ def logparse(options, args, fh):
         else:
             # Multiple fields requested
             is_indices = reduce(and_, (k.isdigit() for k in keys), True)
-            key_func = multikey_getter_gen(parser, keys, is_indices=is_indices)
+            key_func = logtools.parsers.multikey_getter_gen(parser, keys, 
+                                        is_indices=is_indices)
     
     for line in fh:
         try:

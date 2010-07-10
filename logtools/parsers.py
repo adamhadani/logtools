@@ -38,8 +38,6 @@ def multikey_getter_gen(parser, keys, is_indices=False, delimiter="\t"):
     parsing a logline and returning multiple keys (tab-delimited)"""
     if is_indices:
         keys = map(int, keys)
-    elif not hasattr(keys, 'intersection'):
-        keys = set(keys)
         
     def multikey_getter(line, parser, keyset):
         data = parser(line.strip())

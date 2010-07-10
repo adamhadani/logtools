@@ -7,7 +7,9 @@ version 0.5
 	Added qps utility - Parse timestamps from log stream and calculate qps over sliding time window
 	Added JSONParser to parsing module, can now use JSON-formatted logs e.g for logmerge, logparse etc.
 	Can now specify fields by field name in -f parameter for the logparse method/console script
-	Can specify multiple comma-separated fields in logparse method
+	Can now specify multiple comma-separated field names/indices in logparse method
+	Added --ignore flag to logparse, surpresses missing field errors and skips those lines
+	
 	
 version 0.4
 	Added unit-testing for logtools.parsers module

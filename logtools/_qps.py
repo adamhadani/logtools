@@ -62,7 +62,7 @@ def qps(options, args, fh):
 def qps_main():
     """Console entry-point"""
     options, args = qps_parse_args()
-    for qps_info in qps(options, args, fh=sys.stdin.readlines()):
+    for qps_info in qps(options, args, fh=sys.stdin):
         print >> sys.stderr, qps_info
         
     return 0

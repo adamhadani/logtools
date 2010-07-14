@@ -95,11 +95,12 @@ def logparse(options, args, fh):
                 logging.debug("Could not match fields for parsed line: %s", line)
                 continue
             else:
+                logging.error("Could not match fields for parsed line: %s", line)
                 raise
     
 def logparse_main():
     """Console entry-point"""
     options, args = logparse_parse_args()
-    for row in logparse(options, args, fh=sys.stdin.readlines()):
+    for row in logparse(options, args, fh=sys.stdin):
         print row
     return 0

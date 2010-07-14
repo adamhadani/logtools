@@ -157,7 +157,7 @@ def filterbots_main():
     """Console entry-point"""
     options, args = filterbots_parse_args()
     if options.printlines:
-        for line in filterbots(options, args, fh=sys.stdin.readlines()):
+        for line in filterbots(options, args, fh=sys.stdin):
             print line
     else:
         for line in filterbots(options, args, \

@@ -68,7 +68,7 @@ def geoip(options, args, fh):
 def geoip_main():
     """Console entry-point"""
     options, args = geoip_parse_args()
-    for geocode, ip, line in geoip(options, args, fh=sys.stdin.readlines()):
+    for geocode, ip, line in geoip(options, args, fh=sys.stdin):
         if options.printline is True:
             print "{0}\t{1}".format(geocode, line)
         else:

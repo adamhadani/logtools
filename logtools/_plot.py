@@ -19,6 +19,7 @@ Plotting methods for logfiles
 import os
 import re
 import sys
+import locale
 import logging
 from itertools import imap
 from random import randint
@@ -29,6 +30,8 @@ from abc import ABCMeta, abstractmethod
 from _config import logtools_config, interpolate_config, AttrDict
 
 __all__ = ['logplot_parse_args', 'logplot', 'logplot_main']
+
+locale.setlocale(locale.LC_ALL, "")
 
 class PlotBackend(object):
     __metaclass__ = ABCMeta
@@ -118,7 +121,7 @@ class GChartBackend(PlotBackend):
         for l in imap(lambda x: x.strip(), fh):
             splitted_line = l.split(delimiter)
             k = int(splitted_line.pop(field-1))
-            pts.append((k, ' '.join(splitted_line), k))
+            pts.append((k, ' '.join(splitted_line), locale.format('%d', k, True)))
             
         if options.get('limit', None):
             # Only wanna use top N samples by key, sort and truncate
@@ -186,5 +189,5 @@ def logplot(options, args, fh):
 def logplot_main():
     """Console entry-point"""
     options, args = logplot_parse_args()
-    logplot(options, args, fh=sys.stdin.readlines())
+    logplot(options, args, fh=sys.stdin)
     return 0

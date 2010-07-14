@@ -109,10 +109,10 @@ def logsample_main():
     
     if options.weighted is True:
         for k, r in logsample_weighted(options, args, \
-                                       fh=sys.stdin.readlines()):
+                                       fh=sys.stdin):
             print r
     else:
-        for r in logsample(options, args, fh=sys.stdin.readlines()):
+        for r in logsample(options, args, fh=sys.stdin):
             print r
         
     return 0

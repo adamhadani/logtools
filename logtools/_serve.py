@@ -41,5 +41,5 @@ def logserve(options, args, fh):
 def logserve_main():
     """Console entry-point"""
     options, args = logserve_parse_args()
-    logserve(options, args, fh=sys.stdin.readlines())
+    logserve(options, args, fh=sys.stdin)
     return 0

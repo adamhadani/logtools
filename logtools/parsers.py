@@ -41,7 +41,7 @@ def multikey_getter_gen(parser, keys, is_indices=False, delimiter="\t"):
         
     def multikey_getter(line, parser, keyset):
         data = parser(line.strip())
-        return delimiter.join((data[k] for k in keyset))
+        return delimiter.join((unicode(data[k]) for k in keyset))
     
     def multiindex_getter(line, parser, keyset):
         data = parser(line.strip())

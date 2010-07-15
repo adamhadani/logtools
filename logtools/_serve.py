@@ -14,7 +14,7 @@
 """
 logtools._serve
 
-Miniature web server for delivering real-time log stats
+Miniature web server for delivering real-time OLAP-style log stats.
 """
 
 import os
@@ -24,6 +24,7 @@ import logging
 import wsgiref
 from itertools import imap
 from random import randint
+from threading import Thread
 from operator import itemgetter
 from optparse import OptionParser
 from abc import ABCMeta, abstractmethod
@@ -32,11 +33,15 @@ from _config import logtools_config, interpolate_config, AttrDict
 
 __all__ = ['logserve_parse_args', 'logserve', 'logserve_main']
 
+class WSGIAppThread(Thread):
+    """Thread implementation used for
+    the actual WSGI web server"""
+    
 def logserve_parse_args():
     pass
 
 def logserve(options, args, fh):
-    pass
+    app_thread = WSGIAppThread()
 
 def logserve_main():
     """Console entry-point"""

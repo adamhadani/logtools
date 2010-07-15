@@ -245,7 +245,8 @@ class MatplotlibBackend(PlotBackend):
         
         f = figure()
         pie(data, labels=labels, autopct='%1.1f%%', shadow=True)
-        legend(_legend, loc=3)
+        if options.get('legend', None) is True:        
+            legend(_legend, loc=3)
         
         return f
         

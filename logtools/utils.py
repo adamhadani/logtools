@@ -22,19 +22,25 @@ import os
 import sys
 import time
 
-def tail_f(fh, sleep=1):
+def tail_f(fname, block=True, sleep=1):
 	"""Mimic tail -f functionality on file descriptor.
-	This assumes file current position is already at end.
+	This assumes file current position is already where
+	we want it (i.e seeked to end).
 	
 	This code is mostly adapted from the following Python Recipe:
 	http://code.activestate.com/recipes/157035-tail-f-in-python/
 	"""
+	fh = open(fname, 'r')
 	
 	while 1:
 		where = fh.tell()
 		line = fh.readline()
 		if not line:
-			time.sleep(sleep)
+			if block:
+				time.sleep(sleep)
+			else:
+				yield
 			fh.seek(where)
 		else:
 			yield line
+

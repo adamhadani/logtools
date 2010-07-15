@@ -274,7 +274,7 @@ class MatplotlibBackend(PlotBackend):
         
         def format_date(x, pos=None):
             thisind = int(max(0, min(x, N)))
-            return ts[thisind].strftime('%Y-%m-%d')
+            return ts[thisind].strftime(options.dateformat)
 
         
         f = pylab.figure()

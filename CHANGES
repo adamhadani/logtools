@@ -13,7 +13,7 @@ version 0.5
 	Added --ignore flag to logparse, surpresses missing field errors and skips those lines
 	Fixed memory bug resulting from un-needed use of readlines() on file descriptors
 	Added the 'timeseries' plot type for plotting timeseries data
-	Added the matplotlib plotting backend	
+	Added the matplotlib plotting backend supporting pie/line/timeseries charting
 	Updated examples and README to reflect most of latest functionality
 	
 version 0.4

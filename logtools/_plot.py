@@ -215,6 +215,8 @@ class MatplotlibBackend(PlotBackend):
     def _plot_pie(self, options, args, fh):
         """Plot pie chart"""
         from pylab import figure, pie, legend
+        import matplotlib as mpl
+        mpl.rc('font', size=8)
 
         delimiter = options.delimiter
         field = options.field-1

@@ -23,6 +23,7 @@ import locale
 import logging
 from itertools import imap
 from random import randint
+from datetime import datetime
 from operator import itemgetter
 from optparse import OptionParser
 from abc import ABCMeta, abstractmethod
@@ -58,7 +59,8 @@ class GChartBackend(PlotBackend):
         try:
             chart = {
                 'pie': self._plot_pie,
-                'line': self._plot_line
+                'line': self._plot_line,
+                'timeseries': self._plot_timeseries
             }[options.type](options, args, fh)
         except KeyError:
             raise KeyError("Invalid plot type: '%s'" % options.type)
@@ -75,12 +77,12 @@ class GChartBackend(PlotBackend):
         from pygooglechart import Chart, SimpleLineChart, Axis
         
         delimiter = options.delimiter
-        field = options.field
+        field = options.field-1
         
         pts = []
         for l in imap(lambda x: x.strip(), fh):
             splitted_line = l.split(delimiter)
-            k = int(splitted_line.pop(field-1))
+            k = float(splitted_line.pop(field))
             pts.append((k, ' '.join(splitted_line)))
         
         if options.get('limit', None):
@@ -90,7 +92,7 @@ class GChartBackend(PlotBackend):
         if not pts:
             raise ValueError("No data to plot")
                         
-        max_y = max((v for v, label in pts))  
+        max_y = int(max((v for v, label in pts)))
         chart = SimpleLineChart(options.width, options.height,y_range=[0, max_y])
         
         # Styling
@@ -114,13 +116,13 @@ class GChartBackend(PlotBackend):
         from pygooglechart import PieChart3D, PieChart2D
 
         delimiter = options.delimiter
-        field = options.field
+        field = options.field-1
                 
         chart = PieChart2D(options.width, options.height)
         pts = []
         for l in imap(lambda x: x.strip(), fh):
             splitted_line = l.split(delimiter)
-            k = int(splitted_line.pop(field-1))
+            k = int(splitted_line.pop(field))
             pts.append((k, ' '.join(splitted_line), locale.format('%d', k, True)))
             
         if options.get('limit', None):
@@ -138,16 +140,161 @@ class GChartBackend(PlotBackend):
                         
         return chart
     
+    def _plot_timeseries(self, options, args, fh):
+        """Plot a timeseries graph"""
+        from pygooglechart import Chart, SimpleLineChart, Axis
+        
+        delimiter = options.delimiter
+        field = options.field-1
+        datefield = options.datefield-1
+        
+        pts = []
+        for l in imap(lambda x: x.strip(), fh):
+            splitted_line = l.split(delimiter)
+            v = float(splitted_line[field])
+            t = datetime.strptime(splitted_line[datefield], options.dateformat)
+            pts.append((t, v))
+        
+        if options.get('limit', None):
+            # Only wanna use top (earliest) N samples by key, sort and truncate
+            pts = sorted(pts, key=itemgetter(0), reverse=True)[:options.limit]
+                      
+        if not pts:
+            raise ValueError("No data to plot")
+                        
+        max_y = int(max((v for t, v in pts)))
+        chart = SimpleLineChart(options.width, options.height,y_range=[0, max_y])
+        
+        # Styling
+        chart.set_colours(['0000FF'])
+        chart.fill_linear_stripes(Chart.CHART, 0, 'CCCCCC', 0.2, 'FFFFFF', 0.2)        
+        chart.set_grid(0, 25, 5, 5)
+        
+        ts, vals = zip(*pts)
+        chart.add_data(vals)
+        
+        # Axis labels
+        chart.set_axis_labels(Axis.BOTTOM, ts)
+        left_axis = range(0, max_y + 1, 25)
+        left_axis[0] = ''
+        chart.set_axis_labels(Axis.LEFT, left_axis)
+        
+        return chart        
 
+        
+class MatplotlibBackend(PlotBackend):
+    """Use matplotlib (pylab) for rendering plots"""
+    
+    def __init__(self):
+        PlotBackend.__init__(self)
+        
+    def plot(self, options, args, fh):
+        """Plot using google charts api"""
+        try:
+            import pylab
+        except ImportError:
+            logging.error("matplotlib Python package must be installed to use the 'matplotlib' backend")
+            sys.exit(-1)
+            
+        try:
+            chart = {
+                #'pie': self._plot_pie,
+                'line': self._plot_line,
+                'timeseries': self._plot_timeseries
+            }[options.type](options, args, fh)
+        except KeyError:
+            raise KeyError("Invalid plot type: '%s'" % options.type)
+        else:
+            if options.get('title', None):
+                chart.get_axes()[0].set_title(options.title)
+            if options.get('output', None):
+                chart.savefig(options.output)
+                
+            return chart 
+        
+    def _plot_line(self, options, args, fh):
+        """Line plot using matplotlib"""
+        import pylab
+        
+        delimiter = options.delimiter
+        field = options.field-1
+         
+        pts = []
+        max_y = -float("inf")
+        for l in imap(lambda x: x.strip(), fh):
+            splitted_line = l.split(delimiter)
+            k = float(splitted_line.pop(field))
+            pts.append((k, ' '.join(splitted_line)))
+            if k > max_y:
+                max_y = k
+        
+        if options.get('limit', None):
+            # Only wanna use top N samples by key, sort and truncate
+            pts = sorted(pts, key=itemgetter(0), reverse=True)[:options.limit]
+                      
+        if not pts:
+            raise ValueError("No data to plot")
+        
+        data, labels = zip(*pts)
+        
+        f = pylab.figure()
+        pylab.plot(xrange(len(data)), data, "*--b")
+        pylab.xticks(xrange(len(labels)), labels, rotation=17)
+                
+        return f
+    
+    def _plot_timeseries(self, options, args, fh):
+        """Line plot using matplotlib"""
+        import pylab
+        import matplotlib.ticker as ticker
+        
+        delimiter = options.delimiter
+        field = options.field-1
+        datefield = options.datefield-1
+        
+        pts = []
+        max_y = -float("inf")
+        for l in imap(lambda x: x.strip(), fh):
+            splitted_line = l.split(delimiter)
+            v = float(splitted_line[field])
+            t = datetime.strptime(splitted_line[datefield], options.dateformat)
+            pts.append((t, v))
+            if v > max_y:
+                max_y = v
+        
+        if options.get('limit', None):
+            # Only wanna use top N samples by key, sort and truncate
+            pts = sorted(pts, key=itemgetter(0), reverse=True)[:options.limit]
+                      
+        if not pts:
+            raise ValueError("No data to plot")
+        
+        N = len(pts)
+        ts, vals = zip(*pts)
+        
+        def format_date(x, pos=None):
+            thisind = int(max(0, min(x, N)))
+            return ts[thisind].strftime('%Y-%m-%d')
+
+        
+        f = pylab.figure()
+        ax = f.add_subplot(111)
+        ax.plot(xrange(len(vals)), vals, "*--b")
+        ax.xaxis.set_major_formatter(ticker.FuncFormatter(format_date))
+        f.autofmt_xdate()
+                
+        return f    
+
+    
 def logplot_parse_args():
     parser = OptionParser()
     parser.add_option("-b", "--backend", dest="backend",  
-                      help="Backend to use for plotting. Currently available backends: 'gchart'")
+                      help="Backend to use for plotting. Currently available backends: 'gchart', 'matplotlib'")
     parser.add_option("-T", "--type", dest="type",  
                       help="Chart type. Available types: 'pie', 'histogram', 'line'." \
                       "Availability might differ due to backend.")    
     parser.add_option("-f", "--field", dest="field", type=int,
-                      help="Index of field to use as input for generating plot")
+                      help="Index of field to use as main input for plot")
     parser.add_option("-d", "--delimiter", dest="delimiter",
                       help="Delimiter character for field-separation")
     parser.add_option("-o", "--output", dest="output", help="Output filename")    
@@ -158,7 +305,11 @@ def logplot_parse_args():
     parser.add_option("-l", "--legend", dest="legend", action="store_true", 
                       help="Render Plot Legend")
     parser.add_option("-t", "--title", dest="title",
-                      help="Plot Title")     
+                      help="Plot Title")
+    parser.add_option("--datefield", dest="datefield", type=int,
+                      help="Index of field to use as date-time source (for timeseries plots)")    
+    parser.add_option("--dateformat", dest="dateformat",
+                      help="Format string for parsing date-time field (for timeseries plots)")    
     
     parser.add_option("-P", "--profile", dest="profile", default='logplot',
                       help="Configuration profile (section in configuration file)")
@@ -176,6 +327,8 @@ def logplot_parse_args():
     options.limit = interpolate_config(options.limit, options.profile, 'limit', type=int, default=False) 
     options.legend = interpolate_config(options.legend, options.profile, 'legend', type=bool, default=False) 
     options.title = interpolate_config(options.title, options.profile, 'title', default=False)
+    options.datefield = interpolate_config(options.datefield, options.profile, 'datefield', type=int, default=False)
+    options.dateformat = interpolate_config(options.dateformat, options.profile, 'dateformat', default=False)
 
     return AttrDict(options.__dict__), args
 
@@ -183,7 +336,8 @@ def logplot(options, args, fh):
     """Plot some index defined over the logstream,
     using user-specified backend"""            
     return {
-        "gchart":  GChartBackend()
+        "gchart":  GChartBackend(),
+        "matplotlib": MatplotlibBackend()
     }[options.backend].plot(options, args, fh)
 
 def logplot_main():

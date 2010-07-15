@@ -198,7 +198,7 @@ class MatplotlibBackend(PlotBackend):
             
         try:
             chart = {
-                #'pie': self._plot_pie,
+                'pie': self._plot_pie,
                 'line': self._plot_line,
                 'timeseries': self._plot_timeseries
             }[options.type](options, args, fh)
@@ -211,6 +211,41 @@ class MatplotlibBackend(PlotBackend):
                 chart.savefig(options.output)
                 
             return chart 
+        
+    def _plot_pie(self, options, args, fh):
+        """Plot pie chart"""
+        from pylab import figure, pie, legend
+
+        delimiter = options.delimiter
+        field = options.field-1
+                
+        pts = []
+        ttl = 0.
+        for l in imap(lambda x: x.strip(), fh):
+            splitted_line = l.split(delimiter)
+            k = float(splitted_line.pop(field))
+            ttl += k
+            pts.append((k, ' '.join(splitted_line), locale.format('%d', k, True)))
+        
+        
+        if options.get('limit', None):
+            # Only wanna use top N samples by key, sort and truncate
+            pts = sorted(pts, key=itemgetter(0), reverse=True)[:options.limit]
+            
+        if not pts or ttl==0:
+            raise ValueError("No data to plot")
+        
+        data, labels, _legend = zip(*pts)
+        data = list(data)
+        # Normalize
+        for idx, pt in enumerate(data):
+            data[idx] /= ttl
+        
+        f = figure()
+        pie(data, labels=labels, autopct='%1.1f%%', shadow=True)
+        legend(_legend, loc=3)
+        
+        return f
         
     def _plot_line(self, options, args, fh):
         """Line plot using matplotlib"""
@@ -263,7 +298,7 @@ class MatplotlibBackend(PlotBackend):
                 max_y = v
         
         if options.get('limit', None):
-            # Only wanna use top N samples by key, sort and truncate
+            # Only use top N samples by key, sort and truncate
             pts = sorted(pts, key=itemgetter(0), reverse=True)[:options.limit]
                       
         if not pts:

@@ -13,7 +13,10 @@ log mining artifacts that are typically employed in a Website context.
 
 logtools can be used either programmatically from within a python program, or as a set of 
 atomic command-line utilities. See below for description of the command-line tools. 
-For help on using the programmatic interface, see the docs/ sub-directory.
+
+For help on using the programmatic interface, I'm working on creating API
+documentation using Sphinx. For now, the source code itself is fairly well
+commented.
 
 This software is distributed under the Apache 2.0 license.
 
@@ -52,10 +55,10 @@ Console Scripts
     The regular expression mask used for matching the IP in the log line is user-specified.
 	This tool requires the Maxmind GeoIP library and python bindings. See http://www.maxmind.com/app/country
 			
-
 * logparse
 	Use the logtools.parsers module to intelligibly parse the log, emitting/filtering user-selectable field(s).
-	This can be used for inspecting logs whos format is harder to parse than simply cut-ing on whitespace (e.g CLF)
+	This can be used for inspecting logs whos format is harder to parse than simply cut-ing on whitespace,
+	e.g CLF, JSON and so forth.
 
 * logmerge
 	Merge multiple (individually sorted) input logstreams and stream them out in (combined) sorted order.
@@ -72,9 +75,9 @@ Console Scripts
 	See example below.
 
 * logplot
-	Render a plot based on some fields/values from input log. This tool supports a pluggable backend inteface,
-	and currently includes an implementation for plotting using the Google Charts API.
-	See examples below and documentation in docs/ for more details.
+	Render a plot based on some fields/values from input log. This tool supports a pluggable backend interface,
+	and currently includes an implementation for plotting using the Google Charts API as well as matplotlib.
+	See examples below.
 
 * logplotserve
 	Start a compact webserver (WSGI-based) serving log statistics/plots. This can support real-time, streaming
@@ -88,21 +91,23 @@ Configuration
 -------------
 All tools' command-line parameters can assume a default value using parameter interpolation
 from /etc/logtools.cfg and/or ~/.logtoolsrc, if these exist.
-This allows for convenient operation in the usual case where these rarely change.
-The configuration file format is of the form:
+This allows for convenient operation in the usual case where these rarely change, or when they 
+assume one of a small set of different configurations (e.g usage profiles).
 
-[script_name]
-optname: optval
+The basic configuration file format is of the form:
+
+ [script_name]
+ optname: optval
 
 For example:
 
-[geoip]
-ip_re: ^(.*?) -
+ [geoip]
+ ip_re: ^(.*?) -
 
-[filterbots]
-bots_ua: /home/www/conf/bots_useragents.txt
-bots_ips: /home/www/conf/bots_hosts.txt
-ip_ua_re: ^(?P<ip>.*?) -(?:.*?"){5}(?P<ua>.*?)"
+ [filterbots]
+ bots_ua: /home/www/conf/bots_useragents.txt
+ bots_ips: /home/www/conf/bots_hosts.txt
+ ip_ua_re: ^(?P<ip>.*?) -(?:.*?"){5}(?P<ua>.*?)"
 
 Available parameters per each command-line tool can be gleaned by running the 
 tool with the --help flag.
@@ -124,8 +129,8 @@ Usage Examples
 the ip/user agent using the filterbots tool. 
 Notice the use of named match groups syntax in the regular expression - (?P<name>...).
 The ips/useragents files are not specified in commandline and therefore are assumed to be defined
-in ~/.logtoolsrc or /etc/logtools.cfg. The option --print is used to actually print matching lines,
-rather than just report the filtering statistics.
+in ~/.logtoolsrc or /etc/logtools.cfg. For example bots black list files, see data/examples directory.
+The option --print is used to actually print matching lines, rather than just report the filtering statistics.
 
 	cat error_log.1 | filterbots -r ".*\[client (?P<ip>.*?)\].*USER_AGENT:(?P<ua>.*?)\'" --print
 
@@ -143,6 +148,9 @@ to inspect all the filtered (bot) lines.
 	
 	logmerge -d' ' -f1 app_log.1 app_log.2
 	
+	Note that the -d (delimiter) and -f (flags) are used to specify which field is used
+	for the sort-merging (in this case, the first field should be used)
+	
 4. Merge and sort numerically on some numeric field:
 
 	logmerge -d' ' -f3 --numeric app_log.*
@@ -154,21 +162,33 @@ to inspect all the filtered (bot) lines.
 6. Use logparse to parse a CommonLogFormat log (e.g Apache access_log) and print only the date field:
 
 	cat access_log | logparse --parser CommonLogFormat -f4
+
+7. Use logparse to parse a custom format Apache access_log and print first two fields.
+
+	cat my_access_log | logparse --parser AccessLog --format '%h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-agent}i"' -f1,2
 	
-7. Generate a pie chart of Country distributions in Apache access_log using 
+	You might recognize this format as the NCSA extended/combined format.
+	
+8. Use logparse to parse a JSON-format log (each line is a JSON string) 
+   and print only the client_ip, useragent fields:
+
+	cat json_access_log | logparse --parser JSONParser -f 'client_ip,useragent'
+	
+9. Generate a pie chart of Country distributions in Apache access_log using 
    Maxmind GeoIP and GoogleChart API. 
    Note that this requires the GeoIP library and python bindings as well as pygooglechart package.
 
 	cat access_log.1 | geoip -r '^(.*?) -' | aggregate -d$'\t' -f2 | \
 		logplot -d' ' -f1 --backend gchart --type pie -W600 -H300 --limit 10 --output plot.png
 
-8. Filter bots and aggregate IP address values to show IPs of visitors with counts and sorted from most frequent to least:
+10. Filter bots and aggregate IP address values to show IPs of visitors with counts and sorted from most frequent to least:
 
 	cat access_log.1 | filterbots --print | aggregate -d' ' -f1
+
 	
-9. Naturally, piping between utilities is useful, as shown in the examples above.
+** Naturally, piping between utilities is useful, as shown in most of the examples above.
 	
-10. All tools admit a --help command-line option that will print out detailed information about the different
+** All tools admit a --help command-line option that will print out detailed information about the different
    options available.
 
 ~~

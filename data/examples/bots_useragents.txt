@@ -12,6 +12,7 @@ Baiduspider+(+http://www.baidu.com/search/spider.htm)
 Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
 Mozilla/5.0 (compatible; heritrix/2.0.2 +http://getprotected.asu.edu/files/wass.pdf)
 Mozilla/5.0 (compatible; redditbot/1.0; +http://www.reddit.com/feedback)
+Mozilla/5.0 (compatible; Yahoo! Slurp/3.0; http://help.yahoo.com/help/us/ysearch/slurp)
 facebook share (http://facebook.com/sharer.php)
 ############## Prefix Matches ###############
 p'Java/'
@@ -23,4 +24,4 @@ p'facebookexternalhit'
 s'MSIECrawler)'
 s'SurveyBot/2.3 (DomainTools)'
 ############## RegExp Matches ###############
-r'Yahoo Slurp!'
+r'YandexBot'

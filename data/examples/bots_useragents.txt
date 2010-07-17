@@ -1,0 +1,26 @@
+#
+# This is an example bots_useragents.txt, demonstrating the 
+# structure and format of this file.
+#
+# It is best to avoid regular expression patterns for large
+# log mining operations as those are the slowest.
+# Exact match and prefix/suffix matching are always preferred.
+#
+#
+############## Exact Matches ###############
+Baiduspider+(+http://www.baidu.com/search/spider.htm)
+Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
+Mozilla/5.0 (compatible; heritrix/2.0.2 +http://getprotected.asu.edu/files/wass.pdf)
+Mozilla/5.0 (compatible; redditbot/1.0; +http://www.reddit.com/feedback)
+facebook share (http://facebook.com/sharer.php)
+############## Prefix Matches ###############
+p'Java/'
+p'Feedfetcher-Google;'
+p'AppEngine-Google;'
+p'msnbot'
+p'facebookexternalhit'
+############## Suffix Matches ###############
+s'MSIECrawler)'
+s'SurveyBot/2.3 (DomainTools)'
+############## RegExp Matches ###############
+r'Yahoo Slurp!'

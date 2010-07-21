@@ -18,6 +18,7 @@ import sys
 import unittest
 import logging
 from tempfile import mkstemp
+from datetime import datetime
 from StringIO import StringIO
 from operator import itemgetter
 
@@ -181,6 +182,22 @@ class MergeTestCase(unittest.TestCase):
         self.assertEquals(len(output), 11, "Output size was not equal to input size!")
         self.assertEquals(map(itemgetter(0), output), sorted(map(lambda x: int(x[0]), output)), 
                           "Output was not numerically sorted!")
+        
+    def testDateMerge(self):
+        os.write(self.tempfiles[0][0], "\n".join(['2010/01/12 07:00:00,one', '2010/01/12 08:00:00,five', 
+                                                  '2010/01/13 10:00:00,threehundred']))
+        os.write(self.tempfiles[1][0], "\n".join(['2010/01/12 07:30:00,one', '2010/01/12 08:10:00,five', 
+                                                  '2010/01/12 21:00:00,threehundred']))
+        os.write(self.tempfiles[2][0], "\n".join(['2010/01/11 05:33:03,one', '2010/01/12 03:10:00,five', 
+                                                  '2010/01/21 22:00:00,threehundred']))
+        
+        dateformat = '%Y/%m/%d %H:%M:%S'
+        options = AttrDict({'delimiter': ',', 'field': 1, 'datetime': True, 'dateformat': dateformat })
+        output = [(k, l) for k, l in logmerge(options, self.args)]
+        
+        self.assertEquals(len(output), 9, "Output size was not equal to input size!")
+        self.assertEquals(map(itemgetter(0), output), sorted(map(itemgetter(0), output)), 
+                          "Output was not time sorted!")        
         
     def testLexicalMerge(self):
         os.write(self.tempfiles[0][0], "\n".join(['1 one', '300 threehundred', '5 five', 

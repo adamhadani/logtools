@@ -23,6 +23,7 @@ import re
 import sys
 import logging
 from itertools import imap
+from datetime import datetime
 from optparse import OptionParser
 from heapq import heappush, heappop, merge
 
@@ -42,6 +43,10 @@ def logmerge_parse_args():
                     help="Delimiter character for fields in logfile")
     parser.add_option("-n", "--numeric", dest="numeric", default=None, action="store_true",
                     help="Parse key field value as numeric and sort accordingly")
+    parser.add_option("-t", "--datetime", dest="datetime", default=None, action="store_true",
+                    help="Parse key field value as a date/time timestamp and sort accordingly")
+    parser.add_option("--dateformat", dest="dateformat",
+                      help="Format string for parsing date-time field (used with --datetime)")        
     parser.add_option("-p", "--parser", dest="parser", default=None, 
                     help="Log format parser (e.g 'CommonLogFormat'). See documentation for available parsers.")
     
@@ -56,7 +61,11 @@ def logmerge_parse_args():
     options.delimiter = interpolate_config(options.delimiter, 
                                     options.profile, 'delimiter', default=' ')
     options.numeric = interpolate_config(options.numeric, options.profile, 
-                                    'numeric', default=False, type=bool)    
+                                    'numeric', default=False, type=bool) 
+    options.datetime = interpolate_config(options.datetime, options.profile, 
+                                    'datetime', default=False, type=bool)     
+    options.dateformat = interpolate_config(options.dateformat, 
+                                    options.profile, 'dateformat', default=False)    
     options.parser = interpolate_config(options.parser, 
                                     options.profile, 'parser', default=False)    
 
@@ -69,8 +78,10 @@ def logmerge(options, args):
     delimiter = options.delimiter
     field = options.field-1
     
-    if options.get('numeric', None) is True:
+    if options.get('numeric', None):
         key_func = lambda x: (int(x.strip().split(delimiter)[field]), x)
+    elif options.get('datetime', None):
+        key_func = lambda x: (datetime.strptime(x.strip().split(delimiter)[field], options.dateformat), x)
     elif options.get('parser', None):
         parser = eval(options.parser, vars(logtools.parsers), {})()
         key_func = lambda x: (parser(x.strip()).by_index(field), x)

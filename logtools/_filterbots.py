@@ -23,18 +23,17 @@ from functools import partial
 from optparse import OptionParser
 
 from _config import logtools_config, interpolate_config, AttrDict
-from logtools.utils import is_bot_ua
 
 __all__ = ['filterbots_parse_args', 'filterbots', 
-           'filterbots_main', 'parse_bots_ua']
+           'filterbots_main', 'parse_bots_ua', 'is_bot_ua']
 
 def filterbots_parse_args():
     usage = "%prog " \
-            "-u <useragents_blacklist_file> " \
-            "-i <ips_blacklist_file> " \
-            "-r <ip_useragent_regexp>"
+          "-u <useragents_blacklist_file> " \
+          "-i <ips_blacklist_file> " \
+          "-r <ip_useragent_regexp>"
     parser = OptionParser(usage=usage)
-    
+
     parser.add_option("-u", dest="bots_ua", default=None, 
                       help="Bots useragents blacklist file")
     parser.add_option("-i", dest="bots_ips", default=None, 
@@ -48,7 +47,7 @@ def filterbots_parse_args():
                       help="Use pattern analysis to filter bots (See documentation for details)")    
     parser.add_option("-R", "--reverse", dest="reverse", action="store_true",
                       help="Reverse filtering")
-    
+
     parser.add_option("-P", "--profile", dest="profile", default='filterbots',
                       help="Configuration profile (section in configuration file)")
 
@@ -56,18 +55,18 @@ def filterbots_parse_args():
 
     # Interpolate from configuration and open filehandle
     options.bots_ua  = open(interpolate_config(options.bots_ua, 
-                    options.profile, 'bots_ua'), "r")
+                                               options.profile, 'bots_ua'), "r")
     options.bots_ips = open(interpolate_config(options.bots_ips, 
-                    options.profile, 'bots_ips'), "r")
+                                               options.profile, 'bots_ips'), "r")
     options.ip_ua_re  = interpolate_config(options.ip_ua_re, 
-                    options.profile, 'ip_ua_re')  
+                                           options.profile, 'ip_ua_re')  
     options.pattern   = interpolate_config(options.pattern, 
-                    options.profile, 'pattern', default=False, type=bool)    
+                                           options.profile, 'pattern', default=False, type=bool)    
     options.reverse   = interpolate_config(options.reverse, 
-                    options.profile, 'reverse', default=False, type=bool)
+                                           options.profile, 'reverse', default=False, type=bool)
     options.printlines  = interpolate_config(options.printlines, 
-                    options.profile, 'print', default=False, type=bool) 
-    
+                                             options.profile, 'print', default=False, type=bool) 
+
     return AttrDict(options.__dict__), args
 
 def parse_bots_ua(bots_ua):
@@ -78,7 +77,7 @@ def parse_bots_ua(bots_ua):
     bots_ua_prefix_dict = {}
     bots_ua_suffix_dict = {}
     bots_ua_re   = []
-    
+
     for line in imap(lambda x: x.strip(), bots_ua):
         if line.startswith("#"):
             # Comment line
@@ -93,9 +92,37 @@ def parse_bots_ua(bots_ua):
         else:
             # Exact match
             bots_ua_dict[line] = True
-            
+
     return bots_ua_dict, bots_ua_prefix_dict, \
            bots_ua_suffix_dict, bots_ua_re
+
+
+def is_bot_ua(useragent, bots_ua_dict, bots_ua_prefix_dict, bots_ua_suffix_dict, bots_ua_re):
+    """Check if user-agent string is blacklisted as a bot, using
+    given blacklist dictionaries for exact match, prefix, suffix, and regexp matches"""
+    if not useragent:
+        return False
+
+    if useragent in bots_ua_dict:
+        # Exact match hit for host or useragent
+        return True
+    else:
+        # Try prefix matching on user agent
+        for prefix in bots_ua_prefix_dict:
+            if useragent.startswith(prefix):
+                return True
+        else:
+            # Try suffix matching on user agent
+            for suffix in bots_ua_suffix_dict:
+                if useragent.endswith(suffix):
+                    return True
+            else:
+                # Try Regular expression matching on user agent
+                for ua_re in bots_ua_re:
+                    if ua_re.match(useragent):
+                        return True
+    return False
+
 
 def filterbots(fh, ip_ua_re, bots_ua, bots_ips, reverse, **kwargs):
     """Filter bots from a log stream using
@@ -106,7 +133,7 @@ def filterbots(fh, ip_ua_re, bots_ua, bots_ips, reverse, **kwargs):
                               if not l.startswith("#")])
     #reverse = options.reverse
     ua_ip_re = re.compile(ip_ua_re)
-    
+
     is_bot_ua_func = partial(is_bot_ua, bots_ua_dict=bots_ua_dict, 
                              bots_ua_prefix_dict=bots_ua_prefix_dict, 
                              bots_ua_suffix_dict=bots_ua_suffix_dict, 
@@ -119,7 +146,7 @@ def filterbots(fh, ip_ua_re, bots_ua, bots_ips, reverse, **kwargs):
         if not match:
             logging.warn("No match for line: %s", line)
             continue
-    
+
         matchgroups = match.groupdict()
         is_bot = False
 
@@ -129,18 +156,18 @@ def filterbots(fh, ip_ua_re, bots_ua, bots_ips, reverse, **kwargs):
         if not is_bot and matchgroups.get('ip', None) in bots_ips:
             # IP Is blacklisted
             is_bot = True
-            
+
         if is_bot ^ reverse:
             logging.debug("Filtering line: %s", line)
             num_filtered+=1
             continue
-        
+
         num_lines+=1
         yield line
 
     logging.info("Number of lines after filtering: %s", num_lines)
     logging.info("Number of lines filtered: %s", num_filtered)            
-    
+
     return
 
 def filterbots_main():
@@ -152,6 +179,6 @@ def filterbots_main():
     else:
         for line in filterbots(fh=sys.stdin, *args, **options): 
             pass
-        
+
     return 0
 

@@ -21,33 +21,6 @@ but can be used by other methods
 import os
 import sys
 import time
-
-def is_bot_ua(useragent, bots_ua_dict, bots_ua_prefix_dict, bots_ua_suffix_dict, bots_ua_re):
-	"""Check if user-agent string is blacklisted as a bot, using
-	given blacklist dictionaries for exact match, prefix, suffix, and regexp matches"""
-	if not useragent:
-		return False
-	
-	if useragent in bots_ua_dict:
-		# Exact match hit for host or useragent
-		return True
-	else:
-		# Try prefix matching on user agent
-		for prefix in bots_ua_prefix_dict:
-			if useragent.startswith(prefix):
-				return True
-		else:
-			# Try suffix matching on user agent
-			for suffix in bots_ua_suffix_dict:
-				if useragent.endswith(suffix):
-					return True
-			else:
-				# Try Regular expression matching on user agent
-				for ua_re in bots_ua_re:
-					if ua_re.match(useragent):
-						return True
-	return False
-
 	
 def tail_f(fname, block=True, sleep=1):
 	"""Mimic tail -f functionality on file descriptor.

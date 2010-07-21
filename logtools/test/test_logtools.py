@@ -109,7 +109,7 @@ class FilterBotsTestCase(unittest.TestCase):
 
     def testFiltering(self):
         i=0
-        for l in filterbots(self.options, None, self.fh): 
+        for l in filterbots(fh=self.fh, **self.options): 
             i+=1
         self.assertEquals(i, 1, "filterbots output size different than expected: %s" % str(i))
 

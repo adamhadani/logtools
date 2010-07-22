@@ -46,7 +46,16 @@ def geoip_parse_args():
 
     return AttrDict(options.__dict__), args
 
-def geoip(options, args, fh):
+def geoip(fh, ip_re, **kwargs):
+    """
+    extract geo-information from logline
+    based on ip address and the MaxMind GeoIP
+    library.
+    
+    Args:
+      fh - File handle (as returned by open(), or StringIO)
+      ip_re - Regular expression pattern to use for locating ip in line
+    """
     try:
         import GeoIP
     except ImportError:
@@ -54,7 +63,7 @@ def geoip(options, args, fh):
         sys.exit(-1)
 
     gi = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
-    ip_re = re.compile(options.ip_re)
+    ip_re = re.compile(ip_re)
 
     for line in imap(lambda x: x.strip(), fh):
         match = ip_re.match(line)
@@ -68,7 +77,7 @@ def geoip(options, args, fh):
 def geoip_main():
     """Console entry-point"""
     options, args = geoip_parse_args()
-    for geocode, ip, line in geoip(options, args, fh=sys.stdin):
+    for geocode, ip, line in geoip(fh=sys.stdin, *args, **options):
         if options.printline is True:
             print "{0}\t{1}".format(geocode, line)
         else:

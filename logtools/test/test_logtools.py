@@ -131,7 +131,7 @@ class GeoIPTestCase(unittest.TestCase):
             print >> sys.stderr, "GeoIP Python package not available - skipping geoip unittest."
             return
 
-        output = [(geocode, ip, line) for geocode, ip, line in geoip(self.options, None, self.fh)]
+        output = [(geocode, ip, line) for geocode, ip, line in geoip(fh=self.fh, **self.options)]
         self.assertEquals(len(output), 2, "Output size was different than expected: %s" % str(len(output)))
 
         
@@ -150,12 +150,12 @@ class SamplingTestCase(unittest.TestCase):
         ]))
 
     def testUniformSampling(self):
-        output = [r for r in logsample(self.options, None, self.fh)]
+        output = [r for r in logsample(fh=self.fh, **self.options)]
         self.assertEquals(len(output), self.options.num_samples, 
                           "logsample output size different than expected: %s" % len(output))
         
     def testWeightedSampling(self):
-        output = [(k, r) for k, r in logsample_weighted(self.weighted_opts, None, self.fh)]
+        output = [(k, r) for k, r in logsample_weighted(fh=self.fh, **self.weighted_opts)]
         self.assertEquals(len(output), self.weighted_opts.num_samples, 
                           "logsample output size different than expected: %s" % len(output))        
 

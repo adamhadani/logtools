@@ -102,5 +102,6 @@ def logparse_main():
     """Console entry-point"""
     options, args = logparse_parse_args()
     for row in logparse(options, args, fh=sys.stdin):
-        print row
+        if row:
+            print row.encode('ascii', 'ignore')
     return 0

@@ -49,11 +49,11 @@ def logsample_parse_args():
 
     return AttrDict(options.__dict__), args
 
-def logsample(options, args, fh):
+def logsample(fh, num_samples, **kwargs):
     """Use a Reservoir Sampling algorithm
     to sample uniformly random lines from input stream."""
     R = []
-    N = options.num_samples
+    N = num_samples
     
     for i, k in enumerate(fh):
         if i < N:
@@ -67,14 +67,14 @@ def logsample(options, args, fh):
     for record in R:
         yield record.strip()
 
-def logsample_weighted(options, args, fh):
+def logsample_weighted(fh, num_samples, field, delimiter):
     """Implemented Weighted Reservoir Sampling, assuming integer weights.
     See Weighted random sampling with a reservoir, Efraimidis et al."""
     
-    N = options.num_samples
-    delimiter = options.delimiter
+    N = num_samples
+    delimiter = delimiter
     # NOTE: Convert to 0-based indexing since we expose as 1-based
-    field = options.field-1
+    field = field-1
     
     R = []
     min_val = float("inf")
@@ -108,11 +108,10 @@ def logsample_main():
     options, args = logsample_parse_args()
     
     if options.weighted is True:
-        for k, r in logsample_weighted(options, args, \
-                                       fh=sys.stdin):
+        for k, r in logsample_weighted(fh=sys.stdin, *args, **options):
             print r
     else:
-        for r in logsample(options, args, fh=sys.stdin):
+        for r in logsample(fh=sys.stdin, *args, **options):
             print r
         
     return 0

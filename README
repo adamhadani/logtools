@@ -70,6 +70,11 @@ Console Scripts
     efficiently produce a random sampling over an arbitrary large input stream.
 	Both uniformly random as well as weighted random variants are available. See examples below.
 
+* qps
+	Compute QPS averages given a log file using a datetime/timestamp field and a sliding window interval 
+    specified by the user. Can be very handy to quickly assess current QPS of some arbitrary service
+	based on real-time logfiles (e.g Apache access_log, Tomcat catalina.out).
+		
 * aggregate
 	Convenient shortcut for aggregating values over a given field and sorting/counting by a value's frequency.
 	See example below.
@@ -78,13 +83,6 @@ Console Scripts
 	Render a plot based on some fields/values from input log. This tool supports a pluggable backend interface,
 	and currently includes an implementation for plotting using the Google Charts API as well as matplotlib.
 	See examples below.
-
-* logplotserve
-	Start a compact webserver (WSGI-based) serving log statistics/plots. This can support real-time, streaming
-	updates from a logfile and can be used as a compact real-time monitoring solution for moderate traffic.
-	It uses RRDTool-based plotting to offer high-performance, industry standard compliant charting.
-	
-	Coming Soon.
 
 
 Configuration

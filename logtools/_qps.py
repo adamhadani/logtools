@@ -37,10 +37,6 @@ def qps_parse_args():
     
     parser.add_option("-r", "--re", dest="dt_re", default=None, 
                     help="Regular expression to lookup datetime in logrow")
-    parser.add_option("-d", "--delimiter", dest="delimiter", default=None, 
-                      help="Delimiter character for fields in logfile")
-    parser.add_option("-f", "--field", dest="field", default=None, type=int,
-                    help="Field index to use as key for sorting by (1-based)")
     parser.add_option("-F", "--dateformat", dest="dateformat",
                       help="Format string for parsing date-time field (used with --datetime)")        
     parser.add_option("-W", '--window-size', dest="window_size", type=int, default=None, 
@@ -55,10 +51,6 @@ def qps_parse_args():
 
     # Interpolate from configuration and open filehandle
     options.dt_re  = interpolate_config(options.dt_re, options.profile, 're')    
-    options.delimiter = interpolate_config(options.delimiter, 
-                                           options.profile, 'delimiter', default=' ')
-    options.field = interpolate_config(options.field, 
-                                    options.profile, 'field', type=int)
     options.dateformat = interpolate_config(options.dateformat, 
                                             options.profile, 'dateformat', default=False)    
     options.window_size = interpolate_config(options.window_size, 
@@ -68,7 +60,7 @@ def qps_parse_args():
 
     return AttrDict(options.__dict__), args
 
-def qps(fh, dt_re, dateformat, window_size, **kwargs):
+def qps(fh, dt_re, dateformat, window_size, ignore, **kwargs):
     """Calculate QPS from input stream based on
     parsing of timestamps and using a sliding time window"""
     
@@ -84,7 +76,7 @@ def qps(fh, dt_re, dateformat, window_size, **kwargs):
         try:
             t = datetime.strptime(_re.match(line).groups()[0], dateformat)
         except (AttributeError, KeyError, TypeError, ValueError):
-            if options.ignore:
+            if ignore:
                 logging.debug("Could not match datefield for parsed line: %s", line)
                 continue
             else:
@@ -99,27 +91,41 @@ def qps(fh, dt_re, dateformat, window_size, **kwargs):
         try:
             t = datetime.strptime(_re.match(line).groups()[0], dateformat)
         except (AttributeError, KeyError, TypeError, ValueError):
-            logging.debug("Error while trying to parse date field for line: %s", 
-                          line)
+            if ignore:
+                logging.debug("Could not match datefield for parsed line: %s", line)
+                continue
+            else:
+                logging.error("Could not match datefield for parsed line: %s", line)
+                raise            
         else:
             dt = t-t0
             if dt.seconds > window_size or dt.days:
                 if samples:
-                    yield float(len(samples))/window_size
+                    num_samples = len(samples)
+                    yield {
+                        "qps": float(num_samples)/window_size,
+                        "start_time": samples[0],
+                        "end_time": samples[-1],
+                        "num_samples": num_samples
+                    }
                 t0=t
                 samples=[]
             samples.append(t)
             
     # Emit any remaining values
     if samples:
-        yield float(len(samples))/window_size
-        
-        
+        num_samples = len(samples)
+        yield {
+            "qps": float(num_samples)/window_size,
+            "start_time": samples[0],
+            "end_time": samples[-1],
+            "num_samples": num_samples
+        }        
 
 def qps_main():
     """Console entry-point"""
     options, args = qps_parse_args()
     for qps_info in qps(fh=sys.stdin, *args, **options):
-        print >> sys.stdout, qps_info
+        print >> sys.stdout, "{start_time}\t{end_time}\t{num_samples}\t{qps}".format(**qps_info)
 
     return 0

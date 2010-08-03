@@ -183,6 +183,9 @@ to inspect all the filtered (bot) lines.
 
 	cat access_log.1 | filterbots --print | aggregate -d' ' -f1
 
+11. Create a running average of QPS for a tomcat installation, using time windows of 15 seconds:
+
+	cat catalina.out | qps -r'^(.*?) org' -F '%b %d, %Y %I:%M:%S %p' -W15 --ignore
 	
 ** Naturally, piping between utilities is useful, as shown in most of the examples above.
 	

@@ -23,7 +23,7 @@ from StringIO import StringIO
 from operator import itemgetter
 
 from logtools import (filterbots, geoip, logsample, logsample_weighted, 
-                      logparse, logmerge, logplot)
+                      logparse, logmerge, logplot, qps)
 from logtools.parsers import *
 from logtools import logtools_config, interpolate_config, AttrDict
 
@@ -214,6 +214,32 @@ class MergeTestCase(unittest.TestCase):
         self.assertEquals(map(itemgetter(0), output), sorted(map(itemgetter(0), output)), 
                           "Output was not lexically sorted!")
         
+   
+class QPSTestCase(unittest.TestCase):
+    def setUp(self):
+        self.options = AttrDict({
+            "ignore": True,
+            "dt_re": r'^\[(.*?)\]',
+            "dateformat": "%d/%b/%Y:%H:%M:%S -0700",
+            "window_size": 15
+        })
+        self.fh = StringIO(
+            '[10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" \n' \
+            '[10/Oct/2000:13:55:38 -0700] "GET /apache_pb.gif HTTP/1.0" \n' \
+            '[10/Oct/2000:13:56:59 -0700] "GET /apache_pb.gif HTTP/1.0" \n' \
+            '[10/Oct/2000:13:57:01 -0700] "GET /apache_pb.gif HTTP/1.0" \n' \
+            '[11/Oct/2000:14:01:00 -0700] "GET /apache_pb.gif HTTP/1.0" \n' \
+            '[11/Oct/2000:14:01:13 -0700] "GET /apache_pb.gif HTTP/1.0" \n' \
+            '[11/Oct/2000:14:01:14 -0700] "GET /apache_pb.gif HTTP/1.0" \n'
+        )
+    def testQps(self):
+        blocks=0
+        qs=[]
+        for q in qps(fh=self.fh, **self.options):
+            blocks+=1
+            qs.append(q)
+        self.assertEquals(blocks, 3, "qps output size different than expected: %s" % str(blocks))
+            
         
 class PlotTestCase(unittest.TestCase):
     def setUp(self):

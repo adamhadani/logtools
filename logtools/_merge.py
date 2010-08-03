@@ -45,7 +45,7 @@ def logmerge_parse_args():
                     help="Parse key field value as numeric and sort accordingly")
     parser.add_option("-t", "--datetime", dest="datetime", default=None, action="store_true",
                     help="Parse key field value as a date/time timestamp and sort accordingly")
-    parser.add_option("--dateformat", dest="dateformat",
+    parser.add_option("-F", "--dateformat", dest="dateformat",
                       help="Format string for parsing date-time field (used with --datetime)")        
     parser.add_option("-p", "--parser", dest="parser", default=None, 
                     help="Log format parser (e.g 'CommonLogFormat'). See documentation for available parsers.")

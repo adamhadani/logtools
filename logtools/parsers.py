@@ -29,7 +29,7 @@ import json
 
 from _config import AttrDict
 
-__all__ = ['multikey_getter_gen', 'LogParser', 'JSONParser', 'LogLine',
+__all__ = ['multikey_getter_gen', 'unescape_json', 'LogParser', 'JSONParser', 'LogLine',
            'AccessLog', 'CommonLogFormat']
 
 
@@ -54,6 +54,11 @@ def multikey_getter_gen(parser, keys, is_indices=False, delimiter="\t"):
         # Field names
         return partial(multikey_getter, parser=parser, keyset=keys)
 
+def unescape_json(s):
+    """Unescape a string that was previously encoded into JSON.
+    This unescapes forward slashes (optional in JSON standard),
+    backslashes and double quotes"""
+    return s.replace("\\/", '/').replace('\\"', '"').decode('string_escape')
     
 class LogParser(object):
     """Base class for all our parsers"""

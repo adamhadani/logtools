@@ -84,6 +84,7 @@ class FilterBotsTestCase(unittest.TestCase):
     def setUp(self):
         self.options = AttrDict({
             "reverse": False,
+            "unescape": False,
             "printlines": False,
             "ip_ua_re": "^(?P<ip>.*?) - USER_AGENT:'(?P<ua>.*?)'",
             "bots_ips": StringIO(),

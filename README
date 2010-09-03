@@ -146,7 +146,7 @@ to inspect all the filtered (bot) lines.
 	
 	logmerge -d' ' -f1 app_log.1 app_log.2
 	
-	Note that the -d (delimiter) and -f (flags) are used to specify which field is used
+	Note that the -d (delimiter) and -f (field) are used to specify which field is used
 	for the sort-merging (in this case, the first field should be used)
 	
 4. Merge and sort numerically on some numeric field:
@@ -185,7 +185,7 @@ to inspect all the filtered (bot) lines.
 
 11. Create a running average of QPS for a tomcat installation, using time windows of 15 seconds:
 
-	cat catalina.out | qps -r'^(.*?) org' -F '%b %d, %Y %I:%M:%S %p' -W15 --ignore
+	cat catalina.out | qps -r'^(.*?) org' --format '%b %d, %Y %I:%M:%S %p' -W15 --ignore
 	
 ** Naturally, piping between utilities is useful, as shown in most of the examples above.
 	

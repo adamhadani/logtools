@@ -23,6 +23,7 @@ from functools import partial
 from optparse import OptionParser
 
 from _config import logtools_config, interpolate_config, AttrDict
+import logtools.parsers
 
 __all__ = ['filterbots_parse_args', 'filterbots', 
            'filterbots_main', 'parse_bots_ua', 'is_bot_ua']
@@ -47,6 +48,12 @@ def filterbots_parse_args():
                       help="Use pattern analysis to filter bots (See documentation for details)")    
     parser.add_option("-R", "--reverse", dest="reverse", action="store_true",
                       help="Reverse filtering")
+    parser.add_option("--parser", dest="parser",
+                      help="Feed logs through a parser. Useful when reading encoded/escaped formats (e.g JSON) and when " \
+                      "selecting parsed fields rather than matching via regular expression.")
+    parser.add_option("-f", "--field", dest="field",
+                      help="Field(s) Selector for filtering bots when using a parser (--parser). Format should be " \
+                      " 'ua:<ua_field_name>,ip:<ip_field_name>'. If one of these is missing, it will not be used for filtering.")
 
     parser.add_option("-P", "--profile", dest="profile", default='filterbots',
                       help="Configuration profile (section in configuration file)")
@@ -58,14 +65,23 @@ def filterbots_parse_args():
                                                options.profile, 'bots_ua'), "r")
     options.bots_ips = open(interpolate_config(options.bots_ips, 
                                                options.profile, 'bots_ips'), "r")
-    options.ip_ua_re  = interpolate_config(options.ip_ua_re, 
+    options.ip_ua_re = interpolate_config(options.ip_ua_re, 
                                            options.profile, 'ip_ua_re')  
-    options.pattern   = interpolate_config(options.pattern, 
+    options.parser = interpolate_config(options.parser, options.profile, 'parser', 
+                                        default=False) 
+    #options.format = interpolate_config(options.format, options.profile, 'format', 
+    #                                    default=False) 
+    options.field = interpolate_config(options.field, options.profile, 'field', 
+                                       default=False)      
+    options.pattern = interpolate_config(options.pattern, 
                                            options.profile, 'pattern', default=False, type=bool)    
-    options.reverse   = interpolate_config(options.reverse, 
+    options.reverse = interpolate_config(options.reverse, 
                                            options.profile, 'reverse', default=False, type=bool)
-    options.printlines  = interpolate_config(options.printlines, 
+    options.printlines = interpolate_config(options.printlines, 
                                              options.profile, 'print', default=False, type=bool) 
+    
+    if options.parser and not options.field:
+        parser.error("Must supply --field parameter when using parser-based matching.")
 
     return AttrDict(options.__dict__), args
 
@@ -123,39 +139,74 @@ def is_bot_ua(useragent, bots_ua_dict, bots_ua_prefix_dict, bots_ua_suffix_dict,
                         return True
     return False
 
-
-def filterbots(fh, ip_ua_re, bots_ua, bots_ips, reverse, **kwargs):
+def filterbots(fh, ip_ua_re, bots_ua, bots_ips, 
+               parser=None, format=None, field=None, 
+               reverse=False, **kwargs):
     """Filter bots from a log stream using
     ip/useragent blacklists"""
     bots_ua_dict, bots_ua_prefix_dict, bots_ua_suffix_dict, bots_ua_re = \
                 parse_bots_ua(bots_ua)
     bots_ips = dict.fromkeys([l.strip() for l in bots_ips \
                               if not l.startswith("#")])
-    #reverse = options.reverse
-    ua_ip_re = re.compile(ip_ua_re)
-
-    is_bot_ua_func = partial(is_bot_ua, bots_ua_dict=bots_ua_dict, 
+    _is_bot_func=None
+    if not parser:
+        # Regular expression-based matching
+        ua_ip_re = re.compile(ip_ua_re)
+        is_bot_ua_func = partial(is_bot_ua, bots_ua_dict=bots_ua_dict, 
                              bots_ua_prefix_dict=bots_ua_prefix_dict, 
                              bots_ua_suffix_dict=bots_ua_suffix_dict, 
                              bots_ua_re=bots_ua_re)
+        
+        def _is_bot_func(line):
+            match = ua_ip_re.match(line)
+            if not match:
+                raise ValueError("No match for line: %s" % line)
+    
+            matchgroups = match.groupdict()
+            is_bot = False
+    
+            ua = matchgroups.get('ua', None)
+            is_bot = is_bot_ua_func(ua)        
+    
+            if not is_bot and matchgroups.get('ip', None) in bots_ips:
+                # IP Is blacklisted
+                is_bot = True
+                
+            return is_bot
+                
+    else:
+        # Custom parser specified, use field-based matching
+        parser = eval(parser, vars(logtools.parsers), {})()
+        try:
+            fields_map = dict([tuple(k.split(':')) for k in field.split(',')])
+        except ValueError:
+            raise ValueError("Invalid format for --field parameter. Use --help for usage instructions.")
+        is_indices = reduce(and_, (k.isdigit() for k in fields_map.values()), True)
+        if is_indices:
+            # Field index based matching
+            def _is_bot_func(line):
+                parsed_line = parser(line)
+                if 'ua' in fields_map and parsed_line:
+                    pass
+        else:
+            # Named field based matching
+            def _is_bot_func(line):
+                pass
+            
+            
+            
 
     num_lines=0
     num_filtered=0
+    num_nomatch=0
     for line in imap(lambda x: x.strip(), fh):
-        match = ua_ip_re.match(line)
-        if not match:
-            logging.warn("No match for line: %s", line)
+        try:
+            is_bot = _is_bot_func(line)
+        except (KeyError, ValueError):
+            # Parsing error
+            logging.warn("No match for line: %s", line)            
+            num_nomatch +=1
             continue
-
-        matchgroups = match.groupdict()
-        is_bot = False
-
-        ua = matchgroups.get('ua', None)
-        is_bot = is_bot_ua_func(ua)        
-
-        if not is_bot and matchgroups.get('ip', None) in bots_ips:
-            # IP Is blacklisted
-            is_bot = True
 
         if is_bot ^ reverse:
             logging.debug("Filtering line: %s", line)
@@ -166,7 +217,9 @@ def filterbots(fh, ip_ua_re, bots_ua, bots_ips, reverse, **kwargs):
         yield line
 
     logging.info("Number of lines after filtering: %s", num_lines)
-    logging.info("Number of lines filtered: %s", num_filtered)            
+    logging.info("Number of lines filtered: %s", num_filtered)        
+    if num_nomatch:
+        logging.info("Number of lines could not match on: %s", num_nomatch)
 
     return
 

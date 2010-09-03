@@ -1,4 +1,10 @@
 
+version 0.6
+	Added unescape flag for filterbots, to unescape common backslashes (e.g JSON string encodings) when matching useragents
+	Add IP Range support to bots_hosts.txt format (e.g 255.255.*.*)
+	Add --pattern to filterbots, uses pattern analysis to filter out bots. check documentation for details.
+	Added Sphinx API documentation
+	
 version 0.5
 	Added qps utility - Parse timestamps from log stream and calculate qps over sliding time window		
 	Added Prefix/Suffix matching to filterbots - Specify p'<prefix>' or s'<suffix>' in useragents file to use this feature

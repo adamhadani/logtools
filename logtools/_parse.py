@@ -40,6 +40,8 @@ def logparse_parse_args():
                     help="Parsed Field index to output")    
     parser.add_option("-i", "--ignore", dest="ignore", default=None, action="store_true",
                     help="Ignore missing fields errors (skip lines with missing fields)")    
+    parser.add_option("-H", "--header", dest="header", default=None, action="store_true",
+                    help="Prepend a header describing the selected fields to output.")    
     
     parser.add_option("-P", "--profile", dest="profile", default='logparse',
                       help="Configuration profile (section in configuration file)")
@@ -53,7 +55,8 @@ def logparse_parse_args():
     options.field = interpolate_config(options.field, options.profile, 'field')
     options.ignore = interpolate_config(options.ignore, options.profile, 'ignore', 
                                         default=False, type=bool)
-    
+    options.header = interpolate_config(options.header, options.profile, 'header', 
+                                        default=False, type=bool)    
 
     return AttrDict(options.__dict__), args
 
@@ -68,11 +71,13 @@ def logparse(options, args, fh):
         parser.set_format(options.format)
         
     keyfunc = None
+    keys = None
     if isinstance(options.field, int) or \
        (isinstance(options.field, basestring) and options.field.isdigit()):
         # Field given as integer (index)
-        field = int(options.field) - 1            
+        field = int(options.field) - 1
         key_func = lambda x: parser(x.strip()).by_index(field, raw=True)
+        keys = [options.field]
     else:
         # Field given as string
         
@@ -87,6 +92,9 @@ def logparse(options, args, fh):
             key_func = logtools.parsers.multikey_getter_gen(parser, keys, 
                                         is_indices=is_indices)
     
+    if options.header is True:
+        yield '\t'.join(keys)
+        
     for line in fh:
         try:
             yield key_func(line)

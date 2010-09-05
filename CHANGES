@@ -1,9 +1,10 @@
 
 version 0.6
-	Added unescape flag for filterbots, to unescape common backslashes (e.g JSON string encodings) when matching useragents
+	Added --header flag to logparse, will prepend output with field names. useful e.g for dumping to CSV file
+	Added --parser and --ip-ua-fields options to filterbots, allows routing input through a parser for filtering bots
 	Add IP Range support to bots_hosts.txt format (e.g 255.255.*.*)
 	Add --pattern to filterbots, uses pattern analysis to filter out bots. check documentation for details.
-	Added Sphinx API documentation
+	Add Sphinx API documentation
 	
 version 0.5
 	Added qps utility - Parse timestamps from log stream and calculate qps over sliding time window		

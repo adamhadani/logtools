@@ -67,7 +67,7 @@ class ParsingTestCase(unittest.TestCase):
             self.assertNotEquals(parsed, None, "Could not parse line: %s" % str(logrow))        
         
     def testLogParse(self):
-        options = AttrDict({'parser': 'CommonLogFormat', 'field': 4})
+        options = AttrDict({'parser': 'CommonLogFormat', 'field': 4, 'header': False})
         fh = StringIO('\n'.join(self.clf_rows))
         output = [l for l in logparse(options, None, fh)]
         self.assertEquals(len(output), len(self.clf_rows), "Output size was not equal to input size!")
@@ -108,8 +108,23 @@ class FilterBotsTestCase(unittest.TestCase):
             "5.5.5.5 - USER_AGENT:'Java/1.6.0_18'\n" \
             "6.6.6.6 - USER_AGENT:'ssearch_bot/Nutch-1.0 (sSearch Crawler; http://www.semantissimo.de)'\n"
         )
+        self.json_fh = StringIO(
+            '''{"timestamp":"2010\/09\/01 00:00:01","user_agent":"Mozilla\/5.0 (compatible; Googlebot\/2.1; +http:\/\/www.google.com\/bot.html)","user_ip":"66.249.71.108"}\n''' \
+            '''{"timestamp":"2010\/10\/01 11:00:01","user_agent":"Mozilla\/5.0 (compatible; Googlebot\/2.1; +http:\/\/www.google.com\/bot.html)","user_ip":"66.249.71.109"}\n''' \
+            '''{"timestamp":"2010\/09\/01 00:00:01","user_agent":"Mozilla\/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.11) Gecko\/20100701 Firefox\/3.5.11 (.NET CLR 3.5.30729)","user_ip":"100.100.1.100"}\n''' \
+        )
 
-    def testFiltering(self):
+    def testParserFiltering(self):
+        json_options = self.options
+        json_options['parser'] = 'JSONParser'
+        json_options['ip_ua_fields'] = 'ua:user_agent,ip:user_ip'
+        
+        i=0
+        for l in filterbots(fh=self.json_fh, **json_options):
+            i+=1
+        self.assertEquals(i, 1, "filterbots output size different than expected: %s" % str(i))
+            
+    def testRegExpFiltering(self):
         i=0
         for l in filterbots(fh=self.fh, **self.options): 
             i+=1

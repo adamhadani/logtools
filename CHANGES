@@ -2,9 +2,7 @@
 version 0.6
 	Added --header flag to logparse, will prepend output with field names. useful e.g for dumping to CSV file
 	Added --parser and --ip-ua-fields options to filterbots, allows routing input through a parser for filtering bots
-	Add IP Range support to bots_hosts.txt format (e.g 255.255.*.*)
-	Add --pattern to filterbots, uses pattern analysis to filter out bots. check documentation for details.
-	Add Sphinx API documentation
+	Updated logmerge to support indexed/named field-based merge-sorting when using --parser
 	
 version 0.5
 	Added qps utility - Parse timestamps from log stream and calculate qps over sliding time window		

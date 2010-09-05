@@ -37,7 +37,7 @@ def logmerge_parse_args():
     usage = "%prog -f <field> -d <delimiter> filename1 filename2 ..."
     parser = OptionParser(usage=usage)
     
-    parser.add_option("-f", "--field", dest="field", default=None, type=int,
+    parser.add_option("-f", "--field", dest="field", default=None,
                     help="Field index to use as key for sorting by (1-based)")
     parser.add_option("-d", "--delimiter", dest="delimiter", default=None, 
                     help="Delimiter character for fields in logfile")
@@ -57,7 +57,7 @@ def logmerge_parse_args():
     
     # Interpolate from configuration
     options.field = interpolate_config(options.field, 
-                                    options.profile, 'field', type=int)
+                                    options.profile, 'field')
     options.delimiter = interpolate_config(options.delimiter, 
                                     options.profile, 'delimiter', default=' ')
     options.numeric = interpolate_config(options.numeric, options.profile, 
@@ -76,17 +76,27 @@ def logmerge(options, args):
     and emit in sorted order using a priority queue"""
     
     delimiter = options.delimiter
-    field = options.field-1
-    
-    if options.get('numeric', None):
-        key_func = lambda x: (int(x.strip().split(delimiter)[field]), x)
-    elif options.get('datetime', None):
-        key_func = lambda x: (datetime.strptime(x.strip().split(delimiter)[field], options.dateformat), x)
-    elif options.get('parser', None):
+    field = options.field
+
+    key_func = None
+    if options.get('parser', None):
+        # Use a parser to extract field to merge/sort by
         parser = eval(options.parser, vars(logtools.parsers), {})()
-        key_func = lambda x: (parser(x.strip()).by_index(field), x)
+        if field.isdigit():            
+            extract_func = lambda x: parser(x.strip()).by_index(int(field)-1)
+        else:
+            extract_func = lambda x: parser(x.strip())[field]
     else:
-        key_func = lambda x: (x.strip().split(delimiter)[field], x)
+        # No parser given, use indexed field based extraction
+        extract_func = lambda x: x.strip().split(delimiter)[int(field)-1]
+        
+    if options.get('numeric', None):
+        key_func = lambda x: (int(extract_func(x)), x)
+    elif options.get('datetime', None):
+        key_func = lambda x: (datetime.strptime(extract_func(x), \
+                                    options.dateformat), x)            
+    else:
+        key_func = lambda x: (extract_func(x), x)
         
     iters = (imap(key_func, open(filename, "r")) for filename in args)
     

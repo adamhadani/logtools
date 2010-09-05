@@ -81,8 +81,8 @@ def filterbots_parse_args():
     options.printlines = interpolate_config(options.printlines, 
                                              options.profile, 'print', default=False, type=bool) 
     
-    if options.parser and not options.field:
-        parser.error("Must supply --field parameter when using parser-based matching.")
+    if options.parser and not options.ip_ua_fields:
+        parser.error("Must supply --ip-ua-fields parameter when using parser-based matching.")
 
     return AttrDict(options.__dict__), args
 

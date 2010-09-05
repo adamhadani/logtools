@@ -87,7 +87,9 @@ class FilterBotsTestCase(unittest.TestCase):
             "unescape": False,
             "printlines": False,
             "ip_ua_re": "^(?P<ip>.*?) - USER_AGENT:'(?P<ua>.*?)'",
-            "bots_ips": StringIO(),
+            "bots_ips": StringIO("\n".join([
+                "6.6.6.6"
+            ]) + "\n"),
             "bots_ua": StringIO("\n".join([
                 "## Example comment ##",
                 "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
@@ -112,6 +114,7 @@ class FilterBotsTestCase(unittest.TestCase):
             '''{"timestamp":"2010\/09\/01 00:00:01","user_agent":"Mozilla\/5.0 (compatible; Googlebot\/2.1; +http:\/\/www.google.com\/bot.html)","user_ip":"66.249.71.108"}\n''' \
             '''{"timestamp":"2010\/10\/01 11:00:01","user_agent":"Mozilla\/5.0 (compatible; Googlebot\/2.1; +http:\/\/www.google.com\/bot.html)","user_ip":"66.249.71.109"}\n''' \
             '''{"timestamp":"2010\/09\/01 00:00:01","user_agent":"Mozilla\/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.11) Gecko\/20100701 Firefox\/3.5.11 (.NET CLR 3.5.30729)","user_ip":"100.100.1.100"}\n''' \
+            '''{"timestamp":"2010\/10\/01 00:00:01","user_agent":"Mozilla\/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.11) Gecko\/20100701 Firefox\/3.5.11 (.NET CLR 3.5.30729)","user_ip":"6.6.6.6"}\n''' \
         )
 
     def testParserFiltering(self):

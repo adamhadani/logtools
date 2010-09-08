@@ -67,7 +67,7 @@ def filterbots_parse_args():
     options.bots_ips = open(interpolate_config(options.bots_ips, 
                                                options.profile, 'bots_ips'), "r")
     options.ip_ua_re = interpolate_config(options.ip_ua_re, 
-                                           options.profile, 'ip_ua_re')  
+                                           options.profile, 'ip_ua_re', default=False)  
     options.parser = interpolate_config(options.parser, options.profile, 'parser', 
                                         default=False) 
     #options.format = interpolate_config(options.format, options.profile, 'format', 
@@ -226,8 +226,8 @@ def filterbots(fh, ip_ua_re, bots_ua, bots_ips,
         num_lines+=1
         yield line
 
-    logging.info("Number of lines after filtering: %s", num_lines)
-    logging.info("Number of lines filtered: %s", num_filtered)        
+    logging.info("Number of lines after bot filtering: %s", num_lines)
+    logging.info("Number of lines (bots) filtered: %s", num_filtered)        
     if num_nomatch:
         logging.info("Number of lines could not match on: %s", num_nomatch)
 

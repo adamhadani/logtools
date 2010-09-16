@@ -2,7 +2,8 @@
 version 0.6
 	Added --header flag to logparse, will prepend output with field names. useful e.g for dumping to CSV file
 	Added --parser and --ip-ua-fields options to filterbots, allows routing input through a parser for filtering bots
-	Updated logmerge to support indexed/named field-based merge-sorting when using --parser. See README for examples	
+	Updated logmerge to support indexed/named field-based merge-sorting when using --parser. See README for examples
+	Added Histogram plot type support to logplot (--type hist)
 	Added urlparse utility/API. See README for details
 	
 version 0.5

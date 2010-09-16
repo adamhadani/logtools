@@ -23,7 +23,7 @@ from StringIO import StringIO
 from operator import itemgetter
 
 from logtools import (filterbots, geoip, logsample, logsample_weighted, 
-                      logparse, logmerge, logplot, qps)
+                      logparse, urlparse, logmerge, logplot, qps)
 from logtools.parsers import *
 from logtools import logtools_config, interpolate_config, AttrDict
 
@@ -35,6 +35,22 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertRaises(KeyError, interpolate_config, None, 'bogus_sec', 'bogus_key')
 
 
+class URLParseTestCase(unittest.TestCase):
+    def setUp(self):
+        self.rows = [
+            "http://www.mydomain.com/my/path/myfile?myparam1=myval1&myparam2=myval2",
+            "http://www.mydomain2.com",
+            "http://www.mydomain3.com/home",
+            "http://fun.com/index.php?home"
+        ]
+        
+    def testUrlParse(self):
+        i=0
+        for row in urlparse(StringIO('\n'.join(self.rows)+'\n'), part='netloc'):
+            i+=1
+        self.assertEquals(i, len(self.rows), \
+                          "Number of rows output is not equal to input size")
+    
 class ParsingTestCase(unittest.TestCase):
     def setUp(self):
         self.clf_rows = [

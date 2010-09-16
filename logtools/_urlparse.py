@@ -55,16 +55,18 @@ def urlparse(fh, part, **kwargs):
     """URLParse"""
     for line in imap(lambda x: x.strip(), fh):
         url = urlsplit(line)
-        part = {
-            "domain": url.domain,
-            "path": url.path,
-            "query": parse_qs(url.query)
+        val = {
+            "scheme": url.scheme,
+            "domain": url.netloc,
+            "netloc": url.netloc,
+            "path":   url.path,
+            "query":  parse_qs(url.query)
         }[part]
-        yield part
+        yield val
 
 def urlparse_main():
     """Console entry-point"""
-    options, args = qps_parse_args()
+    options, args = urlparse_parse_args()
     for parsed_url in urlparse(fh=sys.stdin, *args, **options):
         print >> sys.stdout, parsed_url
 

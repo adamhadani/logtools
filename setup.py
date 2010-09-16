@@ -70,6 +70,7 @@ This software is distributed under the Apache 2.0 license.
             'filterbots = logtools:filterbots_main',
             'geoip = logtools:geoip_main',
             'logparse = logtools:logparse_main',
+            'urlparse = logtools:urlparse_main',
             'logmerge = logtools:logmerge_main',
             'logplot = logtools:logplot_main',
             'logsample = logtools:logsample_main',

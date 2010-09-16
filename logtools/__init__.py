@@ -25,6 +25,7 @@ from _filterbots import *
 from _geoip import *
 from _merge import *
 from _parse import *
+from _urlparse import *
 from _plot import *
 from _qps import *
 from _sample import *

@@ -1,0 +1,4 @@
+http://www.mydomain.com/my/path/myfile?myparam1=myval1&myparam2=myval2
+http://www.mydomain2.com
+http://www.mydomain3.com/home
+http://fun.com/index.php?home

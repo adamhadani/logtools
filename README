@@ -52,7 +52,7 @@ Console Scripts
 
 * geoip
 	Simple helper utility for using the Maxmind GeoIP library to tag log lines by the IP's country.
-    The regular expression mask used for matching the IP in the log line is user-specified.
+        The regular expression mask used for matching the IP in the log line is user-specified.
 	This tool requires the Maxmind GeoIP library and python bindings. See http://www.maxmind.com/app/country
 			
 * logparse
@@ -137,53 +137,58 @@ to inspect all the filtered (bot) lines.
 
 	cat error_log.1 | filterbots -r ".*\[client (?P<ip>.*?)\].*USER_AGENT:(?P<ua>.*?)\'" --print --reverse
 
-2. The following example demonstrates using the geoip wrapper (Uses Maxmind GeoIP package). This will
+2. filterbots can also route input to a custom parser (see logtools.parsing module), for example:
+	cat request_log.json | filterbots --parser JSONParser -f 'ua:user_agent,ip:user_ip'
+	
+   This will parse the JSON log, and use the fields called 'user_agent' and 'user_ip' for filtering bots.
+   
+3. The following example demonstrates using the geoip wrapper (Uses Maxmind GeoIP package). This will
    emit by default lines of the form '<ip>	<country>', per each input log line.
 
 	cat access_log.1 | geoip -r '.*client (.*?)\]'
 
-3. Merge (individually sorted) log files from multiple webapps and output combined and (lexically) sorted stream:
+4. Merge (individually sorted) log files from multiple webapps and output combined and (lexically) sorted stream:
 	
 	logmerge -d' ' -f1 app_log.1 app_log.2
 	
 	Note that the -d (delimiter) and -f (field) are used to specify which field is used
 	for the sort-merging (in this case, the first field should be used)
-	
-4. Merge and sort numerically on some numeric field:
+
+5. Merge and sort numerically on some numeric field:
 
 	logmerge -d' ' -f3 --numeric app_log.*
 		
-5. Use a custom parser for sort/merge. In this example, parse CommonLogFormat and sort by date:
+6. Use a custom parser for sort/merge. In this example, parse CommonLogFormat and sort by date:
 
 	logmerge --parser CommonLogFormat -f4 access_log.*
 	
-6. Use logparse to parse a CommonLogFormat log (e.g Apache access_log) and print only the date field:
+7. Use logparse to parse a CommonLogFormat log (e.g Apache access_log) and print only the date field:
 
 	cat access_log | logparse --parser CommonLogFormat -f4
 
-7. Use logparse to parse a custom format Apache access_log and print first two fields.
+8. Use logparse to parse a custom format Apache access_log and print first two fields.
 
 	cat my_access_log | logparse --parser AccessLog --format '%h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-agent}i"' -f1,2
 	
 	You might recognize this format as the NCSA extended/combined format.
 	
-8. Use logparse to parse a JSON-format log (each line is a JSON string) 
+9. Use logparse to parse a JSON-format log (each line is a JSON string) 
    and print only the client_ip, useragent fields:
 
 	cat json_access_log | logparse --parser JSONParser -f 'client_ip,useragent'
 	
-9. Generate a pie chart of Country distributions in Apache access_log using 
+10. Generate a pie chart of Country distributions in Apache access_log using 
    Maxmind GeoIP and GoogleChart API. 
    Note that this requires the GeoIP library and python bindings as well as pygooglechart package.
 
 	cat access_log.1 | geoip -r '^(.*?) -' | aggregate -d$'\t' -f2 | \
 		logplot -d' ' -f1 --backend gchart --type pie -W600 -H300 --limit 10 --output plot.png
 
-10. Filter bots and aggregate IP address values to show IPs of visitors with counts and sorted from most frequent to least:
+11. Filter bots and aggregate IP address values to show IPs of visitors with counts and sorted from most frequent to least:
 
 	cat access_log.1 | filterbots --print | aggregate -d' ' -f1
 
-11. Create a running average of QPS for a tomcat installation, using time windows of 15 seconds:
+12. Create a running average of QPS for a tomcat installation, using time windows of 15 seconds:
 
 	cat catalina.out | qps -r'^(.*?) org' --format '%b %d, %Y %I:%M:%S %p' -W15 --ignore
 	

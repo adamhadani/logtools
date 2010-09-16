@@ -198,6 +198,7 @@ class MatplotlibBackend(PlotBackend):
             
         try:
             chart = {
+                'hist': self._plot_hist,
                 'pie': self._plot_pie,
                 'line': self._plot_line,
                 'timeseries': self._plot_timeseries
@@ -211,7 +212,38 @@ class MatplotlibBackend(PlotBackend):
                 chart.savefig(options.output)
                 
             return chart 
+      
+    def _plot_hist(self, options, args, fh):
+        """Plot a histogram"""
+        import pylab
         
+        delimiter = options.delimiter
+        field = options.field-1
+         
+        pts = []
+        max_y = -float("inf")
+        for l in imap(lambda x: x.strip(), fh):
+            splitted_line = l.split(delimiter)
+            k = float(splitted_line.pop(field))
+            pts.append((k, ' '.join(splitted_line)))
+            if k > max_y:
+                max_y = k
+        
+        if options.get('limit', None):
+            # Only wanna use top N samples by key, sort and truncate
+            pts = sorted(pts, key=itemgetter(0), reverse=True)[:options.limit]
+                      
+        if not pts:
+            raise ValueError("No data to plot")
+        
+        data, labels = zip(*pts)
+        
+        f = pylab.figure()
+        pylab.hist(data, bins=len(data)/100, normed=True)
+                
+        return f
+    
+    
     def _plot_pie(self, options, args, fh):
         """Plot pie chart"""
         from pylab import figure, pie, legend

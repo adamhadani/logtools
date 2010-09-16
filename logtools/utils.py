@@ -43,5 +43,3 @@ def tail_f(fname, block=True, sleep=1):
 			fh.seek(where)
 		else:
 			yield line
-
-

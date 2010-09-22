@@ -40,31 +40,27 @@ def logjoin_parse_args():
           "-t <timestamp_format_string>"
     parser = OptionParser(usage=usage)
     
-    parser.add_option("-p", "--part", dest="part", default=None, 
-                    help="Part of URL to print out")
+    parser.add_option("-f", "--field", dest="field", type=int,
+                      help="Index of field to use as main input for plot")
+    parser.add_option("-d", "--delimiter", dest="delimiter",
+                      help="Delimiter character for field-separation")    
 
     parser.add_option("-P", "--profile", dest="profile", default='qps',
                       help="Configuration profile (section in configuration file)")
 
     options, args = parser.parse_args()
 
-    # Interpolate from configuration and open filehandle
-    options.part  = interpolate_config(options.part, options.profile, 'part')    
+    # Interpolate from configuration
+    options.field  = interpolate_config(options.field, options.profile, 'field', type=int)
+    options.delimiter = interpolate_config(options.delimiter, options.profile, 'delimiter')    
 
     return AttrDict(options.__dict__), args
 
-def logjoin(fh, part, **kwargs):
+def logjoin(fh, field, delimiter, backend, join_stmt):
     """Perform a join"""
     for line in imap(lambda x: x.strip(), fh):
-        url = urlsplit(line)
-        val = {
-            "scheme": url.scheme,
-            "domain": url.netloc,
-            "netloc": url.netloc,
-            "path":   url.path,
-            "query":  parse_qs(url.query)
-        }[part]
-        yield val
+        row = None
+        yield row
 
 def logjoin_main():
     """Console entry-point"""

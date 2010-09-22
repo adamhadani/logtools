@@ -12,10 +12,12 @@
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
 """
-logtools._urlparse
+logtools._join
 
-Parses URLs, Decodes query parameters,
-and allows some selection on URL parts.
+Perform a join between log stream and
+some other arbitrary source of data.
+Can be used with pluggable drivers e.g
+to join against database, other files etc.
 """
 import re
 import sys
@@ -29,14 +31,17 @@ from urlparse import parse_qs, urlsplit
 
 from _config import logtools_config, interpolate_config, AttrDict
 
-__all__ = ['urlparse_parse_args', 'urlparse', 'urlparse_main']
+__all__ = ['logjoin_parse_args', 'logjoin', 'logjoin_main']
 
-def urlparse_parse_args():
-    usage = "%prog -p <url_part>"
+def logjoin_parse_args():
+    usage = "%prog " \
+          "-f <field> " \
+          "-d <delimiter_character> " \
+          "-t <timestamp_format_string>"
     parser = OptionParser(usage=usage)
     
     parser.add_option("-p", "--part", dest="part", default=None, 
-                    help="Part of URL to print out. Valid values: scheme, domain, netloc, path, query")
+                    help="Part of URL to print out")
 
     parser.add_option("-P", "--profile", dest="profile", default='qps',
                       help="Configuration profile (section in configuration file)")
@@ -48,8 +53,8 @@ def urlparse_parse_args():
 
     return AttrDict(options.__dict__), args
 
-def urlparse(fh, part, **kwargs):
-    """URLParse"""
+def logjoin(fh, part, **kwargs):
+    """Perform a join"""
     for line in imap(lambda x: x.strip(), fh):
         url = urlsplit(line)
         val = {
@@ -61,10 +66,10 @@ def urlparse(fh, part, **kwargs):
         }[part]
         yield val
 
-def urlparse_main():
+def logjoin_main():
     """Console entry-point"""
-    options, args = urlparse_parse_args()
-    for parsed_url in urlparse(fh=sys.stdin, *args, **options):
-        print >> sys.stdout, parsed_url
+    options, args = logjoin_parse_args()
+    for row in logjoin(fh=sys.stdin, *args, **options):
+        print >> sys.stdout, row
 
     return 0

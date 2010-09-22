@@ -5,6 +5,7 @@ version 0.6
 	Updated logmerge to support indexed/named field-based merge-sorting when using --parser. See README for examples
 	Added Histogram plot type support to logplot (--type hist)
 	Added urlparse utility/API. See README for details
+	Added urljoin utility/API. See README for details
 	
 version 0.5
 	Added qps utility - Parse timestamps from log stream and calculate qps over sliding time window		

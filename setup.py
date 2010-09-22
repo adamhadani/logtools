@@ -72,6 +72,7 @@ This software is distributed under the Apache 2.0 license.
             'logparse = logtools:logparse_main',
             'urlparse = logtools:urlparse_main',
             'logmerge = logtools:logmerge_main',
+            'logjoin = logtools:logjoin_main',
             'logplot = logtools:logplot_main',
             'logsample = logtools:logsample_main',
             'qps = logtools:qps_main'

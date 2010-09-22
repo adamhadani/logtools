@@ -23,6 +23,7 @@ from _config import *
 
 from _filterbots import *
 from _geoip import *
+from _join import *
 from _merge import *
 from _parse import *
 from _urlparse import *

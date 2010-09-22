@@ -65,6 +65,11 @@ Console Scripts
 	This is useful for combining logs from multiple traffic-serving machines (e.g in a load-balanced environment)
 	into a single stream which is globally ordered.
 
+* logjoin
+	Perform a join on some field between input log stream and an additional, arbitrary source of data.
+	This uses a pluggable driver (similar to logparse) allowing all kinds of joins, e.g between logfile and
+	a database, filesystem objects etc. See examples below.
+	
 * logsample
 	Produce a random sample of lines from an input log stream. This uses Reservoir Sampling to
     efficiently produce a random sampling over an arbitrary large input stream.

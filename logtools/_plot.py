@@ -236,10 +236,12 @@ class MatplotlibBackend(PlotBackend):
         if not pts:
             raise ValueError("No data to plot")
         
-        data, labels = zip(*pts)
+        data, labels = zip(*pts)        
+        normed = False
+        bins = len(data)/100.
         
         f = pylab.figure()
-        pylab.hist(data, bins=len(data)/100, normed=True)
+        pylab.hist(data, bins=bins, normed=normed)
                 
         return f
     

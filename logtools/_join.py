@@ -22,7 +22,7 @@ to join against database, other files etc.
 import re
 import sys
 import logging
-
+import unicodedata
 from time import time
 from itertools import imap
 from datetime import datetime
@@ -67,7 +67,7 @@ def logjoin_parse_args():
     options.delimiter = interpolate_config(options.delimiter, options.profile, 'delimiter')
     options.backend = interpolate_config(options.backend, options.profile, 'backend')
     
-    options.connect_string = interpolate_config(options.join_connect_string, options.profile, 'join_connect_string')
+    options.join_connect_string = interpolate_config(options.join_connect_string, options.profile, 'join_connect_string')
     options.join_remote_fields = interpolate_config(options.join_remote_fields, options.profile, 'join_remote_fields')
     options.join_remote_name = interpolate_config(options.join_remote_name, options.profile, 'join_remote_name')
     options.join_remote_key = interpolate_config(options.join_remote_key, options.profile, 'join_remote_key')
@@ -80,6 +80,7 @@ def logjoin(fh, field, delimiter, backend, join_connect_string,
     """Perform a join"""
     
     field = field-1
+    delimiter = unicode(delimiter)
     
     backend_impl = {
         "sqlalchemy": SQLAlchemyJoinBackend
@@ -89,12 +90,12 @@ def logjoin(fh, field, delimiter, backend, join_connect_string,
     for row in imap(lambda x: x.strip(), fh):
         key = row.split(delimiter)[field]
         for join_row in backend_impl.join(key):
-            yield key, row + delimiter + delimiter.join(imap(str, join_row))
+            yield key, unicode(row) + delimiter + delimiter.join(imap(unicode, join_row))
 
 def logjoin_main():
     """Console entry-point"""
     options, args = logjoin_parse_args()
     for key, row in logjoin(fh=sys.stdin, *args, **options):
-        print >> sys.stdout, row
+        print >> sys.stdout, unicodedata.normalize('NFKD', unicode(row)).encode('ascii','ignore')
 
     return 0

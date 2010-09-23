@@ -87,13 +87,14 @@ def logjoin(fh, field, delimiter, backend, join_connect_string,
                        remote_key=join_remote_key, connect_string=join_connect_string)
     
     for row in imap(lambda x: x.strip(), fh):
-        for join_row in backend_impl.join(row.split(delimiter)[field]):
-            yield row + delimiter + delimiter.join(imap(str, join_row))
+        key = row.split(delimiter)[field]
+        for join_row in backend_impl.join(key):
+            yield key, row + delimiter + delimiter.join(imap(str, join_row))
 
 def logjoin_main():
     """Console entry-point"""
     options, args = logjoin_parse_args()
-    for row in logjoin(fh=sys.stdin, *args, **options):
+    for key, row in logjoin(fh=sys.stdin, *args, **options):
         print >> sys.stdout, row
 
     return 0

@@ -212,9 +212,8 @@ def filterbots(fh, ip_ua_re, bots_ua, bots_ips,
         try:
             is_bot = _is_bot_func(line)
         except (KeyError, ValueError):
-            raise
             # Parsing error
-            logging.warn("No match for line: %s", line)            
+            logging.warn("No match for line: %s", line)
             num_nomatch +=1
             continue
 

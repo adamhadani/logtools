@@ -86,8 +86,9 @@ def logjoin(fh, field, delimiter, backend, join_connect_string,
     }[backend](remote_fields=join_remote_fields, remote_name=join_remote_name, 
                        remote_key=join_remote_key, connect_string=join_connect_string)
     
-    for row in backend_impl.join(imap(lambda x: x.strip().split(delimiter)[field], fh)):
-        yield row
+    for row in imap(lambda x: x.strip(), fh):
+        for join_row in backend_impl.join(row.split(delimiter)[field]):
+            yield row + delimiter + delimiter.join(imap(str, join_row))
 
 def logjoin_main():
     """Console entry-point"""

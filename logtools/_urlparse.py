@@ -53,6 +53,11 @@ def urlparse_parse_args():
 
 def urlparse(fh, part, query_param=None, **kwargs):
     """URLParse"""
+    
+    _yield_func = lambda x: x
+    if query_param and part == 'query':
+        _yield_func = lambda x: val.get(query_param, (None,))[0]
+        
     for line in imap(lambda x: x.strip(), fh):
         url = urlsplit(line)
         val = {
@@ -63,10 +68,8 @@ def urlparse(fh, part, query_param=None, **kwargs):
             "query":  parse_qs(url.query)
         }[part]
         
-        if query_param and part == 'query':
-            yield val.get(query_param, None)
-        else:
-            yield val
+        yield _yield_func(val)
+
 
 def urlparse_main():
     """Console entry-point"""

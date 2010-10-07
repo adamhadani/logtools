@@ -27,7 +27,7 @@ setup(
     author_email = 'adamhadani@gmail.com',
     url          = 'http://github.com/adamhadani/logtools',
     keywords     = ['logging', 'sampling', 'geoip', 'filterbots', 'aggregate',
-                    'logparse', 'logmerge', 'logjoin', 'logplot', 'qps', 'filter'],
+                    'logparse', 'logmerge', 'logjoin', 'urlparse', 'logplot', 'qps', 'filter'],
     classifiers = [
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.6",        

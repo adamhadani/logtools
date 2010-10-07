@@ -21,6 +21,7 @@ import re
 import sys
 import locale
 import logging
+import unicodedata
 from itertools import imap
 from random import randint
 from datetime import datetime
@@ -296,7 +297,9 @@ class MatplotlibBackend(PlotBackend):
         for l in imap(lambda x: x.strip(), fh):
             splitted_line = l.split(delimiter)
             k = float(splitted_line.pop(field))
-            pts.append((k, ' '.join(splitted_line)))
+            label = unicodedata.normalize('NFKD', \
+                        unicode(' '.join(splitted_line), 'utf-8')).encode('ascii','ignore')
+            pts.append((k, label))
             if k > max_y:
                 max_y = k
         
@@ -311,7 +314,8 @@ class MatplotlibBackend(PlotBackend):
         
         f = pylab.figure()
         pylab.plot(xrange(len(data)), data, "*--b")
-        pylab.xticks(xrange(len(labels)), labels, rotation=17)
+        if options.get('legend', None):
+            pylab.xticks(xrange(len(labels)), labels, rotation=17)
                 
         return f
     

@@ -197,6 +197,18 @@ to inspect all the filtered (bot) lines.
 
 	cat catalina.out | qps -r'^(.*?) org' --format '%b %d, %Y %I:%M:%S %p' -W15 --ignore
 	
+13. Parse URLs from log and print out a specific url query parameter:
+
+	cat access_log.1 | grep -o 'http://[^\s]+' | urlparse --part query -q 'rows'
+	
+14. Create a join between some extracted log field and a DB table using logjoin:
+	the logjoin utility is a very powerful tool that lets you create some joins on the fly.
+	While its not ment for large scale joins (there is no batching at the moment), it can be
+	very instrumental when trying to map information from logs to entries in a DB manually
+	or on small increments:
+	
+	cat my_log.json | logparse --parser JSONParser -f 'my_join_field' | logjoin
+	
 ** Naturally, piping between utilities is useful, as shown in most of the examples above.
 	
 ** All tools admit a --help command-line option that will print out detailed information about the different

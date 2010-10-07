@@ -1,5 +1,6 @@
 version 0.7
 	Added -q flag to urlparse (See README/documentation for examples)
+	Updated documentation, Added more examples for new utilities in README
 	
 version 0.6
 	Added --header flag to logparse, will prepend output with field names. useful e.g for dumping to CSV file

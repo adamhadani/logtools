@@ -37,6 +37,8 @@ def urlparse_parse_args():
     
     parser.add_option("-p", "--part", dest="part", default=None, 
                     help="Part of URL to print out. Valid values: scheme, domain, netloc, path, query")
+    parser.add_option("-q", "--query-param", dest="query_param", default=None,
+                      help="Query parameter to print. Used in conjunction with '-p query'")
 
     parser.add_option("-P", "--profile", dest="profile", default='qps',
                       help="Configuration profile (section in configuration file)")
@@ -45,10 +47,11 @@ def urlparse_parse_args():
 
     # Interpolate from configuration and open filehandle
     options.part  = interpolate_config(options.part, options.profile, 'part')    
+    options.query_param = interpolate_config(options.query_param, options.profile, 'query_param', default=False)  
 
     return AttrDict(options.__dict__), args
 
-def urlparse(fh, part, **kwargs):
+def urlparse(fh, part, query_param=None, **kwargs):
     """URLParse"""
     for line in imap(lambda x: x.strip(), fh):
         url = urlsplit(line)
@@ -59,12 +62,20 @@ def urlparse(fh, part, **kwargs):
             "path":   url.path,
             "query":  parse_qs(url.query)
         }[part]
-        yield val
+        
+        if query_param and part == 'query':
+            yield val.get(query_param, None)
+        else:
+            yield val
 
 def urlparse_main():
     """Console entry-point"""
     options, args = urlparse_parse_args()
     for parsed_url in urlparse(fh=sys.stdin, *args, **options):
-        print >> sys.stdout, parsed_url
+        if parsed_url:
+            print >> sys.stdout, parsed_url
+        else:
+            # Lines where we couldnt get any match (e.g when using -q)
+            print >> sys.stdout, ''
 
     return 0

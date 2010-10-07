@@ -21,7 +21,7 @@ except ImportError:
 
 setup(  
     name         = 'logtools',
-    version      = '0.6',
+    version      = '0.7',
     description  = 'Log analysis and filtering tools',
     author       = 'Adam Ever-Hadani',
     author_email = 'adamhadani@gmail.com',

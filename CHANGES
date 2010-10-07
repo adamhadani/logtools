@@ -1,4 +1,6 @@
-
+version 0.7
+	Added -q flag to urlparse (See README/documentation for examples)
+	
 version 0.6
 	Added --header flag to logparse, will prepend output with field names. useful e.g for dumping to CSV file
 	Added --parser and --ip-ua-fields options to filterbots, allows routing input through a parser for filtering bots

@@ -63,6 +63,7 @@ This software is distributed under the Apache 2.0 license.
     
     install_requires = [
         "pygooglechart>=0.2.1",
+        "prettytable>=0.5",
         "sqlalchemy>=0.6.4"
     ],
 
@@ -76,7 +77,8 @@ This software is distributed under the Apache 2.0 license.
             'logjoin = logtools:logjoin_main',
             'logplot = logtools:logplot_main',
             'logsample = logtools:logsample_main',
-            'qps = logtools:qps_main'
+            'qps = logtools:qps_main',
+            'sumstat = logtools:sumstat_main'
         ]
     },
 

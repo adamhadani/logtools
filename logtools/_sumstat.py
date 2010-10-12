@@ -88,8 +88,11 @@ def sumstat(fh, delimiter, reverse=False, **kwargs):
     
     
     # Percentiles
-    percentiles = [counts[M/4], counts[M/2], counts[3*M/4], 
-                   counts[9*M/10], counts[95*M/100], counts[99*M/100], counts[999*M/1000]]
+    percentiles_idx = [M/10, M/4, M/2, 3*M/4, 9*M/10, 95*M/100, 99*M/100, 999*M/1000]
+    percentiles = map(lambda x: "%d (Idx: %s)" % \
+                      (counts[x], locale.format('%d', x, True)), 
+                      percentiles_idx)
+    
     
     table = PrettyTable()
     table.set_field_names([
@@ -98,6 +101,7 @@ def sumstat(fh, delimiter, reverse=False, **kwargs):
         "Min. Value",
         "Max. Value",
         "Average Value",
+        "10th Percentile",
         "25th Percentile",
         "50th Percentile",
         "75th Percentile",
@@ -107,14 +111,39 @@ def sumstat(fh, delimiter, reverse=False, **kwargs):
         "99.9th Percentile"
     ])
     
+    S10th, S25th, S50th, S75th, S90th = None, None, None, None, None
+    accum = 0.
+    for idx, c in enumerate(reversed(counts)):
+        accum += c
+        if not S10th and accum/N >= 0.1:
+            S10th = idx+1            
+        if not S25th and accum/N >= 0.25:
+            S25th = idx+1        
+        if not S50th and accum/N >= 0.5:
+            S50th = idx+1
+        elif not S75th and accum/N >= 0.75:
+            S75th = idx+1            
+        elif not S90th and accum/N >= 0.9:
+            S90th = idx+1                    
+
     table.add_row(
         map(lambda x: locale.format('%d', x, True), [N, M]) + \
         [minv, maxv, avg] + \
         percentiles
     )
     table.printt()
-        
 
+    print "10%% of Sample Volume is encompassed within the top %s (%.4f%%) sample values" % \
+          (locale.format("%d", S10th, True), 100.*S10th/M)
+    print "25%% of Sample Volume is encompassed within the top %s (%.4f%%) sample values" % \
+          (locale.format("%d", S25th, True), 100.*S25th/M)
+    print "50%% of Sample Volume is encompassed within the top %s (%.4f%%) sample values" % \
+          (locale.format("%d", S50th, True), 100.*S50th/M)
+    print "75%% of Sample Volume is encompassed within the top %s (%.4f%%) sample values" % \
+          (locale.format("%d", S75th, True), 100.*S75th/M)
+    print "90%% of Sample Volume is encompassed within the top %s (%.4f%%) sample values" % \
+          (locale.format("%d", S90th, True), 100.*S90th/M)
+    
 
 def sumstat_main():
     """Console entry-point"""

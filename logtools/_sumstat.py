@@ -24,6 +24,7 @@ logfile is expected to be sorted by count
 
 import re
 import sys
+import locale
 import logging
 
 from time import time
@@ -37,6 +38,8 @@ from prettytable import PrettyTable
 from _config import logtools_config, interpolate_config, AttrDict
 
 __all__ = ['sumstat_parse_args', 'sumstat', 'sumstat_main']
+
+locale.setlocale(locale.LC_ALL, "")
 
 def arith_mean(values):
     """Computes the arithmetic mean of a list of numbers"""
@@ -77,8 +80,8 @@ def sumstat(fh, delimiter, reverse=False, **kwargs):
             N += count
             
     if reverse is True:
+        logging.info("Reversing row ordering")
         counts.reverse()
-    print counts[0], counts[-1]
     
     avg = arith_mean(counts)
     minv, maxv = min(counts), max(counts)
@@ -104,7 +107,11 @@ def sumstat(fh, delimiter, reverse=False, **kwargs):
         "99.9th Percentile"
     ])
     
-    table.add_row([N, M, minv, maxv, avg] + percentiles)
+    table.add_row(
+        map(lambda x: locale.format('%d', x, True), [N, M]) + \
+        [minv, maxv, avg] + \
+        percentiles
+    )
     table.printt()
         
 

@@ -20,10 +20,10 @@ and allows some selection on URL parts.
 import re
 import sys
 import logging
-
 from time import time
 from itertools import imap
 from datetime import datetime
+from urllib import unquote_plus
 from optparse import OptionParser
 from urlparse import parse_qs, urlsplit
 
@@ -39,6 +39,8 @@ def urlparse_parse_args():
                     help="Part of URL to print out. Valid values: scheme, domain, netloc, path, query")
     parser.add_option("-q", "--query-param", dest="query_param", default=None,
                       help="Query parameter to print. Used in conjunction with '-p query'")
+    parser.add_option("-d", "--decode", dest="decode", action="store_true",
+                      help="Decode mode - Unquote input text, translating %xx characters and '+' into spaces")
 
     parser.add_option("-P", "--profile", dest="profile", default='qps',
                       help="Configuration profile (section in configuration file)")
@@ -48,27 +50,32 @@ def urlparse_parse_args():
     # Interpolate from configuration and open filehandle
     options.part  = interpolate_config(options.part, options.profile, 'part')    
     options.query_param = interpolate_config(options.query_param, options.profile, 'query_param', default=False)  
+    options.decode = interpolate_config(options.decode, options.profile, 'decode', default=False) 
 
     return AttrDict(options.__dict__), args
 
-def urlparse(fh, part, query_param=None, **kwargs):
+def urlparse(fh, part, query_param=None, decode=False, **kwargs):
     """URLParse"""
     
     _yield_func = lambda x: x
     if query_param and part == 'query':
         _yield_func = lambda x: val.get(query_param, (None,))[0]
-        
-    for line in imap(lambda x: x.strip(), fh):
-        url = urlsplit(line)
-        val = {
-            "scheme": url.scheme,
-            "domain": url.netloc,
-            "netloc": url.netloc,
-            "path":   url.path,
-            "query":  parse_qs(url.query)
-        }[part]
-        
-        yield _yield_func(val)
+    
+    if decode is True:
+        for line in imap(lambda x: x.strip(), fh):
+            yield unquote_plus(line)
+    else:
+        for line in imap(lambda x: x.strip(), fh):
+            url = urlsplit(line)
+            val = {
+                "scheme": url.scheme,
+                "domain": url.netloc,
+                "netloc": url.netloc,
+                "path":   url.path,
+                "query":  parse_qs(url.query)
+            }[part]
+            
+            yield _yield_func(val)
 
 
 def urlparse_main():

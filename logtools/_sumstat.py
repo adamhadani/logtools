@@ -67,7 +67,7 @@ def sumstat_parse_args():
 def sumstat(fh, delimiter, reverse=False, **kwargs):
     counts = []
     N, M = 0, 0
-    
+
     for line in imap(lambda x: x.strip(), fh):
         try:
             count, val = line.split(delimiter)[:2]
@@ -93,6 +93,36 @@ def sumstat(fh, delimiter, reverse=False, **kwargs):
                       (counts[x], locale.format('%d', x, True)), 
                       percentiles_idx)
     
+    S10th, S25th, S50th, S75th, S90th = None, None, None, None, None
+    accum = 0.
+    for idx, c in enumerate(reversed(counts)):
+        accum += c
+        if not S10th and accum/N >= 0.1:
+            S10th = idx+1            
+        if not S25th and accum/N >= 0.25:
+            S25th = idx+1        
+        if not S50th and accum/N >= 0.5:
+            S50th = idx+1
+        elif not S75th and accum/N >= 0.75:
+            S75th = idx+1            
+        elif not S90th and accum/N >= 0.9:
+            S90th = idx+1
+            
+    return {
+        "M": M,
+        "N": N,
+        "avg": avg,
+        "min": minv,
+        "max": maxv,
+        "percentiles": percentiles,
+        "cover": [S10th, S25th, S50th, S75th, S90th]
+        }
+    
+
+def sumstat_main():
+    """Console entry-point"""
+    options, args = sumstat_parse_args()
+    stat_dict = sumstat(fh=sys.stdin, *args, **options)
     
     table = PrettyTable()
     table.set_field_names([
@@ -109,30 +139,16 @@ def sumstat(fh, delimiter, reverse=False, **kwargs):
         "95th Percentile",
         "99th Percentile",
         "99.9th Percentile"
-    ])
-    
-    S10th, S25th, S50th, S75th, S90th = None, None, None, None, None
-    accum = 0.
-    for idx, c in enumerate(reversed(counts)):
-        accum += c
-        if not S10th and accum/N >= 0.1:
-            S10th = idx+1            
-        if not S25th and accum/N >= 0.25:
-            S25th = idx+1        
-        if not S50th and accum/N >= 0.5:
-            S50th = idx+1
-        elif not S75th and accum/N >= 0.75:
-            S75th = idx+1            
-        elif not S90th and accum/N >= 0.9:
-            S90th = idx+1                    
-
+    ])            
     table.add_row(
-        map(lambda x: locale.format('%d', x, True), [N, M]) + \
-        [minv, maxv, avg] + \
-        percentiles
+        map(lambda x: locale.format('%d', x, True), [stat_dict['N'], stat_dict['M']]) + \
+        [stat_dict['min'], stat_dict['max'], stat_dict['avg']] + \
+        stat_dict['percentiles']
     )
     table.printt()
 
+    S10th, S25th, S50th, S75th, S90th = stat_dict['cover']
+    M = stat_dict['M']
     print "10%% of Sample Volume is encompassed within the top %s (%.4f%%) sample values" % \
           (locale.format("%d", S10th, True), 100.*S10th/M)
     print "25%% of Sample Volume is encompassed within the top %s (%.4f%%) sample values" % \
@@ -144,9 +160,4 @@ def sumstat(fh, delimiter, reverse=False, **kwargs):
     print "90%% of Sample Volume is encompassed within the top %s (%.4f%%) sample values" % \
           (locale.format("%d", S90th, True), 100.*S90th/M)
     
-
-def sumstat_main():
-    """Console entry-point"""
-    options, args = sumstat_parse_args()
-    sumstat(fh=sys.stdin, *args, **options)
     return 0

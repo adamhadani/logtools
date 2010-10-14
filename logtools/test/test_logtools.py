@@ -23,7 +23,7 @@ from StringIO import StringIO
 from operator import itemgetter
 
 from logtools import (filterbots, geoip, logsample, logsample_weighted, 
-                      logparse, urlparse, logmerge, logplot, qps)
+                      logparse, urlparse, logmerge, logplot, qps, sumstat)
 from logtools.parsers import *
 from logtools import logtools_config, interpolate_config, AttrDict
 
@@ -315,5 +315,24 @@ class PlotTestCase(unittest.TestCase):
         os.remove(tmp_fname)
     
 
+class SumstatTestCase(unittest.TestCase):
+    def setUp(self):
+        self.data = StringIO('\n'.join([
+            '500 val1',
+            '440 val2',
+            '320 val3',
+            '85 val4',
+            '13 val5'
+            ]))
+        self.avg = 271.6
+        self.N = 1358
+        self.M = 5
+        
+    def testSumstat(self):
+        stat = sumstat(fh=self.data, delimiter=' ', reverse=True)
+        self.assertEquals(stat['M'], self.M)
+        self.assertEquals(stat['N'], self.N)
+        self.assertEquals(stat['avg'], self.avg)
+        
 if __name__ == "__main__":
     unittest.main()

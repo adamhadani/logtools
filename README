@@ -35,8 +35,12 @@ To run unit tests, issue this command:
 
 	python setup.py test
 
-Note that for this to work you'd need to have the popular python unit-testing framework 'nose'.
-You can easily install it if you have setuptools installed by:
+You can also issue the following to get code-coverage report (needs the coverage python package):
+
+	python setup.py nosetests
+
+If for some reason setuptools does not install 'nose' by default, 
+you can easily install it if you have setuptools installed by running:
 	
 	easy_install nose
 
@@ -88,6 +92,14 @@ Console Scripts
 	Render a plot based on some fields/values from input log. This tool supports a pluggable backend interface,
 	and currently includes an implementation for plotting using the Google Charts API as well as matplotlib.
 	See examples below.
+
+* urlparse
+	Parse URLs and extract specific fields from them (domain, path, query parameters), also decoding various
+	URL encoding formats .
+
+* sumstat
+	Display various summary statistics from a logfile/dataset given as a histogram (e.g (<count>,<value>) rows).
+	This includes average, min/max, percentiles etc. 
 
 
 Configuration

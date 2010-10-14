@@ -47,8 +47,7 @@ def urlparse_parse_args():
 
     options, args = parser.parse_args()
 
-    if options.decode is False and \
-       not options.part:
+    if not options.decode and not options.part:
         parser.error("Must supply -p (part) when not working in decode (-d) mode. See --help for usage instructions.")
         
     # Interpolate from configuration and open filehandle

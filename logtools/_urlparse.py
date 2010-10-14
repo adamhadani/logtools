@@ -47,14 +47,18 @@ def urlparse_parse_args():
 
     options, args = parser.parse_args()
 
+    if options.decode is False and \
+       not options.part:
+        parser.error("Must supply -p (part) when not working in decode (-d) mode. See --help for usage instructions.")
+        
     # Interpolate from configuration and open filehandle
-    options.part  = interpolate_config(options.part, options.profile, 'part')    
+    options.part  = interpolate_config(options.part, options.profile, 'part', default=False)    
     options.query_param = interpolate_config(options.query_param, options.profile, 'query_param', default=False)  
     options.decode = interpolate_config(options.decode, options.profile, 'decode', default=False) 
 
     return AttrDict(options.__dict__), args
 
-def urlparse(fh, part, query_param=None, decode=False, **kwargs):
+def urlparse(fh, part=None, query_param=None, decode=False, **kwargs):
     """URLParse"""
     
     _yield_func = lambda x: x

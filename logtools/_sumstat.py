@@ -93,15 +93,17 @@ def sumstat(fh, delimiter, reverse=False, **kwargs):
                       (counts[x], locale.format('%d', x, True)), 
                       percentiles_idx)
     
-    S10th, S25th, S50th, S75th, S90th = None, None, None, None, None
+    S10th, S25th, S40th, S50th, S75th, S90th = None, None, None, None, None, None
     accum = 0.
     for idx, c in enumerate(reversed(counts)):
         accum += c
         if not S10th and accum/N >= 0.1:
             S10th = idx+1            
-        if not S25th and accum/N >= 0.25:
-            S25th = idx+1        
-        if not S50th and accum/N >= 0.5:
+        elif not S25th and accum/N >= 0.25:
+            S25th = idx+1       
+        elif not S40th and accum/N >= 0.4:
+            S40th = idx+1                 
+        elif not S50th and accum/N >= 0.5:
             S50th = idx+1
         elif not S75th and accum/N >= 0.75:
             S75th = idx+1            
@@ -115,7 +117,7 @@ def sumstat(fh, delimiter, reverse=False, **kwargs):
         "min": minv,
         "max": maxv,
         "percentiles": percentiles,
-        "cover": [S10th, S25th, S50th, S75th, S90th]
+        "cover": [S10th, S25th, S40th, S50th, S75th, S90th]
         }
     
 
@@ -147,12 +149,14 @@ def sumstat_main():
     )
     table.printt()
 
-    S10th, S25th, S50th, S75th, S90th = stat_dict['cover']
+    S10th, S25th, S40th, S50th, S75th, S90th = stat_dict['cover']
     M = stat_dict['M']
     print "10%% of Sample Volume is encompassed within the top %s (%.4f%%) sample values" % \
           (locale.format("%d", S10th, True), 100.*S10th/M)
     print "25%% of Sample Volume is encompassed within the top %s (%.4f%%) sample values" % \
           (locale.format("%d", S25th, True), 100.*S25th/M)
+    print "40%% of Sample Volume is encompassed within the top %s (%.4f%%) sample values" % \
+          (locale.format("%d", S40th, True), 100.*S40th/M)    
     print "50%% of Sample Volume is encompassed within the top %s (%.4f%%) sample values" % \
           (locale.format("%d", S50th, True), 100.*S50th/M)
     print "75%% of Sample Volume is encompassed within the top %s (%.4f%%) sample values" % \

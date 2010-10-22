@@ -1,0 +1,32 @@
+#!/bin/bash
+#
+# colsum
+#
+# Shortcut for a summation over a data column operation
+#
+#
+
+DELIM=' '
+FIELD=1
+
+usage() {
+	printf "Usage: $(basename $0) -d <delimiter> -f <field>\n" >&2
+	exit -1
+}
+
+while getopts "d:f:h" OPT
+do
+	case $OPT in
+		d)	DELIM="$OPTARG"
+			;;
+		f)	FIELD="$OPTARG"
+			;;
+		h)	usage
+			;;
+	esac
+done
+shift $((OPTIND-1))
+
+export LC_ALL=C
+cat | cut -d "$DELIM" -f "$FIELD" | awk 'BEGIN{a=0} {a+=$1} END {print a}'
+

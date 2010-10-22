@@ -57,7 +57,7 @@ This software is distributed under the Apache 2.0 license.
     
     packages = find_packages(),
 
-    scripts = ['scripts/aggregate'],
+    scripts = ['scripts/aggregate', 'scripts/colsum'],
 
     include_package_data = False,    
     

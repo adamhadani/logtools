@@ -82,7 +82,7 @@ This software is distributed under the Apache 2.0 license.
         ]
     },
 
-    setup_requires=['nose>=0.11'],
+    tests_require = ['nose>=0.11', "coverage>=3.4"],
 
     test_suite = "nose.collector",
 

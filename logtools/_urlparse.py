@@ -92,7 +92,7 @@ def urlparse_main():
     options, args = urlparse_parse_args()
     for parsed_url in urlparse(fh=sys.stdin, *args, **options):
         if parsed_url:
-            if isinstance(parsed_url, list):
+            if hasattr(parsed_url, '__iter__'):
                 # Format as tab-delimited for output
                 parsed_url = "\t".join(parsed_url)
             print parsed_url

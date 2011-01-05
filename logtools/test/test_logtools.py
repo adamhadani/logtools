@@ -50,6 +50,13 @@ class URLParseTestCase(unittest.TestCase):
             i+=1
         self.assertEquals(i, len(self.rows), \
                           "Number of rows output is not equal to input size")
+        
+    def testMultipleQueryParams(self):
+        url = "http://www.mydomain.com/my/path/myfile?myparam1=myval1&myparam2=myval2"
+        for row in urlparse(StringIO(url+"\n"), part='query', query_params='myparam1,myparam2'):
+            self.assertEquals(row[0], 'myval1', "Returned query param value was not as expected: %s" % \
+                          row)
+
     
 class ParsingTestCase(unittest.TestCase):
     def setUp(self):

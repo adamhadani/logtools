@@ -6,6 +6,7 @@ version 0.7
 	Added --decode options to urlparse that allows one to url-decode (unquote) input stream
 	Added 'colsum' script utility that does an arithmetic summation over a column of data
 	Added stripping of leading whitespace from output of 'aggregate' script
+	Fixed bug in use of --ignore for logparse
 	
 version 0.6
 	Added --header flag to logparse, will prepend output with field names. useful e.g for dumping to CSV file

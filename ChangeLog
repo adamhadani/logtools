@@ -2,6 +2,7 @@ version 0.7
 	Added -q flag to urlparse (See README/documentation for examples)
 	Updated documentation, Added more examples for new utilities in README
 	Unicode encoding in logplot line-plot using matplotlib backend (would crash with encoding problems in some cases)
+	Unicode encoding for the logparse, fixes some cases of errors, e.g when using JSONParser for a JSON that has non-string types (e.g integers)
 	Added sumstat utility/API for generating some common summary statistics for a given histogram-like logfile. See README for examples
 	Added --decode options to urlparse that allows one to url-decode (unquote) input stream
 	Added 'colsum' script utility that does an arithmetic summation over a column of data

@@ -43,7 +43,8 @@ def geoip_parse_args():
     
     # Interpolate from configuration
     options.ip_re  = interpolate_config(options.ip_re, options.profile, 'ip_re')
-    options.filter = interpolate_config(options.filter, options.profile, 'filter')
+    options.filter = interpolate_config(options.filter, options.profile, 'filter',
+                                        default=False)
     options.printline  = interpolate_config(options.printline, options.profile, 'print', 
                                         type=bool, default=False)
 

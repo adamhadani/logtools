@@ -1,3 +1,6 @@
+version 0.7.1
+	Small fix with geoip --filter default value
+
 version 0.7
 	Added -q flag to urlparse (See README/documentation for examples)
 	Added -f flag to geoip, allowing one to filter inplace for a specific country (e.g -f 'United States')

@@ -64,7 +64,7 @@ def logjoin_parse_args():
 
     # Interpolate from configuration
     options.field  = interpolate_config(options.field, options.profile, 'field', type=int)
-    options.delimiter = interpolate_config(options.delimiter, options.profile, 'delimiter')
+    options.delimiter = interpolate_config(options.delimiter, options.profile, 'delimiter', default=' ')
     options.backend = interpolate_config(options.backend, options.profile, 'backend')
     
     options.join_connect_string = interpolate_config(options.join_connect_string, options.profile, 'join_connect_string')

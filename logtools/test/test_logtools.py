@@ -163,7 +163,9 @@ class GeoIPTestCase(unittest.TestCase):
         
         self.fh = StringIO(
             "127.0.0.1 - USER_AGENT:'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' - ...\n" \
-            "255.255.255.255 - USER_AGENT:'Mozilla' - ...\n"
+            "255.255.255.255 - USER_AGENT:'Mozilla' - ...\n" \
+            "74.125.225.48 - USER_AGENT:'IE' - ...\n" \
+            "65.55.175.254 - USER_AGENT:'IE' - ...\n"
         )
 
     def testGeoIP(self):
@@ -175,7 +177,25 @@ class GeoIPTestCase(unittest.TestCase):
 
         output = [(geocode, ip, line) for geocode, ip, line in geoip(fh=self.fh, **self.options)]
         self.assertEquals(len(output), 2, "Output size was different than expected: %s" % str(len(output)))
-
+        
+    def testFilter(self):
+        """Test GeoIP filtering functionality"""        
+        try:
+            import GeoIP
+        except ImportError:
+            print >> sys.stderr, "GeoIP Python package not available - skipping geoip unittest."
+            return        
+        
+        # Check positive filter
+        self.options['filter'] = 'United States'
+        output = [(geocode, ip, line) for geocode, ip, line in geoip(fh=self.fh, **self.options)]
+        self.assertEquals(len(output), 2, "Output size was different than expected: %s" % str(len(output)))
+        
+        # Check negative filter
+        self.options['filter'] = 'India'
+        output = [(geocode, ip, line) for geocode, ip, line in geoip(fh=self.fh, **self.options)]
+        self.assertEquals(len(output), 0, "Output size was different than expected: %s" % str(len(output)))
+        
         
 class SamplingTestCase(unittest.TestCase):
     def setUp(self):

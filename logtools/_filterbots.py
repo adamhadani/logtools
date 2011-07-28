@@ -142,7 +142,7 @@ def is_bot_ua(useragent, bots_ua_dict, bots_ua_prefix_dict, bots_ua_suffix_dict,
 
 def filterbots(fh, ip_ua_re, bots_ua, bots_ips, 
                parser=None, format=None, ip_ua_fields=None, 
-               reverse=False, **kwargs):
+               reverse=False, debug=False, **kwargs):
     """Filter bots from a log stream using
     ip/useragent blacklists"""
     bots_ua_dict, bots_ua_prefix_dict, bots_ua_suffix_dict, bots_ua_re = \
@@ -163,6 +163,7 @@ def filterbots(fh, ip_ua_re, bots_ua, bots_ips,
             match = ua_ip_re.match(line)
             if not match:
                 raise ValueError("No match for line: %s" % line)
+            logging.debug("Regular expression matched line: %s", match)
     
             matchgroups = match.groupdict()
             is_bot = False

@@ -31,6 +31,8 @@ def geoip_parse_args():
     parser = OptionParser()
     parser.add_option("-r", "--re", dest="ip_re", default=None, 
                     help="Regular expression to lookup IP in logrow")
+    parser.add_option("-f", "--filter", dest="filter", default=None, 
+                    help="Country/Area Code to filter to (e.g 'United States')")    
     parser.add_option("-p", "--print", dest="printline", default=None, action="store_true",
                     help="Print original log line with the geolocation. By default we only print <country, ip>")    
 
@@ -41,6 +43,7 @@ def geoip_parse_args():
     
     # Interpolate from configuration
     options.ip_re  = interpolate_config(options.ip_re, options.profile, 'ip_re')
+    options.filter = interpolate_config(options.filter, options.profile, 'filter')
     options.printline  = interpolate_config(options.printline, options.profile, 'print', 
                                         type=bool, default=False)
 
@@ -65,6 +68,11 @@ def geoip(fh, ip_re, **kwargs):
     gi = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
     ip_re = re.compile(ip_re)
 
+    filter_func = lambda x: True
+    if 'filter' in kwargs:
+        filter_func = lambda x: \
+            True if x == kwargs['filter'] else False
+    
     for line in imap(lambda x: x.strip(), fh):
         match = ip_re.match(line)
         if match: 
@@ -72,7 +80,11 @@ def geoip(fh, ip_re, **kwargs):
             geocode = gi.country_name_by_addr(ip)
             if geocode is None:
                 logging.debug("No Geocode for IP: %s", ip)
-            yield geocode, ip, line
+            elif filter_func(geocode) is False:
+                # Filter out
+                pass
+            else:
+                yield geocode, ip, line
 
 def geoip_main():
     """Console entry-point"""

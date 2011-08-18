@@ -1,3 +1,7 @@
+version 0.7.2
+	Added missing -d and -f parameters to logsample for enabling weighted reservoir sampling
+	Bugfix to geoip --filter default value triggering a filtering by default (regression introduced in in 0.7.1)
+
 version 0.7.1
 	Small fix with geoip --filter default value
 

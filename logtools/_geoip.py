@@ -70,7 +70,7 @@ def geoip(fh, ip_re, **kwargs):
     ip_re = re.compile(ip_re)
 
     filter_func = lambda x: True
-    if 'filter' in kwargs:
+    if 'filter' in kwargs and kwargs['filter']:
         filter_func = lambda x: \
             True if x == kwargs['filter'] else False
     

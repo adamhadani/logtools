@@ -35,6 +35,10 @@ def logsample_parse_args():
                       help="Number of samples to produce")
     parser.add_option("-w", "--weighted", dest="weighted", action="store_true",
                       help="Use Weighted Reservoir Sampling (needs -f and -d parameters)")
+    parser.add_option("-f", "--field", dest="field", type=int,
+                      help="Index of field to use as weight for weighted sampling (-w)")
+    parser.add_option("-d", "--delimiter", dest="delimiter",
+                      help="Delimiter character for field-separation used by weighted sampling (-w)")
 
     parser.add_option("-P", "--profile", dest="profile", default='logsample',
                       help="Configuration profile (section in configuration file)")
@@ -45,7 +49,11 @@ def logsample_parse_args():
     options.num_samples  = interpolate_config(options.num_samples, 
                                 options.profile, 'num_samples', type=int)
     options.weighted  = interpolate_config(options.weighted, 
-                                options.profile, 'weighted', type=bool, default=False)    
+                                options.profile, 'weighted', type=bool, default=False)
+    options.field  = interpolate_config(options.field, options.profile, 
+                                        'field', type=int, default=False)
+    options.delimiter = interpolate_config(options.delimiter, options.profile, 
+                                           'delimiter', default=' ')    
 
     return AttrDict(options.__dict__), args
 
@@ -67,7 +75,7 @@ def logsample(fh, num_samples, **kwargs):
     for record in R:
         yield record.strip()
 
-def logsample_weighted(fh, num_samples, field, delimiter):
+def logsample_weighted(fh, num_samples, field, delimiter, **kwargs):
     """Implemented Weighted Reservoir Sampling, assuming integer weights.
     See Weighted random sampling with a reservoir, Efraimidis et al."""
     

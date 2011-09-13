@@ -79,6 +79,11 @@ Console Scripts
     efficiently produce a random sampling over an arbitrary large input stream.
 	Both uniformly random as well as weighted random variants are available. See examples below.
 
+* logfilter
+	Parse a log file and perform generic blacklist/whitelist-based row filtering against a specific field in the log row. Can use
+	simple delimited field formats, or use a parser (see logtools.parsers) for dealing with more complex formats/encodings, 
+	e.g JSON
+	
 * qps
 	Compute QPS averages given a log file using a datetime/timestamp field and a sliding window interval 
     specified by the user. Can be very handy to quickly assess current QPS of some arbitrary service

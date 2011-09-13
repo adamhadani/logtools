@@ -21,7 +21,7 @@ except ImportError:
 
 setup(  
     name         = 'logtools',
-    version      = '0.7.2',
+    version      = '0.8',
     description  = 'Log analysis and filtering tools',
     author       = 'Adam Ever-Hadani',
     author_email = 'adamhadani@gmail.com',
@@ -77,6 +77,7 @@ This software is distributed under the Apache 2.0 license.
             'logjoin = logtools:logjoin_main',
             'logplot = logtools:logplot_main',
             'logsample = logtools:logsample_main',
+            'logfilter = logtools:logfilter_main',            
             'qps = logtools:qps_main',
             'sumstat = logtools:sumstat_main'
         ]

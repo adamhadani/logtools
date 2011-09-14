@@ -1,5 +1,7 @@
 version 0.8
-	Added the logfilter utility. See README for description and example uses
+	Added the logfilter utility with support for regexp/aho-corasick based matching. See README/documentation for examples
+	Added unit-tests for the logfilter functionality
+	Added dependency on the acora string matching library (Implements Aho-Corasick in CPython)
 	
 version 0.7.2
 	Added missing -d and -f parameters to logsample for enabling weighted reservoir sampling

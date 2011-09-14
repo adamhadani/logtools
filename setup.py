@@ -64,7 +64,8 @@ This software is distributed under the Apache 2.0 license.
     install_requires = [
         "pygooglechart>=0.2.1",
         "prettytable>=0.5",
-        "sqlalchemy>=0.6.4"
+        "sqlalchemy>=0.6.4",
+        "acora>=1.7"
     ],
 
     entry_points = {

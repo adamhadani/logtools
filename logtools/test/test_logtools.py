@@ -22,7 +22,7 @@ from datetime import datetime
 from StringIO import StringIO
 from operator import itemgetter
 
-from logtools import (filterbots, geoip, logsample, logsample_weighted, 
+from logtools import (filterbots, logfilter, geoip, logsample, logsample_weighted, 
                       logparse, urlparse, logmerge, logplot, qps, sumstat)
 from logtools.parsers import *
 from logtools import logtools_config, interpolate_config, AttrDict
@@ -220,6 +220,74 @@ class SamplingTestCase(unittest.TestCase):
         output = [(k, r) for k, r in logsample_weighted(fh=self.fh, **self.weighted_opts)]
         self.assertEquals(len(output), self.weighted_opts.num_samples, 
                           "logsample output size different than expected: %s" % len(output))        
+
+class FilterTestCase(unittest.TestCase):
+    """Unit-test for the logfilter functionality"""
+    
+    def setUp(self):
+        self.testset = StringIO("\n".join([
+            "AA word",
+            "word AA word",
+            "word AA",
+            "AA",
+            "aa word",
+            "wordAA",
+            "AAword",
+            "wordAAword",
+            "CC DD word"
+            ])+"\n")
+        self.exp_emitted_wb = 4
+        self.exp_emitted = 1
+        self.blacklist = StringIO("\n".join([
+            'AA',
+            'bb',
+            'CC DD'
+            ])+"\n")
+        
+    def testACWB(self):
+        """Aho-Corasick-based matching with Word Boundaries"""
+        lines = 0
+        for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
+                           with_acora=True, ignorecase=False,
+                           word_boundaries=True):
+            print l
+            lines += 1
+        self.assertEquals(lines, self.exp_emitted_wb, "Number of lines emitted was not as expected: %s (Expected: %s)" %
+                          (lines, self.exp_emitted_wb))
+        
+    def testAC(self):
+        """Aho-Corasick-based matching"""
+        lines = 0
+        for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
+                           with_acora=True, ignorecase=False,
+                           word_boundaries=False):
+            print l
+            lines += 1
+        self.assertEquals(lines, self.exp_emitted, "Number of lines emitted was not as expected: %s (Expected: %s)" %
+                          (lines, self.exp_emitted))        
+        
+    def testRE(self):
+        """Regular Expression-based matching"""
+        lines = 0
+        for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
+                           with_acora=False, ignorecase=False,
+                           word_boundaries=False):
+            print l
+            lines += 1
+        self.assertEquals(lines, self.exp_emitted, "Number of lines emitted was not as expected: %s (Expected: %s)" %
+                          (lines, self.exp_emitted))          
+    
+    def testREWB(self):
+        """Regular Expression-based matching with Word Boundaries"""
+        lines = 0
+        for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
+                           with_acora=False, ignorecase=False,
+                           word_boundaries=True):
+            print l
+            lines += 1
+        self.assertEquals(lines, self.exp_emitted_wb, "Number of lines emitted was not as expected: %s (Expected: %s)" %
+                          (lines, self.exp_emitted_wb))          
+
 
 class MergeTestCase(unittest.TestCase):
     def setUp(self):

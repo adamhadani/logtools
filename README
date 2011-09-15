@@ -106,6 +106,8 @@ Console Scripts
 	Display various summary statistics from a logfile/dataset given as a histogram (e.g (<count>,<value>) rows).
 	This includes average, min/max, percentiles etc. 
 
+* percentiles
+	A quick and simple utility to compute percentiles from input numeric values.
 
 Configuration
 -------------

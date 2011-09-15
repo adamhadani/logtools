@@ -7,15 +7,20 @@
 cleanup() {
 	rm $TMPFILE
 }
+log() {
+	printf "`date +%c` - $*\n" >&2
+}
 
 TMPFILE=`mktemp`
-N=5000
+N=10000
 
 tail -n $N $* | \
 	sort -k1,1n > $TMPFILE
 
 L=`cat $TMPFILE | wc -l`
 typeset -i L
+
+log "Number of samples used: `cat $TMPFILE | wc -l`"
 
 for i in {10,20,30,40,50,60,70,80,90};
 do
@@ -25,9 +30,8 @@ do
 	then
 		l=1
 	fi
-	echo $i $L $l
 	p=`cat $TMPFILE | head -n $l | tail -n1`
-	echo "${i}th Percentile: $p"
+	log "${i}th Percentile (${l}th Sample): $p"
 done
 
 cleanup

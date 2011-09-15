@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# Compute percentiles over last N samples
+# from stdin
+#
+
+cleanup() {
+	rm $TMPFILE
+}
+
+TMPFILE=`mktemp`
+N=5000
+
+tail -n $N $* | \
+	sort -k1,1n > $TMPFILE
+
+L=`cat $TMPFILE | wc -l`
+typeset -i L
+
+for i in {10,20,30,40,50,60,70,80,90};
+do
+	l=`echo "scale=1; $i / 100 * $L" | bc | awk -F '.' '{ print $1; exit; }'`
+	typeset -i l
+	if [ -z "$l" ];
+	then
+		l=1
+	fi
+	echo $i $L $l
+	p=`cat $TMPFILE | head -n $l | tail -n1`
+	echo "${i}th Percentile: $p"
+done
+
+cleanup

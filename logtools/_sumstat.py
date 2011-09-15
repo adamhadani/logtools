@@ -46,7 +46,7 @@ def arith_mean(values):
     return sum(values, 0.0) / len(values)
 
 def sumstat_parse_args():
-    usage = "%prog -p <url_part>"
+    usage = "%prog -d <delimiter> [--reverse]"
     parser = OptionParser(usage=usage)
     parser.add_option("-r", "--reverse", dest="reverse", action="store_true",
                       help="Reverse ordering of entries (toggle between increasing/decreasing sort order")

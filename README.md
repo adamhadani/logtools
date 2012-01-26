@@ -1,7 +1,6 @@
-logtools
-A log files analysis / filtering framework.
+# logtools
 
-Author: Adam Ever-Hadani <adamhadani@gmail.com>
+### A log files analysis / filtering framework.
 
 logtools encompasses of a few easy-to-use, easy to configure command-line
 tools, typically used in conjunction with Apache logs (but not only).
@@ -21,8 +20,8 @@ commented.
 This software is distributed under the Apache 2.0 license.
 
 
-Installation
-------------
+## Installation
+
 To install this package and associated console scripts, unpack the distributable tar file,
 or check out the project directory, and then run:
 
@@ -45,8 +44,8 @@ you can easily install it if you have setuptools installed by running:
 	easy_install nose
 
 
-Console Scripts
----------------
+## Console Scripts
+
 * filterbots
 	Used to filter bots based on an ip blacklist and/or a useragent blacklist file(s).
     The actual regular expression mask used for matching is also user-specified,
@@ -109,8 +108,8 @@ Console Scripts
 * percentiles
 	A quick and simple utility to compute percentiles from input numeric values.
 
-Configuration
--------------
+## Configuration
+
 All tools' command-line parameters can assume a default value using parameter interpolation
 from /etc/logtools.cfg and/or ~/.logtoolsrc, if these exist.
 This allows for convenient operation in the usual case where these rarely change, or when they 
@@ -145,8 +144,8 @@ will look up default parameter values from the section [fbots_accesslogs] in ~/.
 if that exists.
 
 
-Usage Examples
---------------
+## Usage Examples
+
 1. The following example demonstrates specifying a custom regular expression for matching
 the ip/user agent using the filterbots tool. 
 Notice the use of named match groups syntax in the regular expression - (?P<name>...).
@@ -233,4 +232,19 @@ to inspect all the filtered (bot) lines.
 ** All tools admit a --help command-line option that will print out detailed information about the different
    options available.
 
-~~
+## Credits
+
+logtools was created by [Adam Ever-Hadani](http://github.com/adamhadani/)
+
+## Contact
+
+Adam Ever-Hadani
+
+- http://github.com/adamhadani
+- http://www.linkedin.com/in/adamhadani
+- adamhadani@gmail.com
+
+## License
+
+logtools is available under the Apache license 2.0. See the LICENSE file for more info.
+

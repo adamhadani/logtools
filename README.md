@@ -172,27 +172,27 @@ if that exists.
 
 2. filterbots can also route input to a custom parser (see logtools.parsing module), for example:
 
-```
-cat request_log.json | filterbots --parser JSONParser -f 'ua:user_agent,ip:user_ip'
-```
-
-This will parse the JSON log, and use the fields called 'user_agent' and 'user_ip' for filtering bots.
-   
+	```
+	cat request_log.json | filterbots --parser JSONParser -f 'ua:user_agent,ip:user_ip'
+	```
+	
+	This will parse the JSON log, and use the fields called 'user_agent' and 'user_ip' for filtering bots.
+	   
 3. The following example demonstrates using the geoip wrapper (Uses Maxmind GeoIP package). This will
-emit by default lines of the form '<ip>	<country>', per each input log line.
-
-```
-cat access_log.1 | geoip -r '.*client (.*?)\]'
-```
+	emit by default lines of the form '<ip>	<country>', per each input log line.
+	
+	```
+	cat access_log.1 | geoip -r '.*client (.*?)\]'
+	```
 
 4. Merge (individually sorted) log files from multiple webapps and output combined and (lexically) sorted stream:
 
-```	
-logmerge -d' ' -f1 app_log.1 app_log.2
-```
-
-Note that the -d (delimiter) and -f (field) are used to specify which field is used
-for the sort-merging (in this case, the first field should be used)
+	```	
+	logmerge -d' ' -f1 app_log.1 app_log.2
+	```
+	
+	Note that the -d (delimiter) and -f (field) are used to specify which field is used
+	for the sort-merging (in this case, the first field should be used)
 
 5. Merge and sort numerically on some numeric field:
 

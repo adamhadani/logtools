@@ -46,66 +46,66 @@ you can easily install it if you have setuptools installed by running:
 
 ## Console Scripts
 
-* filterbots
+* ``filterbots``
 	Used to filter bots based on an ip blacklist and/or a useragent blacklist file(s).
     The actual regular expression mask used for matching is also user-specified,
     so this can be used with any arbitrary log format (See examples below).
 	Blacklist files can specify both exact match as well as more complex matching 
 	types (prefix/suffix match, regexp match. See examples below).
 
-* geoip
+* ``geoip``
 	Simple helper utility for using the Maxmind GeoIP library to tag log lines by the IP's country.
         The regular expression mask used for matching the IP in the log line is user-specified.
 	This tool requires the Maxmind GeoIP library and python bindings. See http://www.maxmind.com/app/country
 			
-* logparse
+* ``logparse``
 	Use the logtools.parsers module to intelligibly parse the log, emitting/filtering user-selectable field(s).
 	This can be used for inspecting logs whos format is harder to parse than simply cut-ing on whitespace,
 	e.g CLF, JSON and so forth.
 
-* logmerge
+* ``logmerge``
 	Merge multiple (individually sorted) input logstreams and stream them out in (combined) sorted order.
 	This is useful for combining logs from multiple traffic-serving machines (e.g in a load-balanced environment)
 	into a single stream which is globally ordered.
 
-* logjoin
+* ``logjoin``
 	Perform a join on some field between input log stream and an additional, arbitrary source of data.
 	This uses a pluggable driver (similar to logparse) allowing all kinds of joins, e.g between logfile and
 	a database, filesystem objects etc. See examples below.
 	
-* logsample
+* ``logsample``
 	Produce a random sample of lines from an input log stream. This uses Reservoir Sampling to
     efficiently produce a random sampling over an arbitrary large input stream.
 	Both uniformly random as well as weighted random variants are available. See examples below.
 
-* logfilter
+* ``logfilter``
 	Parse a log file and perform generic blacklist/whitelist-based row filtering against a specific field in the log row. Can use
 	simple delimited field formats, or use a parser (see logtools.parsers) for dealing with more complex formats/encodings, 
 	e.g JSON
 	
-* qps
+* ``qps``
 	Compute QPS averages given a log file using a datetime/timestamp field and a sliding window interval 
     specified by the user. Can be very handy to quickly assess current QPS of some arbitrary service
 	based on real-time logfiles (e.g Apache access_log, Tomcat catalina.out).
 		
-* aggregate
+* ``aggregate``
 	Convenient shortcut for aggregating values over a given field and sorting/counting by a value's frequency.
 	See example below.
 
-* logplot
+* ``logplot``
 	Render a plot based on some fields/values from input log. This tool supports a pluggable backend interface,
 	and currently includes an implementation for plotting using the Google Charts API as well as matplotlib.
 	See examples below.
 
-* urlparse
+* ``urlparse``
 	Parse URLs and extract specific fields from them (domain, path, query parameters), also decoding various
 	URL encoding formats .
 
-* sumstat
+* ``sumstat``
 	Display various summary statistics from a logfile/dataset given as a histogram (e.g (<count>,<value>) rows).
 	This includes average, min/max, percentiles etc. 
 
-* percentiles
+* ``percentiles``
 	A quick and simple utility to compute percentiles from input numeric values.
 
 ## Configuration
@@ -196,73 +196,73 @@ if that exists.
 
 5. Merge and sort numerically on some numeric field:
 
-```
-logmerge -d' ' -f3 --numeric app_log.*
-```
-	
+	```
+	logmerge -d' ' -f3 --numeric app_log.*
+	```
+		
 6. Use a custom parser for sort/merge. In this example, parse CommonLogFormat and sort by date:
 
-```
-logmerge --parser CommonLogFormat -f4 access_log.*
-```
+	```
+	logmerge --parser CommonLogFormat -f4 access_log.*
+	```
 
 7. Use logparse to parse a CommonLogFormat log (e.g Apache access_log) and print only the date field:
 
-```
-cat access_log | logparse --parser CommonLogFormat -f4
-```
+	```
+	cat access_log | logparse --parser CommonLogFormat -f4
+	```
 
 8. Use logparse to parse a custom format Apache access_log and print first two fields.
 
-```
-cat my_access_log | logparse --parser AccessLog --format '%h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-agent}i"' -f1,2
-```
-
-You might recognize this format as the NCSA extended/combined format.
+	```
+	cat my_access_log | logparse --parser AccessLog --format '%h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-agent}i"' -f1,2
+	```
 	
+	You might recognize this format as the NCSA extended/combined format.
+		
 9. Use logparse to parse a JSON-format log (each line is a JSON string) 
-and print only the client_ip, useragent fields:
-
-```
-cat json_access_log | logparse --parser JSONParser -f 'client_ip,useragent'
-```
+	and print only the client_ip, useragent fields:
+	
+	```
+	cat json_access_log | logparse --parser JSONParser -f 'client_ip,useragent'
+	```
 
 10. Generate a pie chart of Country distributions in Apache access_log using 
-Maxmind GeoIP and GoogleChart API. 
-Note that this requires the GeoIP library and python bindings as well as pygooglechart package.
-
-```
-cat access_log.1 | geoip -r '^(.*?) -' | aggregate -d$'\t' -f2 | \
-		logplot -d' ' -f1 --backend gchart --type pie -W600 -H300 --limit 10 --output plot.png
-```
+	Maxmind GeoIP and GoogleChart API. 
+	Note that this requires the GeoIP library and python bindings as well as pygooglechart package.
+	
+	```
+	cat access_log.1 | geoip -r '^(.*?) -' | aggregate -d$'\t' -f2 | \
+			logplot -d' ' -f1 --backend gchart --type pie -W600 -H300 --limit 10 --output plot.png
+	```
 
 11. Filter bots and aggregate IP address values to show IPs of visitors with counts and sorted from most frequent to least:
 
-```
-cat access_log.1 | filterbots --print | aggregate -d' ' -f1
-```
+	```
+	cat access_log.1 | filterbots --print | aggregate -d' ' -f1
+	```
 
 12. Create a running average of QPS for a tomcat installation, using time windows of 15 seconds:
 
-```
-cat catalina.out | qps -r'^(.*?) org' --dateformat '%b %d, %Y %I:%M:%S %p' -W15 --ignore
-```
+	```
+	cat catalina.out | qps -r'^(.*?) org' --dateformat '%b %d, %Y %I:%M:%S %p' -W15 --ignore
+	```
 
 13. Parse URLs from log and print out a specific url query parameter:
 
-```
-cat access_log.1 | grep -o 'http://[^\s]+' | urlparse --part query -q 'rows'
-```
+	```
+	cat access_log.1 | grep -o 'http://[^\s]+' | urlparse --part query -q 'rows'
+	```
 
 14. Create a join between some extracted log field and a DB table using logjoin:
-the logjoin utility is a very powerful tool that lets you create some joins on the fly.
-While its not ment for large scale joins (there is no batching at the moment), it can be
-very instrumental when trying to map information from logs to entries in a DB manually
-or on small increments:
-
-```
-cat my_log.json | logparse --parser JSONParser -f 'my_join_field' | logjoin
-```
+	the logjoin utility is a very powerful tool that lets you create some joins on the fly.
+	While its not ment for large scale joins (there is no batching at the moment), it can be
+	very instrumental when trying to map information from logs to entries in a DB manually
+	or on small increments:
+	
+	```
+	cat my_log.json | logparse --parser JSONParser -f 'my_join_field' | logjoin
+	```
 
 ** Naturally, piping between utilities is useful, as shown in most of the examples above.
 	

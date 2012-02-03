@@ -153,22 +153,22 @@ if that exists.
 ## Usage Examples
 
 1. The following example demonstrates specifying a custom regular expression for matching
-the ip/user agent using the filterbots tool. 
-Notice the use of named match groups syntax in the regular expression - (?P<name>...).
-The ips/useragents files are not specified in commandline and therefore are assumed to be defined
-in ~/.logtoolsrc or /etc/logtools.cfg. For example bots black list files, see data/examples directory.
-The option --print is used to actually print matching lines, rather than just report the filtering statistics.
-
-```
-cat error_log.1 | filterbots -r ".*\[client (?P<ip>.*?)\].*USER_AGENT:(?P<ua>.*?)\'" --print
-```
-
-Notice that its easy to reverse the filtermask simply by adding the --reverse flag. This is useful e.g
-to inspect all the filtered (bot) lines.
+	the ip/user agent using the filterbots tool. 
+	Notice the use of named match groups syntax in the regular expression - (?P<name>...).
+	The ips/useragents files are not specified in commandline and therefore are assumed to be defined
+	in ~/.logtoolsrc or /etc/logtools.cfg. For example bots black list files, see data/examples directory.
+	The option --print is used to actually print matching lines, rather than just report the filtering statistics.
 	
-```
-cat error_log.1 | filterbots -r ".*\[client (?P<ip>.*?)\].*USER_AGENT:(?P<ua>.*?)\'" --print --reverse
-```
+	```
+	cat error_log.1 | filterbots -r ".*\[client (?P<ip>.*?)\].*USER_AGENT:(?P<ua>.*?)\'" --print
+	```
+	
+	Notice that its easy to reverse the filtermask simply by adding the --reverse flag. This is useful e.g
+	to inspect all the filtered (bot) lines.
+		
+	```
+	cat error_log.1 | filterbots -r ".*\[client (?P<ip>.*?)\].*USER_AGENT:(?P<ua>.*?)\'" --print --reverse
+	```
 
 2. filterbots can also route input to a custom parser (see logtools.parsing module), for example:
 

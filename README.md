@@ -123,6 +123,7 @@ The basic configuration file format is of the form:
 ```
 
 For example:
+
 ```
  [geoip]
  ip_re: ^(.*?) -
@@ -142,7 +143,7 @@ All the tools admit a -P/--profile <profile_name> flag that will try to load def
 values from a [<profile_name>] section in the aforementioned .ini files. e.g:
 
 ```
-	filterbots --profile fbots_accesslog
+filterbots --profile fbots_accesslog
 ```
 
 will look up default parameter values from the section [fbots_accesslogs] in ~/.logtoolsrc or /etc/logtools.cfg
@@ -157,8 +158,9 @@ Notice the use of named match groups syntax in the regular expression - (?P<name
 The ips/useragents files are not specified in commandline and therefore are assumed to be defined
 in ~/.logtoolsrc or /etc/logtools.cfg. For example bots black list files, see data/examples directory.
 The option --print is used to actually print matching lines, rather than just report the filtering statistics.
+
 ```
-	cat error_log.1 | filterbots -r ".*\[client (?P<ip>.*?)\].*USER_AGENT:(?P<ua>.*?)\'" --print
+cat error_log.1 | filterbots -r ".*\[client (?P<ip>.*?)\].*USER_AGENT:(?P<ua>.*?)\'" --print
 ```
 
 Notice that its easy to reverse the filtermask simply by adding the --reverse flag. This is useful e.g

@@ -126,6 +126,6 @@ def qps_main():
     """Console entry-point"""
     options, args = qps_parse_args()
     for qps_info in qps(fh=sys.stdin, *args, **options):
-        print >> sys.stdout, "{start_time}\t{end_time}\t{num_samples}\t{qps}".format(**qps_info)
+        print >> sys.stdout, "{start_time}\t{end_time}\t{num_samples}\t{qps:.2f}".format(**qps_info)
 
     return 0

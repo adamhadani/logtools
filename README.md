@@ -213,7 +213,7 @@ to inspect all the filtered (bot) lines.
 
 12. Create a running average of QPS for a tomcat installation, using time windows of 15 seconds:
 
-	cat catalina.out | qps -r'^(.*?) org' --format '%b %d, %Y %I:%M:%S %p' -W15 --ignore
+	cat catalina.out | qps -r'^(.*?) org' --dateformat '%b %d, %Y %I:%M:%S %p' -W15 --ignore
 	
 13. Parse URLs from log and print out a specific url query parameter:
 

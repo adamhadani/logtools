@@ -31,7 +31,7 @@ __all__ = ['qps_parse_args', 'qps', 'qps_main']
 def qps_parse_args():
     usage = "%prog " \
           "-d <delimiter_character> " \
-          "-t <timestamp_format_string> " \
+          "-F <timestamp_format_string> " \
           "-t <sliding_window_interval_seconds>"
     parser = OptionParser(usage=usage)
     

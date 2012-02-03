@@ -123,7 +123,7 @@ The basic configuration file format is of the form:
 ```
 
 For example:
-
+```
  [geoip]
  ip_re: ^(.*?) -
 
@@ -131,6 +131,7 @@ For example:
  bots_ua: /home/www/conf/bots_useragents.txt
  bots_ips: /home/www/conf/bots_hosts.txt
  ip_ua_re: ^(?P<ip>.*?) -(?:.*?"){5}(?P<ua>.*?)"
+```
 
 Available parameters per each command-line tool can be gleaned by running the 
 tool with the --help flag.
@@ -140,7 +141,9 @@ where you have a set of common, distinct configurations that you'd like to keep 
 All the tools admit a -P/--profile <profile_name> flag that will try to load default parameter
 values from a [<profile_name>] section in the aforementioned .ini files. e.g:
 
+```
 	filterbots --profile fbots_accesslog
+```
 
 will look up default parameter values from the section [fbots_accesslogs] in ~/.logtoolsrc or /etc/logtools.cfg
 if that exists.
@@ -154,81 +157,90 @@ Notice the use of named match groups syntax in the regular expression - (?P<name
 The ips/useragents files are not specified in commandline and therefore are assumed to be defined
 in ~/.logtoolsrc or /etc/logtools.cfg. For example bots black list files, see data/examples directory.
 The option --print is used to actually print matching lines, rather than just report the filtering statistics.
-
+```
 	cat error_log.1 | filterbots -r ".*\[client (?P<ip>.*?)\].*USER_AGENT:(?P<ua>.*?)\'" --print
+```
 
 Notice that its easy to reverse the filtermask simply by adding the --reverse flag. This is useful e.g
 to inspect all the filtered (bot) lines.
-
+```
 	cat error_log.1 | filterbots -r ".*\[client (?P<ip>.*?)\].*USER_AGENT:(?P<ua>.*?)\'" --print --reverse
+```
 
 2. filterbots can also route input to a custom parser (see logtools.parsing module), for example:
+```
 	cat request_log.json | filterbots --parser JSONParser -f 'ua:user_agent,ip:user_ip'
-	
+```
    This will parse the JSON log, and use the fields called 'user_agent' and 'user_ip' for filtering bots.
    
 3. The following example demonstrates using the geoip wrapper (Uses Maxmind GeoIP package). This will
    emit by default lines of the form '<ip>	<country>', per each input log line.
-
+```
 	cat access_log.1 | geoip -r '.*client (.*?)\]'
+```
 
 4. Merge (individually sorted) log files from multiple webapps and output combined and (lexically) sorted stream:
-	
+```	
 	logmerge -d' ' -f1 app_log.1 app_log.2
-	
+```
 	Note that the -d (delimiter) and -f (field) are used to specify which field is used
 	for the sort-merging (in this case, the first field should be used)
 
 5. Merge and sort numerically on some numeric field:
-
+```
 	logmerge -d' ' -f3 --numeric app_log.*
-		
-6. Use a custom parser for sort/merge. In this example, parse CommonLogFormat and sort by date:
-
-	logmerge --parser CommonLogFormat -f4 access_log.*
+```
 	
-7. Use logparse to parse a CommonLogFormat log (e.g Apache access_log) and print only the date field:
+6. Use a custom parser for sort/merge. In this example, parse CommonLogFormat and sort by date:
+```
+	logmerge --parser CommonLogFormat -f4 access_log.*
+```
 
+7. Use logparse to parse a CommonLogFormat log (e.g Apache access_log) and print only the date field:
+```
 	cat access_log | logparse --parser CommonLogFormat -f4
+```
 
 8. Use logparse to parse a custom format Apache access_log and print first two fields.
-
+```
 	cat my_access_log | logparse --parser AccessLog --format '%h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-agent}i"' -f1,2
-	
+```
+
 	You might recognize this format as the NCSA extended/combined format.
 	
 9. Use logparse to parse a JSON-format log (each line is a JSON string) 
    and print only the client_ip, useragent fields:
-
+```
 	cat json_access_log | logparse --parser JSONParser -f 'client_ip,useragent'
-	
+```
+
 10. Generate a pie chart of Country distributions in Apache access_log using 
    Maxmind GeoIP and GoogleChart API. 
    Note that this requires the GeoIP library and python bindings as well as pygooglechart package.
-
+```
 	cat access_log.1 | geoip -r '^(.*?) -' | aggregate -d$'\t' -f2 | \
 		logplot -d' ' -f1 --backend gchart --type pie -W600 -H300 --limit 10 --output plot.png
-
+```
 11. Filter bots and aggregate IP address values to show IPs of visitors with counts and sorted from most frequent to least:
-
+```
 	cat access_log.1 | filterbots --print | aggregate -d' ' -f1
-
+```
 12. Create a running average of QPS for a tomcat installation, using time windows of 15 seconds:
-
+```
 	cat catalina.out | qps -r'^(.*?) org' --dateformat '%b %d, %Y %I:%M:%S %p' -W15 --ignore
-	
+```
 13. Parse URLs from log and print out a specific url query parameter:
-
+```
 	cat access_log.1 | grep -o 'http://[^\s]+' | urlparse --part query -q 'rows'
-	
+```
 14. Create a join between some extracted log field and a DB table using logjoin:
 	the logjoin utility is a very powerful tool that lets you create some joins on the fly.
 	While its not ment for large scale joins (there is no batching at the moment), it can be
 	very instrumental when trying to map information from logs to entries in a DB manually
 	or on small increments:
-	
+```
 	cat my_log.json | logparse --parser JSONParser -f 'my_join_field' | logjoin
-	
+```
 ** Naturally, piping between utilities is useful, as shown in most of the examples above.
 	
 ** All tools admit a --help command-line option that will print out detailed information about the different

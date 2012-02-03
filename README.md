@@ -117,8 +117,10 @@ assume one of a small set of different configurations (e.g usage profiles).
 
 The basic configuration file format is of the form:
 
+```
  [script_name]
  optname: optval
+```
 
 For example:
 

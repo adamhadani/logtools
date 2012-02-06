@@ -3,7 +3,9 @@ version 0.8
 	Added the 'percentiles' utility for quickly computing percentiles out of input data
 	Added unit-tests for the logfilter functionality
 	Added dependency on the acora string matching library (Implements Aho-Corasick in CPython)
-
+    Minor fixes to qps utility (formatting and parameter naming in README
+    example)
+    Updated README to be markdown based, cleaned up and edited
 	
 version 0.7.2
 	Added missing -d and -f parameters to logsample for enabling weighted reservoir sampling

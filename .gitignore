@@ -1,5 +1,9 @@
 *.pyc
+*.egg
 *.egg-info
 *.wpr
 build
 dist
+.coverage
+.project
+.pydevproject

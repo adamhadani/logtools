@@ -156,7 +156,7 @@ if that exists.
 	the ip/user agent using the filterbots tool. 
 	Notice the use of named match groups syntax in the regular expression - (?P<name>...).
 	The ips/useragents files are not specified in commandline and therefore are assumed to be defined
-	in ~/.logtoolsrc or /etc/logtools.cfg. For example bots black list files, see data/examples directory.
+	in ~/.logtoolsrc or /etc/logtools.cfg as described above. For an example bots black list file, see the included data/examples directory.
 	The option --print is used to actually print matching lines, rather than just report the filtering statistics.
 	
 	```
@@ -263,6 +263,19 @@ if that exists.
 	```
 	cat my_log.json | logparse --parser JSONParser -f 'my_join_field' | logjoin
 	```
+
+15. Filter lines from log using the blacklist file-based logfilter tool. We use Aho-Corasick exact string matching
+    as well as a custom parser to filter a JSON log format, while ignoring case:
+
+    ```
+    cat my_log.json | logfilter --parser JSONParser -f'user_query' --blacklist queries_blacklist.txt --with-acora --ignore-case --print
+    ```
+
+16. Compute percentiles from numerical data:
+
+    ```
+    cat my_response_times.log | percentiles
+    ```
 
 ** Naturally, piping between utilities is useful, as shown in most of the examples above.
 	

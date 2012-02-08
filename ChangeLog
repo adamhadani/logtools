@@ -1,3 +1,9 @@
+version 0.8.1
+    Fixes to logfilter to properly support --parser -based filtering
+    Updated documentation and examples in README
+    Cleanup and error checking to percentiles utility, fixed to work with osx
+    mktemp
+
 version 0.8
 	Added the 'logfilter' utility with support for regexp/aho-corasick based matching. See README/documentation for examples
 	Added the 'percentiles' utility for quickly computing percentiles out of input data

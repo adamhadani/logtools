@@ -10,9 +10,21 @@ cleanup() {
 log() {
 	printf "`date +%c` - $*\n" >&2
 }
+error() {
+    printf "ERROR: $*\n" >&2
+    exit 1
+}
 
-TMPFILE=`mktemp`
+TMPFILE=`mktemp /tmp/tmp_percentiles.XXXXXX`
+
+if [ "$?" -ne 0 ];
+then
+    error "Could not create temporary file, aborting."
+fi
+
 N=10000
+
+trap "cleanup; exit" SIGTERM EXIT
 
 tail -n $N $* | \
 	sort -k1,1n > $TMPFILE
@@ -33,5 +45,3 @@ do
 	p=`cat $TMPFILE | head -n $l | tail -n1`
 	log "${i}th Percentile (${l}th Sample): $p"
 done
-
-cleanup

@@ -101,7 +101,7 @@ def logfilter_parse_args():
                       "selecting parsed fields rather than matching via regular expression.")
     parser.add_option("-d", "--delimiter", dest="delimiter",
                       help="Delimiter character for field-separation (when not using a --parser)")        
-    parser.add_option("-f", "--field", dest="field", type=int,
+    parser.add_option("-f", "--field", dest="field",
                       help="Index of field to use for filtering against")
 
     parser.add_option("-P", "--profile", dest="profile", default='logfilter',
@@ -110,7 +110,7 @@ def logfilter_parse_args():
     options, args = parser.parse_args()
 
     # Interpolate from configuration and open filehandle
-    options.field  = interpolate_config(options.field, options.profile, 'field', type=int)
+    options.field  = interpolate_config(options.field, options.profile, 'field')
     options.delimiter = interpolate_config(options.delimiter, options.profile, 'delimiter', default=' ')    
     options.blacklist = open(interpolate_config(options.blacklist, 
                         options.profile, 'blacklist'), "r")

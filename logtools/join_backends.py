@@ -26,7 +26,7 @@ import json
 
 from _config import AttrDict
 
-from sqlalchemy.ext.sqlsoup import SqlSoup
+from sqlsoup import SQLSoup
 
 __all__ = ['JoinBackend', 'SQLAlchemyJoinBackend']
 
@@ -64,7 +64,7 @@ class SQLAlchemyJoinBackend(JoinBackend):
         
     def connect(self):
         """Connect to remote join backend (DB)"""
-        self.db = SqlSoup(self.connect_string)
+        self.db = SQLSoup(self.connect_string)
         
         
     def join(self, key):

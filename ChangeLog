@@ -1,3 +1,8 @@
+version 0.8.2
+	Updated dependecy on sqlsoup (separated out of sqlalchemy). Thanks to
+	Robert Churchill for pointing it out.
+	Update SqlAlchemy dependency version to latest stable release
+
 version 0.8.1
     Fixes to logfilter to properly support --parser -based filtering
     Updated documentation and examples in README

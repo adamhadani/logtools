@@ -21,7 +21,7 @@ except ImportError:
 
 setup(  
     name         = 'logtools',
-    version      = '0.8.1',
+    version      = '0.8.2',
     description  = 'Log analysis and filtering tools',
     author       = 'Adam Ever-Hadani',
     author_email = 'adamhadani@gmail.com',
@@ -65,7 +65,8 @@ This software is distributed under the Apache 2.0 license.
     install_requires = [
         "pygooglechart>=0.2.1",
         "prettytable>=0.5",
-        "sqlalchemy>=0.6.4",
+        "sqlalchemy>=0.7.9",
+        "sqlsoup>=0.9.0",
         "acora>=1.7"
     ],
 

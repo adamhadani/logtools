@@ -1,3 +1,7 @@
+version 0.8.3
+	Added explicit error message when --format is missing to AccessLog log
+	parser
+
 version 0.8.2
 	Updated dependecy on sqlsoup (separated out of sqlalchemy). Thanks to
 	Robert Churchill for pointing it out.

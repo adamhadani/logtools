@@ -172,7 +172,12 @@ class AccessLog(LogParser):
         Will raise ParseError Exception when
         parsing failed.
         """
-        match = self.fieldselector.match(logline)
+        try:
+            match = self.fieldselector.match(logline)
+        except AttributeError, exc:
+            raise AttributeError("%s needs a valid format string (--format)" % \
+                    self.__class__.__name__ )
+
         if match:
             data = self._logline_wrapper
             data.clear()

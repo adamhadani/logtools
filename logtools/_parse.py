@@ -98,7 +98,11 @@ def logparse(options, args, fh):
     for line in fh:
         try:
             yield key_func(line)
-        except (KeyError, ValueError):
+        except KeyError, exc:
+            # Could not find user-specified field
+            logging.warn("Could not match user-specified fields: %s", exc)
+        except ValueError, exc:
+            # Could not parse the log line
             if options.ignore:
                 logging.debug("Could not match fields for parsed line: %s", line)
                 continue

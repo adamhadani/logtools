@@ -30,7 +30,7 @@ import json
 from _config import AttrDict
 
 __all__ = ['multikey_getter_gen', 'unescape_json', 'LogParser', 'JSONParser', 'LogLine',
-           'AccessLog', 'CommonLogFormat']
+           'AccessLog', 'CommonLogFormat', 'uWSGIParser']
 
 
 def multikey_getter_gen(parser, keys, is_indices=False, delimiter="\t"):
@@ -54,12 +54,14 @@ def multikey_getter_gen(parser, keys, is_indices=False, delimiter="\t"):
         # Field names
         return partial(multikey_getter, parser=parser, keyset=keys)
 
+
 def unescape_json(s):
     """Unescape a string that was previously encoded into JSON.
     This unescapes forward slashes (optional in JSON standard),
     backslashes and double quotes"""
     return s.replace("\\/", '/').replace('\\"', '"').decode('string_escape')
     
+
 class LogParser(object):
     """Base class for all our parsers"""
     __metaclass__ = ABCMeta
@@ -245,4 +247,25 @@ class CommonLogFormat(AccessLog):
 
     def __init__(self):
         AccessLog.__init__(self, format='%h %l %u %t "%r" %>s %b')
-        
+
+
+class uWSGIParser(LogParser):
+    """Parser for the uWSGI log format"""
+
+    def __init__(self):
+        LogParser.__init__(self)
+        self._re = re.compile(r'.* ((?:[0-9]+\.){3}[0-9]+) .* \[(.*?)\] (GET|POST) (\S+) .* generated (\d+) bytes in (\d+) msecs .*')
+        self.fieldnames = ('ip', 'timestamp', 'method', 'path', 'bytes', 'processing_time')
+        self._logline_wrapper = LogLine(self.fieldnames)
+
+    def parse(self, logline):
+        """Parse log line"""
+        match = self._re.match(logline)
+        if match:
+            data = self._logline_wrapper
+            data.clear()
+            for k, v in zip(self.fieldnames, match.groups()):
+                data[k] = v
+            return data
+        else:
+            raise ValueError("Could not parse log line: '%s'" % logline)

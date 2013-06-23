@@ -27,7 +27,9 @@ from logtools import (filterbots, logfilter, geoip, logsample, logsample_weighte
 from logtools.parsers import *
 from logtools import logtools_config, interpolate_config, AttrDict
 
+
 logging.basicConfig(level=logging.INFO)
+
 
 class ConfigurationTestCase(unittest.TestCase):
     def testInterpolation(self):
@@ -67,6 +69,10 @@ class ParsingTestCase(unittest.TestCase):
         self.json_rows = [
             '{"key1":"val1","key2":true,"key3":31337,"key4":null,"nested_key":[{"nested_key_1":"2"}]}'
         ]
+        self.uwsgi_rows = [
+                "[pid: 11216|app: 0|req: 2680/5864] 24.218.159.119 () {40 vars in 957 bytes} [Thu Jun 13 22:29:59 2013] GET /my/uri/path/?param_id=52&token=s61048gkje_l001z => generated 1813 bytes in 11 msecs (HTTP/1.1 200) 2 headers in 73 bytes (1 switches on core 0)",
+                "[pid: 11217|app: 0|req: 3064/5865] 10.18.50.145 () {34 vars in 382 bytes} [Thu Jun 13 22:30:00 2013] GET / => generated 8264 bytes in 9 msecs (HTTP/1.1 200) 2 headers in 73 bytes (1 switches on core 0)"
+        ]
         
     def testJSONParser(self):
         parser = JSONParser()
@@ -88,7 +94,13 @@ class ParsingTestCase(unittest.TestCase):
         for logrow in self.clf_rows:
             parsed = parser(logrow)
             self.assertNotEquals(parsed, None, "Could not parse line: %s" % str(logrow))        
-        
+
+    def testuWSGIParser(self):
+        parser = uWSGIParser()
+        for logrow in self.uwsgi_rows:
+            parsed = parser(logrow)
+            self.assertNotEquals(parsed, None, "Could not parse line: %s" % logrow)
+
     def testLogParse(self):
         options = AttrDict({'parser': 'CommonLogFormat', 'field': 4, 'header': False})
         fh = StringIO('\n'.join(self.clf_rows))
@@ -250,7 +262,7 @@ class FilterTestCase(unittest.TestCase):
         for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
                            with_acora=True, ignorecase=False,
                            word_boundaries=True):
-            print l
+            #print l
             lines += 1
         self.assertEquals(lines, self.exp_emitted_wb, "Number of lines emitted was not as expected: %s (Expected: %s)" %
                           (lines, self.exp_emitted_wb))
@@ -261,7 +273,7 @@ class FilterTestCase(unittest.TestCase):
         for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
                            with_acora=True, ignorecase=False,
                            word_boundaries=False):
-            print l
+            #print l
             lines += 1
         self.assertEquals(lines, self.exp_emitted, "Number of lines emitted was not as expected: %s (Expected: %s)" %
                           (lines, self.exp_emitted))        
@@ -272,7 +284,7 @@ class FilterTestCase(unittest.TestCase):
         for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
                            with_acora=False, ignorecase=False,
                            word_boundaries=False):
-            print l
+            #print l
             lines += 1
         self.assertEquals(lines, self.exp_emitted, "Number of lines emitted was not as expected: %s (Expected: %s)" %
                           (lines, self.exp_emitted))          
@@ -283,7 +295,7 @@ class FilterTestCase(unittest.TestCase):
         for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
                            with_acora=False, ignorecase=False,
                            word_boundaries=True):
-            print l
+            #print l
             lines += 1
         self.assertEquals(lines, self.exp_emitted_wb, "Number of lines emitted was not as expected: %s (Expected: %s)" %
                           (lines, self.exp_emitted_wb))          

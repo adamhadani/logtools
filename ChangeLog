@@ -1,6 +1,9 @@
 version 0.8.3
-	Added explicit error message when --format is missing to AccessLog log
-	parser
+	Added explicit error message when --format is missing to AccessLog log parser
+	Added uWSGIParser. Can now be used with logparse --parser uWSGIParser.
+	Field names (for key-based -f lookup): 'ip', 'timestamp', 'method',
+	'path', 'bytes', 'processing_time'.
+	Added unit-test for the uWSGIParser
 
 version 0.8.2
 	Updated dependecy on sqlsoup (separated out of sqlalchemy). Thanks to

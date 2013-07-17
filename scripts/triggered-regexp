@@ -5,38 +5,97 @@
 # Useful for sorted input streams, e.g timestamped logs,
 # where we wish to start processing a log from a certain point onwards.
 #
+# We include support for an arbitrary trigger string, as well as for
+# time-based triggers, allowing user to specify a date format,
+# and a starting time in human readable form ('2 minutes ago', etc.). 
+#
+# See `man date` for information about the format string and time specifiers.
+#
+################################################################################
+set -o errexit
+
 function usage {
-	printf "USAGE: cat <log_file> | .... | $(basename $0) <trigger_string> <counted_value_regexp>\n" >&2
+	printf "USAGE: cat <file> | ... | $(basename $0) [-s <trigger_string>] [-f <date_format> -d <trigger_date_specifier>] <counted_value_regexp>\n" >&2
 	exit 1
 }
 function log {
-	printf "$*\n" >&2
+	printf "** $*\n" >&2
 }
 
-if [ "$#" -lt 2 ];
+###############################################################################
+
+trigger_string=
+date_format=
+date_spec=
+value_re=
+inclusive=
+
+while getopts "s:f:d:i" opt; 
+do
+	case $opt in
+		i)
+			inclusive=1
+			;;
+		s)  
+			trigger_string="$OPTARG"
+			;;
+		f)  
+			date_format="$OPTARG"
+			;;
+		d)
+			date_spec="$OPTARG"
+			;;
+		?)
+			usage
+           ;;
+	esac
+done
+
+shift $((OPTIND-1))
+
+# Make sure we got all arguments we need
+if [ "$#" -lt 1 ];
 then
 	usage
 fi
 
-# Check if we got stdin
+value_re="$1"
+
+# Make sure we got stdin
 if [ -t 0 ]
 then
 	usage
 fi
 
-trigger_string="$1"
-value_re="$2"
+if [ -z "$trigger_string" ];
+then
+	if [ -z "$date_spec" ] || [ -z "$date_format" ];
+	then
+		usage
+	fi
+
+	trigger_string=$(date -d "${date_spec}" +"${date_format}")
+fi
+
+log "trigger_string: ${trigger_string}, value_re: ${value_re}"
 
 # Find trigger string
-first_match=$(grep -m1 "${trigger_string}")
+first_match=$(grep -m1 "${trigger_string}" -)
 
-if [[ "$?" != 0 ]];
+if [ "$?" != 0 ];
 then
 	log "No matches found for trigger string: $trigger_string"
 	exit 1
 fi
 
-echo $first_match | perl -lne "print \$1 if (m/${value_re}/)"
+log "string trigger encountered in line: ${first_match}"
 
-# Process rest of stdin 
+if [ -n "$inclusive" ];
+then
+	echo "$first_match" | perl -lne "print \$1 if (m/${value_re}/)"
+fi
+
+# Process rest of stdin
 perl -lne "print \$1 if (m/${value_re}/)"
+
+log "All done."

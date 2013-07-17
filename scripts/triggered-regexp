@@ -1,0 +1,42 @@
+#!/bin/bash
+#
+# Read from stdin, and upon hitting a 'trigger' string, 
+# process subsequent lines looking for a regexp match.
+# Useful for sorted input streams, e.g timestamped logs,
+# where we wish to start processing a log from a certain point onwards.
+#
+function usage {
+	printf "USAGE: cat <log_file> | .... | $(basename $0) <trigger_string> <counted_value_regexp>\n" >&2
+	exit 1
+}
+function log {
+	printf "$*\n" >&2
+}
+
+if [ "$#" -lt 2 ];
+then
+	usage
+fi
+
+# Check if we got stdin
+if [ -t 0 ]
+then
+	usage
+fi
+
+trigger_string="$1"
+value_re="$2"
+
+# Find trigger string
+first_match=$(grep -m1 "${trigger_string}")
+
+if [[ "$?" != 0 ]];
+then
+	log "No matches found for trigger string: $trigger_string"
+	exit 1
+fi
+
+echo $first_match | perl -lne "print \$1 if (m/${value_re}/)"
+
+# Process rest of stdin 
+perl -lne "print \$1 if (m/${value_re}/)"

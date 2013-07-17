@@ -31,5 +31,6 @@ from _plot import *
 from _qps import *
 from _sample import *
 from _filter import *
+from _tail import *
 from _sumstat import *
 from _serve import *

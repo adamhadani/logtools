@@ -190,7 +190,7 @@ def logfilter(fh, blacklist, field, parser=None, reverse=False,
                 parsed_line = parser(line)
                 for field in fields:
                     if _is_blacklisted(parsed_line.by_index(field)):
-                        return true
+                        return True
                 return False            
             
     num_lines=0

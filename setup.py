@@ -67,7 +67,8 @@ This software is distributed under the Apache 2.0 license.
         "prettytable>=0.5",
         "sqlalchemy>=0.7.9",
         "sqlsoup>=0.9.0",
-        "acora>=1.7"
+        "acora>=1.7",
+        "python-dateutil>=2.1"
     ],
 
     entry_points = {
@@ -81,6 +82,7 @@ This software is distributed under the Apache 2.0 license.
             'logplot = logtools:logplot_main',
             'logsample = logtools:logsample_main',
             'logfilter = logtools:logfilter_main',            
+            'logtail = logtools:logtail_main',            
             'qps = logtools:qps_main',
             'sumstat = logtools:sumstat_main'
         ]

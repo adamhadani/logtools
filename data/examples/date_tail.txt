@@ -1,0 +1,4 @@
+2013-07-12 20:35:00 - [ERROR] - This error occured at 8pm
+2013-07-13 08:15:21 - [WARNING] - This warning occured at 8:15
+2013-07-14 10:00:00 - [ERROR] - This error occured at 10:00
+2013-07-14 10:00:33 - [ERROR] - This error occured at 10:00:33

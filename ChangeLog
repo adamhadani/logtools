@@ -1,3 +1,7 @@
+version 0.8.4
+	Added the triggered-regexp script
+	Added the logtail utility and CLI
+
 version 0.8.3
 	Added explicit error message when --format is missing to AccessLog log parser
 	Added uWSGIParser. Can now be used with logparse --parser uWSGIParser.

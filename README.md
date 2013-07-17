@@ -82,7 +82,12 @@ you can easily install it if you have setuptools installed by running:
 	Parse a log file and perform generic blacklist/whitelist-based row filtering against a specific field in the log row. Can use
 	simple delimited field formats, or use a parser (see logtools.parsers) for dealing with more complex formats/encodings, 
 	e.g JSON
-	
+
+* ``logtail``
+	Tail a logfile, based on more complex expressions rather than the number of lines N to limit to. Currently supported is 
+    tailing via a date format/expression, e.g filter only to lines in which the date expression is equal or greater than
+    a given start date.
+
 * ``qps``
 	Compute QPS averages given a log file using a datetime/timestamp field and a sliding window interval 
     specified by the user. Can be very handy to quickly assess current QPS of some arbitrary service
@@ -276,6 +281,12 @@ if that exists.
     ```
     cat my_response_times.log | percentiles
     ```
+
+17. Tail a log, printing only lines which occured on or after 03/20/2013:
+
+	```
+	cat my_log.log | logtail --date-format '%Y-%m-%d' --start-date '03/20/2013' --print
+	```
 
 ** Naturally, piping between utilities is useful, as shown in most of the examples above.
 	

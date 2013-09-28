@@ -30,9 +30,11 @@ __all__ = ['qps_parse_args', 'qps', 'qps_main']
 
 def qps_parse_args():
     usage = "%prog " \
-          "-d <delimiter_character> " \
+          "-r <datetime_regexp_mask> " \
           "-F <timestamp_format_string> " \
-          "-t <sliding_window_interval_seconds>"
+          "-W <sliding_window_interval_seconds>" \
+          "-i <ignore_missing_datefield_errors>"
+
     parser = OptionParser(usage=usage)
     
     parser.add_option("-r", "--re", dest="dt_re", default=None, 

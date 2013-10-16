@@ -63,7 +63,7 @@ This software is distributed under the Apache 2.0 license.
     include_package_data = False,    
     
     install_requires = [
-        "pygooglechart>=0.2.1",
+        #"pygooglechart>=0.2.1", # Optional dependency, seems broken for now
         "prettytable>=0.5",
         "sqlalchemy>=0.7.9",
         "sqlsoup>=0.9.0",

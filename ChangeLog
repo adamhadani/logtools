@@ -1,3 +1,7 @@
+version 0.8.5
+	Removed pygooglechart dependency as its optional and currently seems
+	package is broken.
+
 version 0.8.4
 	Added the triggered-regexp script
 	Added the logtail utility and CLI

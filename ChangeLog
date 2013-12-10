@@ -1,3 +1,9 @@
+version 0.8.5
+	Tweaks to the 'percentiles' utility - Added optional -N argument to force
+	tailing specific number of lines (samples), removed hard-coded 10000 lines
+	limitation, changed sort to use -g (general numeral sort) and enforce
+	LC_NUMERIC locale of en_US.utf-8 to correctly handle exponents (e.g '414e-05')
+
 version 0.8.4
 	Added the triggered-regexp script
 	Added the logtail utility and CLI

@@ -14,6 +14,27 @@ error() {
     printf "ERROR: $*\n" >&2
     exit 1
 }
+usage() {
+	printf "Usage: $(basename $0) [-N <tail_num_lines>]\n" >&2
+	exit -1
+}
+
+N=
+
+while getopts "N:h" OPT
+do
+	case $OPT in
+		N)	N="$OPTARG"
+            typeset -i N
+			;;
+		f)	FIELD="$OPTARG"
+			;;
+		h)	usage
+			;;
+	esac
+done
+shift $((OPTIND-1))
+
 
 TMPFILE=`mktemp /tmp/tmp_percentiles.XXXXXX`
 
@@ -22,12 +43,18 @@ then
     error "Could not create temporary file, aborting."
 fi
 
-N=10000
 
 trap "cleanup; exit" SIGTERM EXIT
 
-tail -n $N $* | \
-	sort -k1,1n > $TMPFILE
+if [ -n "$N" ];
+then
+    tail -n $N $* | \
+        LC_NUMERIC=en_US.utf-8 sort -k1,1g > $TMPFILE
+else
+    cat $* | \
+        LC_NUMERIC=en_US.utf-8 sort -k1,1g > $TMPFILE
+
+fi
 
 L=`cat $TMPFILE | wc -l`
 typeset -i L

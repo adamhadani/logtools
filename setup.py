@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 #
-#  Licensed under the Apache License, Version 2.0 (the "License"); 
-#  you may not use this file except in compliance with the License. 
-#  You may obtain a copy of the License at 
-#  
-#      http://www.apache.org/licenses/LICENSE-2.0 
-#     
-#  Unless required by applicable law or agreed to in writing, software 
-#  distributed under the License is distributed on an "AS IS" BASIS, 
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-#  See the License for the specific language governing permissions and 
-#  limitations under the License. 
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
 
 try:
     from setuptools import setup, find_packages
@@ -19,7 +19,7 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
-setup(  
+setup(
     name         = 'logtools',
     version      = '0.8.6',
     description  = 'Log analysis and filtering tools',
@@ -30,7 +30,7 @@ setup(
                     'logparse', 'logmerge', 'logjoin', 'urlparse', 'logplot', 'qps', 'filter'],
     classifiers = [
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.6",        
+        "Programming Language :: Python :: 2.6",
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: POSIX",
@@ -39,7 +39,7 @@ setup(
         "Topic :: Text Processing :: Filters",
         "Topic :: Utilities",
         "Intended Audience :: Developers",
-        "Intended Audience :: System Administrators"        
+        "Intended Audience :: System Administrators"
         ],
     long_description = """\
 A log files analysis / filtering framework.
@@ -54,14 +54,14 @@ log mining artifacts that are typically employed in a Website context.
 
 This software is distributed under the Apache 2.0 license.
 """,
-    
+
     packages = find_packages(),
 
     scripts = ['scripts/aggregate', 'scripts/colsum',
                 'scripts/percentiles', 'scripts/triggered-regexp'],
 
-    include_package_data = False,    
-    
+    include_package_data = False,
+
     install_requires = [
         #"pygooglechart>=0.2.1", # Optional dependency, seems broken for now
         "prettytable>=0.5",
@@ -74,17 +74,18 @@ This software is distributed under the Apache 2.0 license.
     entry_points = {
         'console_scripts': [
             'filterbots = logtools:filterbots_main',
+            'flattenjson = logtools:flattenjson_main',
             'geoip = logtools:geoip_main',
             'logparse = logtools:logparse_main',
-            'urlparse = logtools:urlparse_main',
             'logmerge = logtools:logmerge_main',
             'logjoin = logtools:logjoin_main',
             'logplot = logtools:logplot_main',
             'logsample = logtools:logsample_main',
-            'logfilter = logtools:logfilter_main',            
-            'logtail = logtools:logtail_main',            
+            'logfilter = logtools:logfilter_main',
+            'logtail = logtools:logtail_main',
             'qps = logtools:qps_main',
-            'sumstat = logtools:sumstat_main'
+            'sumstat = logtools:sumstat_main',
+            'urlparse = logtools:urlparse_main',
         ]
     },
 

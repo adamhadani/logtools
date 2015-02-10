@@ -294,7 +294,9 @@ if that exists.
 
 18. Extract a 'results' key from JSON stream and output its items individually per-line:
 
+    ```
     cat my_json_blob.json | flattenjson -f 'results'
+    ```
 
     NOTE: The output is not valid JSON, but rather valid JSON per-line. Useful for working with json2csv
     which acknowledges such a format and does not support easily nested json structures.

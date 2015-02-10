@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/adamhadani/logtools.svg?branch=master)](https://travis-ci.org/adamhadani/logtools)
+
 # logtools
 
 ### A log files analysis / filtering framework.

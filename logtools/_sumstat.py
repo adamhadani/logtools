@@ -79,9 +79,10 @@ def sumstat(fh, delimiter, reverse=False, **kwargs):
 
     for line in imap(lambda x: x.strip(), fh):
         try:
-            count, val = line.split(delimiter)[:2]
+            row = line.split(delimiter, 1)
+            count = row[0]
         except ValueError:
-            logging.error("Exception while trying to parse log line: '%s', skipping", line)  # noqa
+            logging.exception("Exception while trying to parse log line: '%s', skipping", line)  # noqa
         else:
             count = int(count)
             counts.append(count)
@@ -135,7 +136,7 @@ def sumstat_main():
     stat_dict = sumstat(fh=sys.stdin, *args, **options)
 
     table = PrettyTable([
-        "Num. Samples (N)",
+        "Num. Samples / Cumulative Value (N)",
         "Num. Values (M)",
         "Min. Value",
         "Max. Value",

@@ -69,6 +69,7 @@ def qps_parse_args():
 
     return AttrDict(options.__dict__), args
 
+
 def qps(fh, dt_re, dateformat, window_size, ignore, **kwargs):
     """Calculate QPS from input stream based on
     parsing of timestamps and using a sliding time window"""
@@ -83,8 +84,11 @@ def qps(fh, dt_re, dateformat, window_size, ignore, **kwargs):
         if not line:
             return
         try:
-            t = datetime.strptime(_re.match(line).groups()[0], dateformat)
-        except (AttributeError, KeyError, TypeError, ValueError):
+            mstr = _re.match(line).groups()[0]
+            t = datetime.strptime(mstr, dateformat)
+        except (AttributeError, KeyError, TypeError, ValueError) as err:
+            sys.stderr.write(f"In qps: Exception in line:{line[:-1]}\n\t{err}\n\t{type(err)}\n")
+
             if ignore:
                 logging.debug("Could not match datefield for parsed line: %s", line)
                 continue
@@ -99,7 +103,8 @@ def qps(fh, dt_re, dateformat, window_size, ignore, **kwargs):
     for line in map(lambda x: x.strip(), fh):
         try:
             t = datetime.strptime(_re.match(line).groups()[0], dateformat)
-        except (AttributeError, KeyError, TypeError, ValueError):
+        except (AttributeError, KeyError, TypeError, ValueError) as err:
+            sys.stderr.write(f"In qps: Exception in line:{line[:-1]}\n\t{err}\n\t{type(er)}\n")
             if ignore:
                 logging.debug("Could not match datefield for parsed line: %s", line)
                 continue

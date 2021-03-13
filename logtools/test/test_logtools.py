@@ -347,7 +347,7 @@ class MergeTestCase(unittest.TestCase):
              '2010/01/12 21:00:00,threehundred']
         os.write(self.tempfiles[1][0], "\n".join(t2).encode())
         t3 = ['2010/01/11 05:33:03,one', '2010/01/12 03:10:00,five', 
-                                                  '2010/01/21 22:00:00,threehundred']
+              '2010/01/21 22:00:00,threehundred']
         os.write(self.tempfiles[2][0], "\n".join(t3).encode())
         
         dateformat = '%Y/%m/%d %H:%M:%S'
@@ -378,7 +378,9 @@ class MergeTestCase(unittest.TestCase):
                           sorted( list( map(itemgetter(0), output))), 
                           "Output was not lexically sorted!")
         
-   
+#
+# QPS: Queries Per Second
+#
 class QPSTestCase(unittest.TestCase):
     def setUp(self):
         self.options = AttrDict({

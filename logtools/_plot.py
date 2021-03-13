@@ -40,7 +40,9 @@ from ._config import logtools_config, interpolate_config, AttrDict
 
 __all__ = ['logplot_parse_args', 'logplot', 'logplot_main']
 
-locale.setlocale(locale.LC_ALL, "")
+#  problematic in my environment, 
+if False:  
+   locale.setlocale(locale.LC_ALL, "")
 
 class PlotBackend(object):
     __metaclass__ = ABCMeta

@@ -44,7 +44,9 @@ from ._config import interpolate_config, AttrDict
 
 __all__ = ['sumstat_parse_args', 'sumstat', 'sumstat_main']
 
-locale.setlocale(locale.LC_ALL, "")
+# problematic in my environment
+if False:
+    locale.setlocale(locale.LC_ALL, "")
 
 
 def arith_mean(values):

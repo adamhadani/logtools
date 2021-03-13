@@ -28,7 +28,6 @@ logging.basicConfig(
 )
 
 from ._config import *
-
 from ._filterbots import *
 from ._flattenjson import *
 from ._geoip import *

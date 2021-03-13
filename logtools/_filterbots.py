@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._filterbots
 Filter bots from logrows based on an ip/host and useragent blacklists.
@@ -18,12 +26,11 @@ Filter bots from logrows based on an ip/host and useragent blacklists.
 import re
 import sys
 import logging
-from itertools import imap
 from functools import partial
 from operator import and_
 from optparse import OptionParser
 
-from _config import logtools_config, interpolate_config, AttrDict
+from ._config import logtools_config, interpolate_config, AttrDict
 import logtools.parsers
 
 __all__ = ['filterbots_parse_args', 'filterbots', 
@@ -95,7 +102,7 @@ def parse_bots_ua(bots_ua):
     bots_ua_suffix_dict = {}
     bots_ua_re   = []
 
-    for line in imap(lambda x: x.strip(), bots_ua):
+    for line in map(lambda x: x.strip(), bots_ua):
         if line.startswith("#"):
             # Comment line
             continue
@@ -209,7 +216,7 @@ def filterbots(fh, ip_ua_re, bots_ua, bots_ips,
     num_lines=0
     num_filtered=0
     num_nomatch=0
-    for line in imap(lambda x: x.strip(), fh):
+    for line in map(lambda x: x.strip(), fh):
         try:
             is_bot = _is_bot_func(line)
         except (KeyError, ValueError):
@@ -238,7 +245,7 @@ def filterbots_main():
     options, args = filterbots_parse_args()
     if options.printlines:
         for line in filterbots(fh=sys.stdin, *args, **options):
-            print line
+            print( line )
     else:
         for line in filterbots(fh=sys.stdin, *args, **options): 
             pass

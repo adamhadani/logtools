@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._plot
 Plotting methods for logfiles
@@ -22,14 +30,13 @@ import sys
 import locale
 import logging
 import unicodedata
-from itertools import imap
 from random import randint
 from datetime import datetime
 from operator import itemgetter
 from optparse import OptionParser
 from abc import ABCMeta, abstractmethod
 
-from _config import logtools_config, interpolate_config, AttrDict
+from ._config import logtools_config, interpolate_config, AttrDict
 
 __all__ = ['logplot_parse_args', 'logplot', 'logplot_main']
 
@@ -81,7 +88,7 @@ class GChartBackend(PlotBackend):
         field = options.field-1
         
         pts = []
-        for l in imap(lambda x: x.strip(), fh):
+        for l in map(lambda x: x.strip(), fh):
             splitted_line = l.split(delimiter)
             k = float(splitted_line.pop(field))
             pts.append((k, ' '.join(splitted_line)))
@@ -121,7 +128,7 @@ class GChartBackend(PlotBackend):
                 
         chart = PieChart2D(options.width, options.height)
         pts = []
-        for l in imap(lambda x: x.strip(), fh):
+        for l in map(lambda x: x.strip(), fh):
             splitted_line = l.split(delimiter)
             k = int(splitted_line.pop(field))
             pts.append((k, ' '.join(splitted_line), locale.format('%d', k, True)))
@@ -150,7 +157,7 @@ class GChartBackend(PlotBackend):
         datefield = options.datefield-1
         
         pts = []
-        for l in imap(lambda x: x.strip(), fh):
+        for l in map(lambda x: x.strip(), fh):
             splitted_line = l.split(delimiter)
             v = float(splitted_line[field])
             t = datetime.strptime(splitted_line[datefield], options.dateformat)
@@ -223,7 +230,7 @@ class MatplotlibBackend(PlotBackend):
          
         pts = []
         max_y = -float("inf")
-        for l in imap(lambda x: x.strip(), fh):
+        for l in map(lambda x: x.strip(), fh):
             splitted_line = l.split(delimiter)
             k = float(splitted_line.pop(field))
             pts.append((k, ' '.join(splitted_line)))
@@ -258,7 +265,7 @@ class MatplotlibBackend(PlotBackend):
                 
         pts = []
         ttl = 0.
-        for l in imap(lambda x: x.strip(), fh):
+        for l in map(lambda x: x.strip(), fh):
             splitted_line = l.split(delimiter)
             k = float(splitted_line.pop(field))
             ttl += k
@@ -294,7 +301,7 @@ class MatplotlibBackend(PlotBackend):
          
         pts = []
         max_y = -float("inf")
-        for l in imap(lambda x: x.strip(), fh):
+        for l in map(lambda x: x.strip(), fh):
             splitted_line = l.split(delimiter)
             k = float(splitted_line.pop(field))
             label = unicodedata.normalize('NFKD', \
@@ -330,7 +337,7 @@ class MatplotlibBackend(PlotBackend):
         
         pts = []
         max_y = -float("inf")
-        for l in imap(lambda x: x.strip(), fh):
+        for l in map(lambda x: x.strip(), fh):
             splitted_line = l.split(delimiter)
             v = float(splitted_line[field])
             t = datetime.strptime(splitted_line[datefield], options.dateformat)

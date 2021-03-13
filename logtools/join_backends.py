@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools.join_backends
 Backends used by the logjoin API / tool
@@ -24,7 +32,7 @@ from datetime import datetime
 from abc import ABCMeta, abstractmethod
 import json
 
-from _config import AttrDict
+from ._config import AttrDict
 
 from sqlsoup import SQLSoup
 

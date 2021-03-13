@@ -11,6 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """Unit-test code for logtools"""
 
 import os
@@ -184,7 +192,8 @@ class GeoIPTestCase(unittest.TestCase):
         try:
             import GeoIP
         except ImportError:
-            print >> sys.stderr, "GeoIP Python package not available - skipping geoip unittest."
+            print( "GeoIP Python package not available - skipping geoip unittest.",
+                    file = sys.stderr)
             return
 
         output = [(geocode, ip, line) for geocode, ip, line in geoip(fh=self.fh, **self.options)]
@@ -195,7 +204,8 @@ class GeoIPTestCase(unittest.TestCase):
         try:
             import GeoIP
         except ImportError:
-            print >> sys.stderr, "GeoIP Python package not available - skipping geoip unittest."
+            print ("GeoIP Python package not available - skipping geoip unittest.",
+                   file = sys.stderr)
             return        
         
         # Check positive filter
@@ -262,7 +272,7 @@ class FilterTestCase(unittest.TestCase):
         for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
                            with_acora=True, ignorecase=False,
                            word_boundaries=True):
-            #print l
+            #print(l)
             lines += 1
         self.assertEquals(lines, self.exp_emitted_wb, "Number of lines emitted was not as expected: %s (Expected: %s)" %
                           (lines, self.exp_emitted_wb))
@@ -273,7 +283,7 @@ class FilterTestCase(unittest.TestCase):
         for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
                            with_acora=True, ignorecase=False,
                            word_boundaries=False):
-            #print l
+            #print(l)
             lines += 1
         self.assertEquals(lines, self.exp_emitted, "Number of lines emitted was not as expected: %s (Expected: %s)" %
                           (lines, self.exp_emitted))        
@@ -284,7 +294,7 @@ class FilterTestCase(unittest.TestCase):
         for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
                            with_acora=False, ignorecase=False,
                            word_boundaries=False):
-            #print l
+            #print( l)
             lines += 1
         self.assertEquals(lines, self.exp_emitted, "Number of lines emitted was not as expected: %s (Expected: %s)" %
                           (lines, self.exp_emitted))          
@@ -295,7 +305,7 @@ class FilterTestCase(unittest.TestCase):
         for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
                            with_acora=False, ignorecase=False,
                            word_boundaries=True):
-            #print l
+            #print( l)
             lines += 1
         self.assertEquals(lines, self.exp_emitted_wb, "Number of lines emitted was not as expected: %s (Expected: %s)" %
                           (lines, self.exp_emitted_wb))          
@@ -395,7 +405,8 @@ class PlotTestCase(unittest.TestCase):
         try:
             import pygooglechart
         except ImportError:
-            print >> sys.stderr, "pygooglechart Python package not available - skipping logplot gchart unittest."
+            print( "pygooglechart Python package not available - skipping logplot gchart unittest.",
+                    file = sys.stderr)
             return        
         options = AttrDict({
             'backend': 'gchart',

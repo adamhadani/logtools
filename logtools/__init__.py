@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 
 import logging
 
@@ -19,19 +27,19 @@ logging.basicConfig(
     format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
-from _config import *
+from ._config import *
 
-from _filterbots import *
-from _flattenjson import *
-from _geoip import *
-from _join import *
-from _merge import *
-from _parse import *
-from _urlparse import *
-from _plot import *
-from _qps import *
-from _sample import *
-from _filter import *
-from _tail import *
-from _sumstat import *
-from _serve import *
+from ._filterbots import *
+from ._flattenjson import *
+from ._geoip import *
+from ._join import *
+from ._merge import *
+from ._parse import *
+from ._urlparse import *
+from ._plot import *
+from ._qps import *
+from ._sample import *
+from ._filter import *
+from ._tail import *
+from ._sumstat import *
+from ._serve import *

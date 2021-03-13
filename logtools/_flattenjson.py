@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._flattenjson
 
@@ -23,7 +31,7 @@ import sys
 from json import dumps, load
 from optparse import OptionParser
 
-from _config import interpolate_config, AttrDict
+from ._config import interpolate_config, AttrDict
 
 
 __all__ = ['flattenjson_parse_args', 'flattenjson', 'flattenjson_main']
@@ -53,5 +61,5 @@ def flattenjson_main():
     options, args = flattenjson_parse_args()
     for row in flattenjson(options, args, fh=sys.stdin):
         if row:
-            print row.encode('utf-8', 'ignore')
+            print( row.encode('utf-8', 'ignore') )
     return 0

@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._parse
 Log format parsing programmatic and command-line utilities.
@@ -22,7 +30,7 @@ from operator import and_
 from optparse import OptionParser
 
 import logtools.parsers
-from _config import interpolate_config, AttrDict
+from ._config import interpolate_config, AttrDict
 
 __all__ = ['logparse_parse_args', 'logparse', 'logparse_main']
 
@@ -96,10 +104,10 @@ def logparse(options, args, fh):
     for line in fh:
         try:
             yield key_func(line)
-        except KeyError, exc:
+        except KeyError as exc:
             # Could not find user-specified field
             logging.warn("Could not match user-specified fields: %s", exc)
-        except ValueError, exc:
+        except ValueError as exc:
             # Could not parse the log line
             if options.ignore:
                 logging.debug("Could not match fields for parsed line: %s", line)
@@ -114,5 +122,5 @@ def logparse_main():
     options, args = logparse_parse_args()
     for row in logparse(options, args, fh=sys.stdin):
         if row:
-            print row.encode('ascii', 'ignore')
+            print( row.encode('ascii', 'ignore') )
     return 0

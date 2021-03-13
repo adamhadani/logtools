@@ -26,8 +26,16 @@ from functools import partial
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
 import json
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
 
-from _config import AttrDict
+
+from ._config import AttrDict
 
 __all__ = ['multikey_getter_gen', 'unescape_json', 'LogParser', 'JSONParser', 'LogLine',
            'AccessLog', 'CommonLogFormat', 'uWSGIParser']
@@ -176,7 +184,7 @@ class AccessLog(LogParser):
         """
         try:
             match = self.fieldselector.match(logline)
-        except AttributeError, exc:
+        except AttributeError as exc:
             raise AttributeError("%s needs a valid format string (--format)" % \
                     self.__class__.__name__ )
 

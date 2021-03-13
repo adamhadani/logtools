@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._sumstat
 
@@ -27,12 +35,11 @@ import locale
 import logging
 from textwrap import dedent
 
-from itertools import imap
 from optparse import OptionParser
 
 from prettytable import PrettyTable
 
-from _config import interpolate_config, AttrDict
+from ._config import interpolate_config, AttrDict
 
 
 __all__ = ['sumstat_parse_args', 'sumstat', 'sumstat_main']
@@ -77,7 +84,7 @@ def sumstat(fh, delimiter, reverse=False, **kwargs):
     counts = []
     N, M = 0, 0
 
-    for line in imap(lambda x: x.strip(), fh):
+    for line in map(lambda x: x.strip(), fh):
         try:
             row = line.split(delimiter, 1)
             count = row[0]
@@ -155,7 +162,7 @@ def sumstat_main():
         [stat_dict['min'], stat_dict['max'], stat_dict['avg']] + \
         stat_dict['percentiles']
     )
-    print table
+    print(table)
 
     S10th, S25th, S40th, S50th, S75th, S90th = stat_dict['cover']
     M = stat_dict['M']

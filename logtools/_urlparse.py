@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._urlparse
 
@@ -21,13 +29,12 @@ import re
 import sys
 import logging
 from time import time
-from itertools import imap
 from datetime import datetime
-from urllib import unquote_plus
+from urllib.parse import unquote_plus
+from urllib.parse import parse_qs, urlsplit
 from optparse import OptionParser
-from urlparse import parse_qs, urlsplit
 
-from _config import logtools_config, interpolate_config, AttrDict
+from ._config import logtools_config, interpolate_config, AttrDict
 
 __all__ = ['urlparse_parse_args', 'urlparse', 'urlparse_main']
 
@@ -71,10 +78,10 @@ def urlparse(fh, part=None, query_params=None, decode=False, **kwargs):
                     [val.get(p, (None,))[0] for p in query_params]
     
     if decode is True:
-        for line in imap(lambda x: x.strip(), fh):
+        for line in map(lambda x: x.strip(), fh):
             yield unquote_plus(line)
     else:
-        for line in imap(lambda x: x.strip(), fh):
+        for line in map(lambda x: x.strip(), fh):
             url = urlsplit(line)
             val = {
                 "scheme": url.scheme,
@@ -95,9 +102,9 @@ def urlparse_main():
             if hasattr(parsed_url, '__iter__'):
                 # Format as tab-delimited for output
                 parsed_url = "\t".join(parsed_url)
-            print parsed_url
+            print(parsed_url)
         else:
             # Lines where we couldnt get any match (e.g when using -q)
-            print ''
+            print ('')
 
     return 0

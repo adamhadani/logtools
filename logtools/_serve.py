@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._serve
 
@@ -22,14 +30,13 @@ import re
 import sys
 import logging
 import wsgiref
-from itertools import imap
 from random import randint
 from threading import Thread
 from operator import itemgetter
 from optparse import OptionParser
 from abc import ABCMeta, abstractmethod
 
-from _config import logtools_config, interpolate_config, AttrDict
+from ._config import logtools_config, interpolate_config, AttrDict
 
 __all__ = ['logserve_parse_args', 'logserve', 'logserve_main']
 

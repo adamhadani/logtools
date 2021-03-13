@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._filter
 Filter rows based on blacklists and field matching.
@@ -19,14 +27,13 @@ import re
 import sys
 import string
 import logging
-from itertools import imap
 from functools import partial
 from operator import and_
 from optparse import OptionParser
 
 import acora
 
-from _config import logtools_config, interpolate_config, AttrDict
+from ._config import logtools_config, interpolate_config, AttrDict
 import logtools.parsers
 
 __all__ = ['logfilter_parse_args', 'logfilter', 
@@ -37,7 +44,7 @@ __all__ = ['logfilter_parse_args', 'logfilter',
 # character set, however might diverge slightly in case of locale-
 # specific character sets.
 _word_boundary_chars = set(string.printable)\
-                     .difference(string.letters)\
+                     .difference(string.ascii_letters)\
                      .difference(string.digits)\
                      .difference(('_',))
 
@@ -196,7 +203,7 @@ def logfilter(fh, blacklist, field, parser=None, reverse=False,
     num_lines=0
     num_filtered=0
     num_nomatch=0
-    for line in imap(lambda x: x.strip(), fh):
+    for line in map(lambda x: x.strip(), fh):
         try:
             is_blacklisted = _is_blacklisted_func(line)
         except (KeyError, ValueError):
@@ -225,7 +232,7 @@ def logfilter_main():
     options, args = logfilter_parse_args()
     if options.printlines:
         for line in logfilter(fh=sys.stdin, *args, **options):
-            print line
+            print(line)
     else:
         for line in logfilter(fh=sys.stdin, *args, **options): 
             pass

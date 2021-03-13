@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._join
 
@@ -24,13 +32,12 @@ import sys
 import logging
 import unicodedata
 from time import time
-from itertools import imap
 from datetime import datetime
 from optparse import OptionParser
-from urlparse import parse_qs, urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 from logtools.join_backends import *
-from _config import logtools_config, interpolate_config, AttrDict
+from ._config import logtools_config, interpolate_config, AttrDict
 
 __all__ = ['logjoin_parse_args', 'logjoin', 'logjoin_main']
 
@@ -87,16 +94,16 @@ def logjoin(fh, field, delimiter, backend, join_connect_string,
     }[backend](remote_fields=join_remote_fields, remote_name=join_remote_name, 
                        remote_key=join_remote_key, connect_string=join_connect_string)
     
-    for row in imap(lambda x: x.strip(), fh):
+    for row in map(lambda x: x.strip(), fh):
         key = row.split(delimiter)[field]
         for join_row in backend_impl.join(key):
-            yield key, unicode(row) + delimiter + delimiter.join(imap(unicode, join_row))
+            yield key, unicode(row) + delimiter + delimiter.join(map(unicode, join_row))
 
 def logjoin_main():
     """Console entry-point"""
     options, args = logjoin_parse_args()
     for key, row in logjoin(fh=sys.stdin, *args, **options):
-        print >> sys.stdout, unicodedata.normalize('NFKD', unicode(row))\
-              .encode('ascii','ignore')
+        print( unicodedata.normalize('NFKD', unicode(row)).encode('ascii','ignore'),
+               file = sys.stdout )
 
     return 0

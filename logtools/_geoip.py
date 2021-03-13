@@ -11,6 +11,16 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# Modifications limited to syntactic aspects only, no testing with geoip.
+#
+# ........................................ ******
+
 """
 logtools._geoip
 GeoIP interoperability tool.
@@ -20,10 +30,9 @@ import os
 import re
 import sys
 import logging
-from itertools import imap
 from optparse import OptionParser
 
-from _config import logtools_config, interpolate_config, AttrDict
+from ._config import logtools_config, interpolate_config, AttrDict
 
 __all__ = ['geoip_parse_args', 'geoip', 'geoip_main']
 
@@ -74,7 +83,7 @@ def geoip(fh, ip_re, **kwargs):
         filter_func = lambda x: \
             True if x == kwargs['filter'] else False
     
-    for line in imap(lambda x: x.strip(), fh):
+    for line in map(lambda x: x.strip(), fh):
         match = ip_re.match(line)
         if match: 
             ip = match.group(1)
@@ -92,7 +101,7 @@ def geoip_main():
     options, args = geoip_parse_args()
     for geocode, ip, line in geoip(fh=sys.stdin, *args, **options):
         if options.printline is True:
-            print "{0}\t{1}".format(geocode, line)
+            print( "{0}\t{1}".format(geocode, line))
         else:
-            print "{0}\t{1}".format(geocode, ip)
+            print( "{0}\t{1}".format(geocode, ip))
     return 0

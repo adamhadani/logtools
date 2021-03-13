@@ -113,7 +113,7 @@ class GChartBackend(PlotBackend):
         
         # Axis labels
         chart.set_axis_labels(Axis.BOTTOM, labels)
-        left_axis = range(0, max_y + 1, 25)
+        left_axis = list( range(0, max_y + 1, 25) )
         left_axis[0] = ''
         chart.set_axis_labels(Axis.LEFT, left_axis)
         
@@ -144,7 +144,7 @@ class GChartBackend(PlotBackend):
         chart.add_data(data)
         chart.set_pie_labels(labels)
         if options.get('legend', None) is True:
-            chart.set_legend(map(str, legend))
+            chart.set_legend( list (map(str, legend)))
                         
         return chart
     
@@ -305,7 +305,7 @@ class MatplotlibBackend(PlotBackend):
             splitted_line = l.split(delimiter)
             k = float(splitted_line.pop(field))
             label = unicodedata.normalize('NFKD', \
-                        unicode(' '.join(splitted_line), 'utf-8')).encode('ascii','ignore')
+                        str(' '.join(splitted_line), 'utf-8')).encode('ascii','ignore')
             pts.append((k, label))
             if k > max_y:
                 max_y = k

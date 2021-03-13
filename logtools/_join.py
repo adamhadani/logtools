@@ -87,7 +87,7 @@ def logjoin(fh, field, delimiter, backend, join_connect_string,
     """Perform a join"""
     
     field = field-1
-    delimiter = unicode(delimiter)
+    delimiter = str(delimiter)
     
     backend_impl = {
         "sqlalchemy": SQLAlchemyJoinBackend
@@ -97,13 +97,13 @@ def logjoin(fh, field, delimiter, backend, join_connect_string,
     for row in map(lambda x: x.strip(), fh):
         key = row.split(delimiter)[field]
         for join_row in backend_impl.join(key):
-            yield key, unicode(row) + delimiter + delimiter.join(map(unicode, join_row))
+            yield key, str(row) + delimiter + delimiter.join(map(str, join_row))
 
 def logjoin_main():
     """Console entry-point"""
     options, args = logjoin_parse_args()
     for key, row in logjoin(fh=sys.stdin, *args, **options):
-        print( unicodedata.normalize('NFKD', unicode(row)).encode('ascii','ignore'),
+        print( unicodedata.normalize('NFKD', str(row)).encode('ascii','ignore'),
                file = sys.stdout )
 
     return 0

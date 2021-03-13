@@ -26,7 +26,7 @@ Filter bots from logrows based on an ip/host and useragent blacklists.
 import re
 import sys
 import logging
-from functools import partial
+from functools import partial, reduce
 from operator import and_
 from optparse import OptionParser
 

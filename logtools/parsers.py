@@ -49,11 +49,11 @@ def multikey_getter_gen(parser, keys, is_indices=False, delimiter="\t"):
         
     def multikey_getter(line, parser, keyset):
         data = parser(line.strip())
-        return delimiter.join((unicode(data[k]) for k in keyset))
+        return delimiter.join((str(data[k]) for k in keyset))
     
     def multiindex_getter(line, parser, keyset):
         data = parser(line.strip())
-        return delimiter.join((unicode(data.by_index(idx-1, raw=True)) for idx in keys))
+        return delimiter.join((str(data.by_index(idx-1, raw=True)) for idx in keys))
 
     if is_indices is True:
         # Field indices
@@ -149,7 +149,7 @@ class JSONParser(LogParser):
         self._logline_wrapper.fieldnames = parsed_row.keys()
             
         data.clear()
-        for k, v in parsed_row.iteritems():
+        for k, v in parsed_row.items():
             data[k] = v
 
         return data

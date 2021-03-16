@@ -28,6 +28,8 @@ in /etc/logtools.cfg or ~/.logtoolsrc.
 
 import os
 import sys
+import logging
+
 from configparser import SafeConfigParser, NoOptionError, NoSectionError
 
 __all__ = ['logtools_config', 'interpolate_config', 'AttrDict']
@@ -60,4 +62,24 @@ def interpolate_config(var, section, key, default=None, type=str):
         raise KeyError("Missing parameter: '{0}'".format(key))
     
     
+def setLoglevel(options):
+    """ Customize logging level, using options dictionnary collected from CLI
+    """
+    if options.logLevSym and options.logLevVal:
+        print("Flags --sym and --num are exclusive", file = sys.stderr )
+        sys.exit(1)
+    try :
+        basics  ={'format' : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
+        if options.logLevVal:
+            basics['level'] = options.logLevVal
+        elif options.logLevSym:
+            basics['level'] = options.logLevSym 
+        logging.basicConfig(**basics)
+        
+    except ValueError as err:
+        print( f"Bad --sym or --num flag value\n\t{err}", file = sys.stderr)
+        sys.exit(2)
+    except Exception as err:
+        print( f"Unexpected error\n\t{err}", file = sys.stderr)
+        raise
 

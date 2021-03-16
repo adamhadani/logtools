@@ -1,0 +1,9 @@
+acora==2.2
+greenlet==1.0.0
+logtools==0.8.7
+prettytable==2.1.0
+python-dateutil==2.8.1
+six==1.15.0
+SQLAlchemy==0.7.9
+sqlsoup==0.9.1
+wcwidth==0.2.5

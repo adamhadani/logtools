@@ -30,11 +30,13 @@ from functools import partial, reduce
 from operator import and_
 from optparse import OptionParser
 
-from ._config import logtools_config, interpolate_config, AttrDict
+from ._config import logtools_config, interpolate_config, AttrDict, setLoglevel
 import logtools.parsers
 
 __all__ = ['filterbots_parse_args', 'filterbots', 
            'filterbots_main', 'parse_bots_ua', 'is_bot_ua']
+
+
 
 def filterbots_parse_args():
     usage = "%prog " \
@@ -65,6 +67,15 @@ def filterbots_parse_args():
 
     parser.add_option("-P", "--profile", dest="profile", default='filterbots',
                       help="Configuration profile (section in configuration file)")
+    
+    parser.add_option("-s","--sym" , type = str,
+                                  dest="logLevSym",
+                                  help="logging level (symbol)")
+
+    parser.add_option("-n","--num" , type=int , 
+                                  dest="logLevVal",
+                                  help="logging level (value)")
+
 
     options, args = parser.parse_args()
 
@@ -91,6 +102,9 @@ def filterbots_parse_args():
     if options.parser and not options.ip_ua_fields:
         parser.error("Must supply --ip-ua-fields parameter when using parser-based matching.")
 
+    # Set the logging level
+    setLoglevel(options)
+    
     return AttrDict(options.__dict__), args
 
 def parse_bots_ua(bots_ua):

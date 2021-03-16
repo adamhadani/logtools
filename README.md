@@ -39,7 +39,7 @@ This software is distributed under the Apache 2.0 license.
 
 
 ## Installation
-
+### Python2
 To install this package and associated console scripts, unpack the distributable tar file,
 or check out the project directory, and then run:
 
@@ -60,7 +60,13 @@ If for some reason setuptools does not install 'nose' by default,
 you can easily install it if you have setuptools installed by running:
 
 	easy_install nose
+	
+### Python3
 
+Concerning the Python3 port, see  [PYTHON3-README.md](./PYTHON3-README.md)
+
+### Supplemental documentation
+See [MORE-DOC.md](./MORE-DOC.md).
 
 ## Console Scripts
 

@@ -21,7 +21,7 @@ except ImportError:
 
 setup(
     name         = 'logtools',
-    version      = '0.8.7',
+    version      = '0.8.7p3',
     description  = 'Log analysis and filtering tools',
     author       = 'Adam Ever-Hadani',
     author_email = 'adamhadani@gmail.com',
@@ -30,7 +30,7 @@ setup(
                     'logparse', 'logmerge', 'logjoin', 'urlparse', 'logplot', 'qps', 'filter'],
     classifiers = [
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 3.8.6",
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: POSIX",
@@ -65,9 +65,9 @@ This software is distributed under the Apache 2.0 license.
     install_requires = [
         #"pygooglechart>=0.2.1", # Optional dependency, seems broken for now
         "prettytable>=0.5",
-        "sqlalchemy>=0.7.9",
-        "sqlsoup>=0.9.0",
-        "acora>=1.7",
+        "sqlalchemy==0.7.9",
+        "sqlsoup>=0.9.1",
+        "acora>=2.2",
         "python-dateutil>=2.1"
     ],
 

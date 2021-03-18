@@ -195,7 +195,7 @@ class AccessLog(LogParser):
                 data[k] = v
             return data                
         else:
-            raise ValueError("Could not parse log line: '%s'" % logline)
+            raise ValueError("Could not parse log line: %s" % repr(logline))
 
     def _parse_log_format(self, format):
         """This code piece is based on the apachelogs 
@@ -241,8 +241,10 @@ class AccessLog(LogParser):
             subpatterns.append(subpattern)
 
         _pattern = '^' + ' '.join(subpatterns) + '$'
+        logging.debug( f"_parse_log_format input format '{format}'")
+        logging.debug( f"\t\tgenerated rex:{repr(_pattern)} ")
+                       # repr adds escapes so the the regexp can be copied and used
         _regex = re.compile(_pattern)
-
         return _regex
 
     
@@ -276,4 +278,41 @@ class uWSGIParser(LogParser):
                 data[k] = v
             return data
         else:
-            raise ValueError("Could not parse log line: '%s'" % logline)
+            raise ValueError("Could not parse log line: %s" % repr(logline))
+
+#
+# Addition to handle Syslog RFC-5424
+#
+from syslog_rfc5424_parser import SyslogMessage, ParseError
+
+class SyslogRFC5424(LogParser):
+    """ Parser for Syslog RFC-5424
+    """
+    def __init__(self):
+        LogParser.__init__(self)
+        self._logline_wrapper = LogLine()
+
+    def parse(self, logline):
+        "Parse log line "
+        data = self._logline_wrapper
+        
+        logging.debug( f"Parsing RFC5424 line:{repr(logline)}")
+        try:
+            parsed = SyslogMessage.parse(logline)
+            pdict = parsed.as_dict()
+            
+            data.fieldnames = pdict.keys()
+            data.clear()
+            for k, v in pdict.items():
+                data[k] = v
+                
+            logging.debug( f"\tParsed(type(parsed)):{pdict}")
+            return data
+        except ParseError as err:
+            logging.error( f"\tRFC5424 parse error:{err}")
+            
+        data.fieldnames = []
+        data.clear()    
+        return data
+
+   

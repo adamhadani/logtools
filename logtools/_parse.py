@@ -28,9 +28,10 @@ import sys
 import logging
 from operator import and_
 from optparse import OptionParser
+from functools import reduce
 
 import logtools.parsers
-from ._config import interpolate_config, AttrDict
+from ._config import interpolate_config, AttrDict, setLoglevel
 
 __all__ = ['logparse_parse_args', 'logparse', 'logparse_main']
 
@@ -51,6 +52,15 @@ def logparse_parse_args():
     parser.add_option("-P", "--profile", dest="profile", default='logparse',
                       help="Configuration profile (section in configuration file)")  # noqa
 
+    parser.add_option("-s","--sym" , type = str,
+                                  dest="logLevSym",
+                                  help="logging level (symbol)")
+
+    parser.add_option("-n","--num" , type=int , 
+                                  dest="logLevVal",
+                                  help="logging level (value)")
+
+
     options, args = parser.parse_args()
 
     # Interpolate from configuration
@@ -63,6 +73,9 @@ def logparse_parse_args():
     options.header = interpolate_config(options.header, options.profile, 'header',
                                         default=False, type=bool)
 
+    # Set the logging level
+    setLoglevel(options)
+    
     return AttrDict(options.__dict__), args
 
 
@@ -79,7 +92,7 @@ def logparse(options, args, fh):
     keyfunc = None
     keys = None
     if isinstance(options.field, int) or \
-       (isinstance(options.field, basestring) and options.field.isdigit()):
+       (isinstance(options.field, str) and options.field.isdigit()):
         # Field given as integer (index)
         field = int(options.field) - 1
         key_func = lambda x: parser(x.strip()).by_index(field, raw=True)

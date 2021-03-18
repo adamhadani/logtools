@@ -34,23 +34,26 @@ Following issues were encountered:
   
 ### Added functionality
 
-1. added CLI flags to customize the level of logging; not customizable from 
-   ~/.logtoolsrc (propagates slowly to various entries)
+   See [PYTHON3-ADDITIONS](./PYTHON3-ADDITIONS.md)
+
 
   
 ### Test and operative environment
-
- - a `virtualenv`environment has been set up, requiring Python 3.8.6, which happens
- to be the native Python-3 on my system: `virtualenv -p 3.8.6` 
- - it has been populated according to requirements
- - installation and use of the package are all performed under this environment
+ This is really setting up the development / maintenance environment:
+ 
+ - setup a `virtualenv`environment, requiring Python 3.8.6, ( or whatever version 
+   you want to use.  Python 3.8.6 happens to be the native Python-3 on my system,
+   with which all development and tests have been done: `virtualenv -p 3.8.6` 
+ - populate it according to [requirements.txt](./requirements.txt) 
+ - development and maintenance of the package are all performed under this environment
  
 ### Installation
  
  This may be done as follows:
 
- - setup the `virtualenv` environment
- - change directory to the package (where `setup.py` is found)
+ - setup <I>or activate</I> the `virtualenv` environment using the 
+   [requirements.txt](./requirements.txt) file.
+ - change directory to the package (where `setup.py` and source code are found)
  - run `setup.py` using the python interpreter in the `virtualenv` environment:
  
   
@@ -66,14 +69,62 @@ Following issues were encountered:
 
  ### First experiments
  
- - configuration: see `~/.logtoolsrc`
- 
- - filterbots`: 
- 
- ```
+ - configuration: 
+   - establish a  `~/.logtoolsrc` file, which will used for setting 
+     parameters or defaults
+   - as configuration files are named in   `~/.logtoolsrc`, create and populate them,
+     for empty files are OK if there is no blacklist:
+```
 touch bots_hosts.txt         # File designated in ~/.logtoolsrc
 touch bots_useragents.txt    # File designated in ~/.logtoolsrc
-cat /var/log/auth.log | filterbots --print
+ ```
+	 
+ - `filterbots`: 
+   1. extract log entries corresponding to some ̀sudo` uses. <I>Notice that 
+   we are using the `-s` flag to define the level of output</I>
+ ```
+gunzip --stdout /var/log/auth.log.*.gz | \
+cat /var/log/auth.log -  | \
+filterbots -s ERROR -r ".*sudo:(?P<ua>[^:]+).*COMMAND=(?P<ip>\S+).*"  --print
  ```
  
- 
+  - filter :
+  
+  
+  - `logmerge`
+     1. Merges several logs sorting a field defined by delimiter (1 char) and field number:
+          ```  
+          logmerge -d'-' -f1 /var/log/auth.log /var/log/syslog | \
+          grep -i upload
+          ```
+  
+     2. Use a parser for merging 
+	    -  the following supposes Apache Common Log Format
+          see http://httpd.apache.org/docs/1.3/logs.html#accesslog), examples shown in
+		  [MORE-DOC.md](./MORE-DOC.md) :
+          ```
+           logmerge --parser CommonLogFormat -f4 /var/log/auth.log /var/log/syslog
+           ```
+        - by default `format='%h %l %u %t "%r" %>s %b'`
+
+   - `logparse` 
+      1. Parses according to parser format, select output field: 
+	     <I>example extracts the date-time)</I>:
+         ```
+           cat /tmp/tyty.log | logparse --parser CommonLogFormat  -s INFO -f4
+	     ```
+		 
+	  2. Same, selects multiple fields, <I> for some reason only 1 line is output</I>
+	   
+         ```
+		 cat /tmp/tyty.log | testLogparse --parser CommonLogFormat  -s DEBUG -f1,4
+         ```
+		 
+      3. Added RFC 5424 parser `SyslogRFC5424`, here ̀-f`supports symbolic field selection 
+
+         ```
+         cat testData/tytyRFC.log | testLogparse --parser SyslogRFC5424 -f hostname -s INFO
+         ```
+		 
+		 Field names can be found running with flag `-s DEBUG`
+

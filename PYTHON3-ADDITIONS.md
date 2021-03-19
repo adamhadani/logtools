@@ -1,3 +1,4 @@
+
 # Additional features in Python-3 port
 
 ## Note
@@ -22,7 +23,9 @@ Other aspects:
 	 like `-n 10`)
 	 
 	 
-2. Added RFC 5424 parser `SyslogRFC5424`, here ̀-f`supports symbolic field selection 
+2. Added RFC 5424 parser `SyslogRFC5424`, here ̀-f`supports symbolic field selection.
+   This addition makes use of package `syslog_rfc5424_parser` from 
+   https://github.com/EasyPost/syslog-rfc5424-parser. 
 
          ```
          cat testData/tytyRFC.log | testLogparse --parser SyslogRFC5424 -f hostname -s INFO

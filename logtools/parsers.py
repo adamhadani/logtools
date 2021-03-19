@@ -315,4 +315,29 @@ class SyslogRFC5424(LogParser):
         data.clear()    
         return data
 
-   
+#   
+# Addition to handle rsyslog RSYSLOG_TraditionalFileFormat
+# https://rsyslog-doc.readthedocs.io/en/latest/index.html
+#
+# parser described at:
+# https://rsyslog-doc.readthedocs.io/en/latest/configuration/parser.html
+#
+# much documentation at https://github.com/rsyslog
+
+
+#  Templates are described at
+#  url : syslog-5-8-6-doc.neocities.org/rsyslog_conf_templates.html
+#
+#  Where the following templates are defined
+#
+#template FileFormat,"%TIMESTAMP:::date-rfc3339% %HOSTNAME% %syslogtag%%msg:::sp-if-no-1st-sp%%msg:::drop-last-lf%\n"
+
+#$template TraditionalFileFormat,"%TIMESTAMP% %HOSTNAME% %syslogtag%%msg:::sp-if-no-1st-sp%%msg:::drop-last-lf%\n"
+
+#$template ForwardFormat,"<%PRI%>%TIMESTAMP:::date-rfc3339% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%"
+
+#$template TraditionalForwardFormat,"<%PRI%>%TIMESTAMP% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%"
+
+#$template StdSQLFormat,"insert into SystemEvents (Message, Facility, FromHost, Priority, DeviceReportedTime, ReceivedAt, InfoUnitID, SysLogTag) values ('%msg%', %syslogfacility%, '%HOSTNAME%', %syslogpriority%, '%timereported:::date-mysql%', '%timegenerated:::date-mysql%', %iut%, '%syslogtag%')",SQL
+
+#$template jsonRfc5424Template,"{\"type\":\"mytype1\",\"host\":\"%HOSTNAME%\",\"message\":\"<%PRI%>1 %TIMESTAMP:::date-rfc3339% %HOSTNAME% %APP-NAME% %PROCID% %MSGID% %STRUCTURED-DATA% %msg:::json%\"}\n"

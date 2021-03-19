@@ -1,9 +1,11 @@
 acora==2.2
 greenlet==1.0.0
+lark-parser==0.6.7
 logtools==0.8.7
 prettytable==2.1.0
 python-dateutil==2.8.1
 six==1.15.0
 SQLAlchemy==0.7.9
 sqlsoup==0.9.1
+syslog-rfc5424-parser==0.3.2
 wcwidth==0.2.5

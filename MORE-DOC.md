@@ -13,7 +13,8 @@ Included here is additional information extracted by reading the code.
 1. Apache access_log logfile parser.  See
     http://httpd.apache.org/docs/1.3/logs.html#accesslog"
   -  supported by `class AccessLog`
-  -  includes the <B>Common Log Format</B>
+  -  includes the <B>Common Log Format</B> which is described in 
+    http://httpd.apache.org/docs/1.3/mod/mod_log_config.html#formats
   -  example: `127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /a.gif HTTP/1.0" 200 2326`
 
 2. JSON log format

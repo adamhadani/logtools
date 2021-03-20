@@ -30,12 +30,13 @@ import os
 import sys
 import logging
 
-from configparser import SafeConfigParser, NoOptionError, NoSectionError
+from configparser import ConfigParser, NoOptionError, NoSectionError
 
-__all__ = ['logtools_config', 'interpolate_config', 'AttrDict']
+__all__ = ['logtools_config', 'interpolate_config', 'AttrDict', 'setLoglevel']
 
-logtools_config = SafeConfigParser() 
-logtools_config.read(['/etc/logtools.cfg', os.path.expanduser('~/.logtoolsrc')])
+logtools_config = ConfigParser()
+logtools_config_paths = ['/etc/logtools.cfg', os.path.expanduser('~/.logtoolsrc')]
+logtools_config.read(logtools_config_paths)
 
 
 class AttrDict(dict):
@@ -45,8 +46,8 @@ class AttrDict(dict):
 
 def interpolate_config(var, section, key, default=None, type=str):
     """Interpolate a parameter. if var is None,
-    try extracting value from section.key in configuration file.
-    If fails, can raise Exception / issue warning"""
+       try extracting value from section.key in configuration file.
+       If fails, can raise Exception / issue warning"""
     try:
         return var or {
             str: logtools_config.get,
@@ -54,9 +55,18 @@ def interpolate_config(var, section, key, default=None, type=str):
             int:  logtools_config.getint,
             float: logtools_config.getfloat
         }.get(type, str)(section, key)
-    except KeyError:
+    except KeyError as err:
+        if False:
+            #at this point, logging not intialized (?)
+            logging.info( f"{err}\n\ttype parm={type}", file=sys.stderr)        
         raise KeyError("Invalid parameter type: '{0}'".format(type))    
-    except (NoOptionError, NoSectionError):
+    except (NoOptionError, NoSectionError) as err:
+        if False:
+            #at this point, logging not intialized (?)
+            logging.info( f"Error: {err}\n\tdefault={default}"
+                +f"\n\ttype parm={type}\n\tsection={repr(section)}\tkey={repr(key)}"
+                +f"\n\tconfig file sought: {logtools_config_paths}")
+        
         if default is not None:
             return default
         raise KeyError("Missing parameter: '{0}'".format(key))

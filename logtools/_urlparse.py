@@ -34,7 +34,7 @@ from urllib.parse import unquote_plus
 from urllib.parse import parse_qs, urlsplit
 from optparse import OptionParser
 
-from ._config import logtools_config, interpolate_config, AttrDict
+from ._config import logtools_config, interpolate_config, AttrDict,  setLoglevel
 
 __all__ = ['urlparse_parse_args', 'urlparse', 'urlparse_main']
 
@@ -51,6 +51,14 @@ def urlparse_parse_args():
 
     parser.add_option("-P", "--profile", dest="profile", default='qps',
                       help="Configuration profile (section in configuration file)")
+    
+    parser.add_option("-s","--sym" , type = str,
+                                  dest="logLevSym",
+                                  help="logging level (symbol)")
+
+    parser.add_option("-n","--num" , type=int , 
+                                  dest="logLevVal",
+                                  help="logging level (value)")
 
     options, args = parser.parse_args()
 
@@ -61,6 +69,9 @@ def urlparse_parse_args():
     options.part  = interpolate_config(options.part, options.profile, 'part', default=False)    
     options.query_params = interpolate_config(options.query_params, options.profile, 'query_params', default=False)  
     options.decode = interpolate_config(options.decode, options.profile, 'decode', default=False) 
+
+    # Set the logging level
+    setLoglevel(options)
 
     return AttrDict(options.__dict__), args
 

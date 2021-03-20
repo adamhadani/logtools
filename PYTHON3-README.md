@@ -18,11 +18,12 @@ Following issues were encountered:
 - the `sqlsoup` package uses features of `SQLAlchemy`  ( `MapperExtension` ) which have 
   been deprecated (then suppressed since version 0.7; see
   https://docs.sqlalchemy.org/en/13/orm/deprecated.html ).
-  Current versions are
-  `sqlsoup 0.9.1` and  `SQLAlchemy 1.4.0b3`. This port has been made requiring specific
-  versions under `virtualenv`; `setup.py`has been changed accordingly. A file
-  [requirements.txt](./requirements.txt) has been added to document this, and
-  can be used with `pip3`.
+  + Current versions are `sqlsoup 0.9.1` and  `SQLAlchemy 1.4.0b3`. 
+  + This port has been made requiring specific older
+    versions. It is highly recommended to operate under `virtualenv`; `
+    setup.py`has been changed accordingly. 
+  + A file [requirements.txt](./requirements.txt) has been added to document this, and
+    can be used with `pip3`.
   
 - the package's usage of `datetime.strptime` in my locale `"fr_FR.UTF-8"`was found
   problematic ( `testQps` <I>fails when parsing date</I> `11/Oct/2000:14:01:14 -0700`
@@ -43,7 +44,11 @@ Following issues were encountered:
  
  - setup a `virtualenv`environment, requiring Python 3.8.6, ( or whatever version 
    you want to use.  Python 3.8.6 happens to be the native Python-3 on my system,
-   with which all development and tests have been done: `virtualenv -p 3.8.6` 
+   with which all development and tests have been done: 
+   ```
+   cd <py3port-dir>
+   virtualenv -p 3.8.6 .
+   ``` 
  - populate it according to [requirements.txt](./requirements.txt) 
  - development and maintenance of the package are all performed under this environment
  
@@ -111,20 +116,27 @@ filterbots -s ERROR -r ".*sudo:(?P<ua>[^:]+).*COMMAND=(?P<ip>\S+).*"  --print
       1. Parses according to parser format, select output field: 
 	     <I>example extracts the date-time)</I>:
          ```
-           cat /tmp/tyty.log | logparse --parser CommonLogFormat  -s INFO -f4
+           cat testData/testCommonLogFmt.data | logparse --parser CommonLogFormat  -s INFO -f4
 	     ```
 		 
 	  2. Same, selects multiple fields, <I> for some reason only 1 line is output</I>
 	   
          ```
-		 cat /tmp/tyty.log | testLogparse --parser CommonLogFormat  -s DEBUG -f1,4
+		 cat  testData/testCommonLogFmt.data| logparse --parser CommonLogFormat  -s DEBUG -f1,4
          ```
 		 
       3. Added RFC 5424 parser `SyslogRFC5424`, here ̀-f`supports symbolic field selection 
 
          ```
-         cat testData/tytyRFC.log | testLogparse --parser SyslogRFC5424 -f hostname -s INFO
+         cat testData/testRFC5424.data | logparse --parser SyslogRFC5424 -f hostname -s INFO
          ```
 		 
 		 Field names can be found running with flag `-s DEBUG`
 
+      4. Added a facility to handle logs specified by "traditional templates" in the style
+         defined at url https://rsyslog-5-8-6-doc.neocities.org/rsyslog_conf_templates.html.
+		 Usable with /var/log/{syslog,kern.log,auth.log}.
+		 ```
+		 cat testData/TestAuth.data  | \
+		     testLogparse --parser TraditionalFileFormat -f TIMESTAMP -s ERROR	
+		 ```

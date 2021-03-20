@@ -1,6 +1,46 @@
 # logtools
 
-[![Build Status](https://travis-ci.org/adamhadani/logtools.svg?branch=master)](https://travis-ci.org/adamhadani/logtools)
+<B>Derived Version Notice</B>: This is a derived version of <B>logtools</B>, 
+   including a port to Python-3 and
+   additional features. 
+   - The original version, by Adam Ever-Hadani  is available at
+     http://github.com/adamhadani. 
+   - This version, by  Alain Lichnewsky   is available at 
+     https://github.com/AlainLich/logtools
+     distributed <I>as is</I>, with no warranty, under the Apache 2.0 license.
+
+<B>Notes</B>: this version
+   -  is not compatible with Python-2
+   -  has been tested in the following configuration
+
+      <TABLE>
+      <TR>
+	      <TD>System</TD><TD>Ubuntu 20.10</TD>
+	  </TR>
+      <TR>
+	      <TD>Linux</TD><TD>5.8.0-25-generic </TD>
+	  </TR>
+      <TR>
+	      <TD>Python</TD><TD>3.8.6</TD>
+	  </TR>
+      <TR>
+	      <TD>virtualenv</TD><TD>20.0.29+d</TD>
+	  </TR>
+      <TR>
+	      <TD>Used modules</TD><TD>see <A HREF="./requirements.txt">requirements.txt</A>
+		  </TD>
+	  </TR>
+	  <TR>
+	      <TD>Locale</TD><TD>fr_FR.UTF-8</TD>
+	  </TR>
+      </TABLE>
+   
+----------------------------------------------------------
+
+## <CENTER>Original README</CENTER>
+
+----------------------------------------------------------
+
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -40,6 +80,9 @@ This software is distributed under the Apache 2.0 license.
 
 ## Installation
 ### Python2
+<B>Note</B> <I>This applies to the original package, not the port in this directory; please 
+see [Adam Ever-Hadani](http://github.com/adamhadani/) site and original version.</I>
+
 To install this package and associated console scripts, unpack the distributable tar file,
 or check out the project directory, and then run:
 
@@ -65,8 +108,8 @@ you can easily install it if you have setuptools installed by running:
 
 Concerning the Python3 port, see  [PYTHON3-README.md](./PYTHON3-README.md)
 
-### Supplemental documentation
-See [MORE-DOC.md](./MORE-DOC.md).
+Supplemental documentation, extracted in the process of porting can be found
+at [MORE-DOC.md](./MORE-DOC.md).
 
 ## Console Scripts
 
@@ -77,7 +120,7 @@ See [MORE-DOC.md](./MORE-DOC.md).
 	Blacklist files can specify both exact match as well as more complex matching
 	types (prefix/suffix match, regexp match. See examples below).
 
-* ``geoip``
+* ``geoip`` (Not ported to Python-3)
 	Simple helper utility for using the Maxmind GeoIP library to tag log lines by the IP's country.
         The regular expression mask used for matching the IP in the log line is user-specified.
 	This tool requires the Maxmind GeoIP library and python bindings. See http://www.maxmind.com/app/country

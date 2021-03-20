@@ -1,0 +1,8 @@
+Mar 19 09:17:20 alain-PORTEGE-Z30-B NetworkManager[916]: <info>  [1616141840.0795] device
+Mar 19 09:17:20 alain-PORTEGE-Z30-B systemd[1]: logrotate.service: Succeeded.
+Mar 19 09:17:20 alain-PORTEGE-Z30-B NetworkManager[916]: <info>  [1616141840.0814] manager: NetworkManager state is now CONNECTED_LOCAL
+Mar 19 09:17:20 alain-PORTEGE-Z30-B rsyslogd: [origin software="rsyslogd" swVersion="8.2006.0" x-pid="941" x-info="https://www.rsyslog.com"] rsyslogd was HUPed
+Mar 19 09:17:20 alain-PORTEGE-Z30-B systemd[1]: logrotate.service: Succeeded.
+Mar 19 09:17:20 alain-PORTEGE-Z30-B systemd[1]: Finished Rotate log files.
+Mar 19 09:17:20 alain-PORTEGE-Z30-B NetworkManager[916]: <info>  [1616141840.1363] device (wlp2s0): supplicant interface state: internal-starting -> disconnected
+Mar 19 09:17:20 alain-PORTEGE-Z30-B NetworkManager[916]: <info>  [1616141840.1364] device (p

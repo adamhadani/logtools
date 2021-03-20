@@ -31,7 +31,7 @@ from time import time
 from datetime import datetime
 from optparse import OptionParser
 
-from ._config import logtools_config, interpolate_config, AttrDict
+from ._config import logtools_config, interpolate_config, AttrDict, setLoglevel
 
 __all__ = ['qps_parse_args', 'qps', 'qps_main']
 
@@ -56,6 +56,15 @@ def qps_parse_args():
     parser.add_option("-P", "--profile", dest="profile", default='qps',
                       help="Configuration profile (section in configuration file)")
 
+    parser.add_option("-s","--sym" , type = str,
+                                  dest="logLevSym",
+                                  help="logging level (symbol)")
+
+    parser.add_option("-n","--num" , type=int , 
+                                  dest="logLevVal",
+                                  help="logging level (value)")
+
+    
     options, args = parser.parse_args()
 
     # Interpolate from configuration and open filehandle
@@ -65,7 +74,10 @@ def qps_parse_args():
     options.window_size = interpolate_config(options.window_size, 
                                             options.profile, 'window_size', type=int)
     options.ignore = interpolate_config(options.ignore, options.profile, 'ignore', 
-                                        default=False, type=bool)    
+                                        default=False, type=bool)
+    
+    # Set the logging level
+    setLoglevel(options)
 
     return AttrDict(options.__dict__), args
 

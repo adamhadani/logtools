@@ -31,6 +31,7 @@ from optparse import OptionParser
 from functools import reduce
 
 import logtools.parsers
+import logtools.parsers2
 from ._config import interpolate_config, AttrDict, setLoglevel
 
 __all__ = ['logparse_parse_args', 'logparse', 'logparse_main']
@@ -84,8 +85,8 @@ def logparse(options, args, fh):
     parser class and emit specified field(s)"""
 
     field = options.field
-
-    parser = eval(options.parser, vars(logtools.parsers), {})()
+    parser = eval(options.parser, { **vars(logtools.parsers), **vars(logtools.parsers2) },
+                  {})()
     if options.get('format', None):
         parser.set_format(options.format)
 

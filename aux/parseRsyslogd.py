@@ -31,7 +31,7 @@ def setLoglevel(options):
         logging.basicConfig(**basics)
         
     except ValueError as err:
-        print( f"Bad --sym or --num flag value\n\t{err}", file = sys.stderr)
+        print( f"Bad --sym or --num logging flag value\n\t{err}", file = sys.stderr)
         sys.exit(2)
     except Exception as err:
         print( f"Unexpected error\n\t{err}", file = sys.stderr)
@@ -46,6 +46,7 @@ def count(func,iter):
         return 0 if not x  else 1
     return reduce(int.__add__, map( func, iter), 0)
 
+templateDefs = """ 
 #
 # These are the templates considered; when extending keep in mind:
 #     - "FileFormat" must be first.
@@ -53,7 +54,12 @@ def count(func,iter):
 #
 #  Make sure to escape backslash !
 #
-templateDefs = """ 
+#  Here : white lines, lines starting with "# " and lines with only 1 char "#" are ignored,
+#         considered comment.
+#
+# ----------------------------------------------------------------------
+#  Definitions from url : syslog-5-8-6-doc.neocities.org/rsyslog_conf_templates.html
+#
 #$template FileFormat,"%TIMESTAMP:::date-rfc3339% %HOSTNAME% %syslogtag%%msg:::sp-if-no-1st-sp%%msg:::drop-last-lf%\\n"
 
 #$template TraditionalFileFormat,"%TIMESTAMP% %HOSTNAME% %syslogtag%%msg:::sp-if-no-1st-sp%%msg:::drop-last-lf%\\n"
@@ -61,6 +67,14 @@ templateDefs = """
 #$template ForwardFormat,"<%PRI%>%TIMESTAMP:::date-rfc3339% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%"
 
 #$template TraditionalForwardFormat,"<%PRI%>%TIMESTAMP% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%"
+
+# ----------------------------------------------------------------------
+# The stuff below is really for testing only
+
+#$template TestA,"%HOSTNAME%"
+#$template TestB,"%HOSTNAME%\\n"
+#$template TFFA,"%TIMESTAMP% %HOSTNAME%\\n"
+#$template TFFB,"%TIMESTAMP% %HOSTNAME% %syslogtag%"
 
 """
 
@@ -86,7 +100,7 @@ def prepareTemplateDict(tempStr):
             "(\s*,\s*(?P<option>[A-Za-z]+))*\s*$"   # option part, case insensitive
           )
     rex = re.compile("".join(rexs), re.VERBOSE)
-    rexblank = re.compile("^\s*\n?$")
+    rexblank = re.compile("^(\s*|#( .*)?)\n?$")
     
     tmplDict = {}
     tmplIdx  = {}
@@ -196,7 +210,8 @@ class RSyParsing():
     A.let_dig_hyp_ptS = "(" + A.let_dig + "|[.-])+"
     A.let_dig_hyp     = "(" + A.let_dig + "|[-])"
     A.let_dig_hypS    = "(" + A.let_dig + "|[-])+"
-    A.tstampEmpirical = (A.Lets + "\s" +  A.digits + ":" + A.digits + ":" + A.digits )
+    A.tstampEmpirical = ( A.Lets + "\s" +  A.digits + "\s" +
+                          A.digits + ":" + A.digits  + ":" + A.digits )
     A.tstampEmpDpkg   = (  A.digits + "-" + A.digits + "-" + A.digits + "\s" +
                            A.digits + ":" + A.digits + ":" + A.digits )
 

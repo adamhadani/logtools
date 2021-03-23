@@ -23,9 +23,9 @@ setup(
     name         = 'logtools',
     version      = '0.8.7p3',
     description  = 'Log analysis and filtering tools',
-    author       = 'Adam Ever-Hadani',
-    author_email = 'adamhadani@gmail.com',
-    url          = 'http://github.com/adamhadani/logtools',
+    author       = 'Adam Ever-Hadani, additions Alain Lich',
+    author_email = '',
+    url          = 'http://github.com/AlainLich/logtools',
     keywords     = ['logging', 'sampling', 'geoip', 'filterbots', 'aggregate',
                     'logparse', 'logmerge', 'logjoin', 'urlparse', 'logplot', 'qps', 'filter'],
     classifiers = [
@@ -45,7 +45,7 @@ setup(
 A log files analysis / filtering framework.
 
 logtools encompasses of a few easy-to-use, easy to configure command-line
-tools, typically used in conjunction with Apache logs.
+tools, typically used in conjunction with Apache logs, and other common formats.
 
 The idea is to standardize log parsing and filtering using a coherent
 configuration methodology and UNIX command-line interface (STDIN input streaming, command-line piping etc.)
@@ -64,11 +64,23 @@ This software is distributed under the Apache 2.0 license.
 
     install_requires = [
         #"pygooglechart>=0.2.1", # Optional dependency, seems broken for now
-        "prettytable>=0.5",
-        "sqlalchemy==0.7.9",
-        "sqlsoup>=0.9.1",
-        "acora>=2.2",
-        "python-dateutil>=2.1"
+        #"prettytable>=0.5",     # from master branch
+        #"sqlalchemy==0.7.9",
+        #"sqlsoup>=0.9.1",
+        #"acora>=2.2",
+        #"python-dateutil>=2.1"
+        #"acora>=2.2",           # ------------------ 
+        "greenlet>=1.0.0",
+        "lark-parser>=0.6.7",
+        "numpy>=1.20.1",
+        "pandas>=1.2.3",
+        "prettytable>=2.1.0",
+        "python-dateutil>=2.8.1",
+        "pytz>=2021.1",
+        "SQLAlchemy==0.7.9",                       #issue with upwards compat.
+        "sqlsoup==0.9.1",                          #issue with upwards compat.
+        "syslog-rfc5424-parser>=0.3.2",
+        "wcwidth>=0.2.5"
     ],
 
     entry_points = {

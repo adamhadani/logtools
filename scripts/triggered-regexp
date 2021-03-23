@@ -15,11 +15,11 @@
 set -o errexit
 
 function usage {
-	printf "USAGE: cat <file> | ... | $(basename $0) [-s <trigger_string>] [-f <date_format> -d <trigger_date_specifier>] <counted_value_regexp>\n" >&2
+	printf "USAGE: cat <file> | ... | $(basename "$0") [-s <trigger_string>] [-f <date_format> -d <trigger_date_specifier>] <counted_value_regexp>\n" >&2
 	exit 1
 }
 function log {
-	printf "** $*\n" >&2
+	printf "** %s\n" "$*" >&2
 }
 
 ###############################################################################

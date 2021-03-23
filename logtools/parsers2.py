@@ -172,7 +172,7 @@ def prepareTemplateDict(tempStr):
         if mobj:
             return mobj.groupdict()
         else:
-            raise ValueError( f"NO MATCH for line {expr(l)}")
+            raise ValueError( f"NO MATCH for line {repr(l)}")
         return nl
     
     with StringIO(tempStr) as input:

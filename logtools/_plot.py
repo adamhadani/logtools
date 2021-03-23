@@ -43,6 +43,10 @@ __all__ = ['logplot_parse_args', 'logplot', 'logplot_main']
 #  problematic in my environment, 
 if False:  
    locale.setlocale(locale.LC_ALL, "")
+   
+#  xrange obsolete in Python3
+if sys.version_info[0] >= 3:
+   xrange  = range
 
 class PlotBackend(object):
     __metaclass__ = ABCMeta
@@ -185,7 +189,7 @@ class GChartBackend(PlotBackend):
         
         # Axis labels
         chart.set_axis_labels(Axis.BOTTOM, ts)
-        left_axis = range(0, max_y + 1, 25)
+        left_axis = list( range(0, max_y + 1, 25))
         left_axis[0] = ''
         chart.set_axis_labels(Axis.LEFT, left_axis)
         

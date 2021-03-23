@@ -116,7 +116,7 @@ def qps(fh, dt_re, dateformat, window_size, ignore, **kwargs):
         try:
             t = datetime.strptime(_re.match(line).groups()[0], dateformat)
         except (AttributeError, KeyError, TypeError, ValueError) as err:
-            sys.stderr.write(f"In qps: Exception in line:{line[:-1]}\n\t{err}\n\t{type(er)}\n")
+            sys.stderr.write(f"In qps: Exception in line:{line[:-1]}\n\t{err}\n\t{type(err)}\n")
             if ignore:
                 logging.debug("Could not match datefield for parsed line: %s", line)
                 continue

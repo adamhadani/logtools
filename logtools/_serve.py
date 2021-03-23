@@ -45,8 +45,12 @@ class WSGIAppThread(Thread):
     the actual WSGI web server"""
     
 def logserve_parse_args():
-    pass
+    parser = OptionParser()
 
+    # formally required for logserve_main to function, cannot be regarded definitive!!
+    options, args = parser.parse_args()
+    return options, args
+    
 def logserve(options, args, fh):
     app_thread = WSGIAppThread()
 

@@ -8,20 +8,20 @@ cleanup() {
 	rm $TMPFILE
 }
 log() {
-	printf "`date +%c` - $*\n" >&2
+	printf "$(date +%c) - $*\n" >&2
 }
 error() {
-    printf "ERROR: $*\n" >&2
+    printf "ERROR: %s\n" "$*" >&2
     exit 1
 }
 usage() {
-	printf "Usage: $(basename $0) [-N <tail_num_lines>]\n" >&2
-	exit -1
+	printf "Usage: $(basename "$0") [-N <tail_num_lines>]\n" >&2
+	exit 255
 }
 
 N=
 
-while getopts "N:h" OPT
+while getopts "N:h:f" OPT
 do
 	case $OPT in
 		N)	N="$OPTARG"
@@ -29,14 +29,14 @@ do
 			;;
 		f)	FIELD="$OPTARG"
 			;;
-		h)	usage
+		h|*)	usage
 			;;
 	esac
 done
 shift $((OPTIND-1))
 
 
-TMPFILE=`mktemp /tmp/tmp_percentiles.XXXXXX`
+TMPFILE=$(mktemp /tmp/tmp_percentiles.XXXXXX)
 
 if [ "$?" -ne 0 ];
 then
@@ -48,27 +48,27 @@ trap "cleanup; exit" SIGTERM EXIT
 
 if [ -n "$N" ];
 then
-    tail -n $N $* | \
-        LC_NUMERIC=en_US.utf-8 sort -k1,1g > $TMPFILE
+    tail -n $N "$*" | \
+        LC_NUMERIC=en_US.utf-8 sort -k1,1g > "$TMPFILE"
 else
-    cat $* | \
-        LC_NUMERIC=en_US.utf-8 sort -k1,1g > $TMPFILE
+    cat "$*" | \
+        LC_NUMERIC=en_US.utf-8 sort -k1,1g > "$TMPFILE"
 
 fi
 
-L=`cat $TMPFILE | wc -l`
+L=(cat "$TMPFILE" | wc -l)
 typeset -i L
 
-log "Number of samples used: `cat $TMPFILE | wc -l`"
+log "Number of samples used: $(cat $TMPFILE | wc -l)"
 
 for i in {10,20,30,40,50,60,70,80,90};
 do
-	l=`echo "scale=1; $i / 100 * $L" | bc | awk -F '.' '{ print $1; exit; }'`
+	l=$(echo "scale=1; $i / 100 * $L" | bc | awk -F '.' '{ print $1; exit; }')
 	typeset -i l
 	if [ -z "$l" ];
 	then
 		l=1
 	fi
-	p=`cat $TMPFILE | head -n $l | tail -n1`
+	p=$(cat $TMPFILE | head -n $l | tail -n1)
 	log "${i}th Percentile (${l}th Sample): $p"
 done

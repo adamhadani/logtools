@@ -27,7 +27,7 @@ import re
 import sys
 import string
 import logging
-from functools import partial
+from functools import partial, reduce
 from operator import and_
 from optparse import OptionParser
 

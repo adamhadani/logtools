@@ -35,7 +35,8 @@ Following issues were encountered:
   
 ### Added functionality
 
-   See [PYTHON3-ADDITIONS](./PYTHON3-ADDITIONS.md)
+   See [PYTHON3-ADDITIONS](./PYTHON3-ADDITIONS.md). 
+   In [FORMAT-CHEATSHEET](./FORMAT-CHEATSHEET.md), some help for parser format selection
 
 
   

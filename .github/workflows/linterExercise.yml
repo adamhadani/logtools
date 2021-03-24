@@ -36,8 +36,8 @@ jobs:
       # Runs the Super-Linter action
       - name: Run Super-Linter
         uses: github/super-linter@v3
-	# this defines environment variables made available to the
-	# script/action being executed
+      # this defines environment variables made available to the
+      # script/action being executed
         env:
           DEFAULT_BRANCH: ALPython3
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

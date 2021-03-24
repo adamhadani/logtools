@@ -9,8 +9,8 @@ According to the look of a log, which format to look for first!
 
 <TABLE>
 <TR>
-    <TD rowspan=3>program default</TD> 
-	<TD rowspan=3>-r</TD>
+    <TD rowspan=4>program default</TD> 
+	<TD rowspan=4>-r</TD>
 	<TD>/var/log/auth</TD>
 	<TD>Mar 19 09:17:26</TD>
 </TR>
@@ -20,6 +20,10 @@ According to the look of a log, which format to look for first!
 </TR>
 <TR>
 	<TD>/var/log/apport.log</TD>
+</TR>
+<TR>
+	<TD>last</TD>
+	<TD>Wed Dec 30 11:51</TD>
 </TR>
 <TR>
     <TD>Common Log Format</TD> 

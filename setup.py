@@ -71,7 +71,9 @@ This software is distributed under the Apache 2.0 license.
         #"python-dateutil>=2.1"
         #"acora>=2.2",           # ------------------ 
         "greenlet>=1.0.0",
-        "lark-parser>=0.6.7",
+        "lark-parser==0.6.7",    # ran into issue on Github,
+                                 # lark-parser 0.11.2 is installed but lark-parser==0.6.* is required by
+                                 # {'syslog-rfc5424-parser'}
         "numpy>=1.20.1",
         "pandas>=1.2.3",
         "prettytable>=2.1.0",

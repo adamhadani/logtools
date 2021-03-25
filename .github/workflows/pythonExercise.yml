@@ -35,7 +35,7 @@ jobs:
       #                                   location of file loaded from Github/
       #    Also show $LANG ( Locale may be relevant in processing of dates )
       run: |
-        echo Working dir ̀pwd`
+        echo Working dir $(pwd)
         echo Files at this location:
         ls -ltha
         echo HOME: $HOME

@@ -2,6 +2,11 @@
 
 # ------------------------------------------------------------------------------
 #    This is script to estabish environment for running the test program
+#
+#    Normally not needed when the library is installed properly, used in
+#    intermediate development steps.
+#
+#    Kept as information useful  when writing remote execution of test .yml
 # ------------------------------------------------------------------------------
 #    Environ requirements for entering TESTPGM: 
 #          - TESTDATADIR must point to directory "aux/testData"

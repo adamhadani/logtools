@@ -40,6 +40,14 @@ jobs:
         ls -ltha
         echo HOME: $HOME
         echo LANG: $LANG
+      #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      #    ** here :: **
+      #  pythonLocation: /opt/hostedtoolcache/Python/3.8.8/x64
+      #  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.8.8/x64/lib
+      #  Working dir /home/runner/work/logtools/logtools
+      #  HOME: /home/runner
+      #  LANG: C.UTF-8
+      #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         
     - name: Install dependencies
       run: |
@@ -54,7 +62,8 @@ jobs:
       #          must be adapted to actual filepaths
       #
       run: |
-        aux/dot_logtoolsrc.sh $(pwd) "$HOME"
+        echo executing: aux/dot_logtoolsrc.sh $(pwd) "${HOME}/.logtoolsrc"
+        aux/dot_logtoolsrc.sh $(pwd) "${HOME}/.logtoolsrc"
         echo Files in  home dir: "$HOME"
         ls -ltha ~
         
@@ -70,9 +79,11 @@ jobs:
       #     Parameter -s ZZZ indicates logging level; INFO, ERROR and DEBUG are of interest
       #
       #     Environment variables: documented in aux/matTests.py
+      #     Note that if DEBUG not set, some tests suppress error output
       run: |        
         export ZTESTPGM="logtools/test/test_logtools.py"
         export TESTDATADIR="aux/testData"
+	export DEBUG="-"
         python aux/manTests.py Z -s INFO
         python aux/manTests.py A -s ERROR
         python aux/manTests.py + -s INFO

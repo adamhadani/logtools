@@ -8,17 +8,22 @@
 #      1) first argument: PATH leading to logtools package source
 #      2) second argument: path for ~/.logtoolsrc; default to ~/.logtoolsrc
 
-arg2=$2
-DESTFILE=${arg2:=/tmp/.logtoolsrc}
+BASEPATH="$1"
+arg2="$2"
+DESTFILE="${arg2:=/tmp/.logtoolsrc}"
 
-sed -e "s/BASEPATH/$1/" >"$DESTFILE" <<END
+echo "In dot_logtoolsrc.sh"
+echo "   substituting : $BASEPATH to \$BASEPATH, emitting $DESTFILE"
+
+
+cat  >"$DESTFILE" <<END
 # ------------------------------------------------------------
 # defaults for various parameters, organized per script
 # ------------------------------------------------------------
 
 [filterbots]
- bots_ua: BASEPATH/logtools/data/examples/bots_useragents.txt
- bots_ips: BASEPATH/logtools/data/examples//bots_hosts.txt
+ bots_ua: ${BASEPATH}/logtools/data/examples/bots_useragents.txt
+ bots_ips: ${BASEPATH}/logtools/data/examples//bots_hosts.txt
  ip_ua_re: ^(?P<ip>.*?) -(?:.*?"){5}(?P<ua>.*?)"
 
 

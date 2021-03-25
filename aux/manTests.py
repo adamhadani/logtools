@@ -14,6 +14,10 @@
                         otherwise a RuntimeError is issued
           - ZTESTPGMPYPATH if defined TESTPGM is run with PYTHONPATH=$TESTPGMPYPATH
                         otherwise no modification of PYTHONPATH
+
+          - DEBUG       if set, shell scripts will output either to this file or sdterr if
+                        value == "-"; otherwise stderr output suppressed by default!!
+                        Used only in tests A-C
 """
 
 import sys, os
@@ -25,14 +29,22 @@ nbErrors = 0
 errList  = []
 
 # ---------------------------------------------------------------------- Setup Env        
-testDataDir, ztestpypath, ztestpgm  = map( os.getenv,
-                                          ("TESTDATADIR", "ZTESTPGMPYPATH", "ZTESTPGM"))
+testDataDir, ztestpypath, ztestpgm, debugOut  = map( os.getenv,
+                                          ("TESTDATADIR", "ZTESTPGMPYPATH", "ZTESTPGM",
+                                           "DEBUG"))
 missing=[]
 if testDataDir is None:
     missing.append("TESTDATADIR")
 if ztestpgm is None:
     missing.append("ZTESTPGM")
 
+if debugOut is None:
+    debugOut = "2>/dev/null"
+elif debugOut == "-":
+    debugOut = ""
+else:
+    debugOut = ">" + debugOut +" 2>&1" 
+    
 if len(missing):    
     msg = "Missing environment variable(s)" + " and ".join(missing) 
     logging.error(msg)
@@ -102,16 +114,16 @@ def test(letter,options):
 
 testDict={
     "A" : """cat %s/TestAuth.data | 
-	      filterbots -s ERROR -r ".*uid (?P<ip>\d+).* obtain (?P<ua>[^\s]+)" --print 2>/dev/null
-           """ % testDataDir,
+	      filterbots -s ERROR -r ".*uid (?P<ip>\d+).* obtain (?P<ua>[^\s]+)" --print %s
+           """ % (testDataDir, debugOut) ,
 
     "B" : """gunzip --stdout %s/TestApport*.gz | 
-	      filterbots -s ERROR -r ".*pid 9\d+\).*"  --print 2>/dev/null
-          """ % testDataDir,
+	      filterbots -s ERROR -r ".*pid 9\d+\).*"  --print %s
+          """ % (testDataDir, debugOut),
 
     "C" : """gunzip --stdout %s/TestAuth*.gz | 
-              filterbots -s ERROR -r ".*" --print 2>/dev/null | aggregate -d' ' -f1-5
-          """ % testDataDir,
+              filterbots -s ERROR -r ".*" --print %s | aggregate -d' ' -f1-5
+          """ % (testDataDir, debugOut), 
 
     "D" : """gunzip --stdout  %s/TestAuth*.gz  | 
              cat  -   %s/TestAuth.data|  

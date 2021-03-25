@@ -36,11 +36,11 @@ jobs:
       #    Also show $LANG ( Locale may be relevant in processing of dates )
       run: |
         echo Working dir ̀pwd`
-	echo Files at this location:
-	ls -ltha
+        echo Files at this location:
+        ls -ltha
         echo HOME: $HOME
-	echo LANG: $LANG
-	
+        echo LANG: $LANG
+        
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel
@@ -55,9 +55,9 @@ jobs:
       #
       run: |
         aux/dot_logtoolsrc.sh $(pwd) "$HOME"
-	echo Files in  home dir: "$HOME"
+        echo Files in  home dir: "$HOME"
         ls -ltha ~
-	
+        
     - name: Test 
       #
       #     Test Z : runs logtools/test/test_logtools.py
@@ -71,8 +71,8 @@ jobs:
       #
       #     Environment variables: documented in aux/matTests.py
       run: |        
-	export ZTESTPGM="logtools/test/test_logtools.py"
-	export TESTDATADIR="aux/testData"
+        export ZTESTPGM="logtools/test/test_logtools.py"
+        export TESTDATADIR="aux/testData"
         python aux/manTests.py Z -s INFO
         python aux/manTests.py A -s ERROR
         python aux/manTests.py + -s INFO

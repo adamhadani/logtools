@@ -5,6 +5,15 @@
 
 """
     Facilitate running tests manually
+
+
+    Environ requirements : 
+          - TESTDATADIR must point to directory "aux/testData"
+                        otherwise a RuntimeError is issued
+          - ZTESTPGM    must point to file test_logtools.py
+                        otherwise a RuntimeError is issued
+          - ZTESTPGMPYPATH if defined TESTPGM is run with PYTHONPATH=$TESTPGMPYPATH
+                        otherwise no modification of PYTHONPATH
 """
 
 import sys, os
@@ -14,6 +23,26 @@ import logging
 
 nbErrors = 0
 errList  = []
+
+# ---------------------------------------------------------------------- Setup Env        
+testDataDir, ztestpypath, ztestpgm  = map( os.getenv,
+                                          ("TESTDATADIR", "ZTESTPGMPYPATH", "ZTESTPGM"))
+missing=[]
+if testDataDir is None:
+    missing.append("TESTDATADIR")
+if ztestpgm is None:
+    missing.append("ZTESTPGM")
+
+if len(missing):    
+    msg = "Missing environment variable(s)" + " and ".join(missing) 
+    logging.error(msg)
+    raise RuntimeError(msg)
+
+if ztestpypath is None:
+     ztestpypath  = ""
+# ---------------------------------------------------------------------- Setup Env        
+
+
 
 # Note: (development testing)
 # This should run without "pip installing" "logtools", therefore we include this
@@ -67,93 +96,94 @@ def test(letter,options):
         errList.append(letter)
         if not options.doContinue:
             raise err
-       
+
+
+
+
 testDict={
-    "A" : """cat /var/log/auth.log | 
+    "A" : """cat %s/TestAuth.data | 
 	      filterbots -s ERROR -r ".*uid (?P<ip>\d+).* obtain (?P<ua>[^\s]+)" --print 2>/dev/null
-           """,
+           """ % testDataDir,
 
-    "B" : """gunzip --stdout /var/log/apport.log.*.gz | 
+    "B" : """gunzip --stdout %s/TestApport*.gz | 
 	      filterbots -s ERROR -r ".*pid 9\d+\).*"  --print 2>/dev/null
-          """,
+          """ % testDataDir,
 
-    "C" : """gunzip --stdout /var/log/auth.log.*.gz | 
+    "C" : """gunzip --stdout %s/TestAuth*.gz | 
               filterbots -s ERROR -r ".*" --print 2>/dev/null | aggregate -d' ' -f1-5
-          """,
+          """ % testDataDir,
 
-    "D" : """gunzip --stdout /var/log/auth.log.*.gz | 
-             cat /var/log/auth.log -  |  
+    "D" : """gunzip --stdout  %s/TestAuth*.gz  | 
+             cat  -   %s/TestAuth.data|  
              filterbots -s ERROR -r ".*sudo:(?P<ua>[^:]+).*COMMAND=(?P<ip>\S+).*" \
               --print
-          """,
+          """ % (testDataDir, testDataDir),
  
-    "E" : """gunzip --stdout /var/log/auth.log.*.gz | cat /var/log/auth.log -  |
+    "E" : """gunzip --stdout  %s/TestAuth*.gz | cat - %s/TestAuth.data |
              filterbots -s ERROR -r ".*sudo:(?P<ua>[^:]+).*COMMAND=(?P<ip>\S+).*"  --print
-          """,
+          """ % (testDataDir, testDataDir) ,
 
-    "F" : """cat testData/TestAuth.data  | 
+    "F" : """cat %s/TestAuth.data  | 
              filterbots -s ERROR -r ".*sudo:(?P<ua>[^:]+).*COMMAND=(?P<ip>\S+).*"  --print
-          """,
+          """  % testDataDir ,
 
-    "G" : """cat testData/TestAuth.data | 
+    "G" : """cat %s/TestAuth.data | 
              logparse --parser TraditionalFileFormat -f 3 -s ERROR 
-          """,
+          """ % testDataDir,
 
-    "H" : """cat testData/TestAuth.data    | 
+    "H" : """cat %s/TestAuth.data    | 
              logparse --parser TraditionalFileFormat -f msg -s ERROR 
-          """,
+          """ % testDataDir,
 
-    "I" : """cat testData/TestAuth.data  | 
+    "I" : """cat %s/TestAuth.data  | 
              logparse --parser TraditionalFileFormat -f TIMESTAMP -s ERROR
-          """,
+          """ % testDataDir,
 
-     "J" : """cat testData/testRFC5424.data | 
+     "J" : """cat %s/testRFC5424.data | 
               logparse --parser SyslogRFC5424 -f hostname -s INFO
-           """,
+           """ % testDataDir,
 
-     "K" :  """cat testData/testCommonLogFmt.data | 
+     "K" :  """cat %s/testCommonLogFmt.data | 
                logparse --parser CommonLogFormat  -s INFO -f4
-            """,
+            """ % testDataDir,
 
-     "L" :  """logmerge -d' ' -f1 testData/TestAuth.data testData/testRFC5424.data
-            """,
+     "L" :  """logmerge -d' ' -f1 %s/TestAuth.data %s/testRFC5424.data
+            """ % (testDataDir,testDataDir ) ,
 
-     "M" :  """logmerge --parser CommonLogFormat -f4 testData/testCommonLogFmt.data
-            """,
+     "M" :  """logmerge --parser CommonLogFormat -f4 %s/testCommonLogFmt.data
+            """ % testDataDir,
 
-     "N" :  """cat testData/testCommonLogFmtXL.data | 
-               logparse --parser AccessLog \
+     "N" :  ( "cat %s/testCommonLogFmtXL.data | "  % testDataDir  +
+             """ logparse --parser AccessLog \
                   --format '%h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-agent}i"' \
                   -f1,2 -s DEBUG
-             """,
+             """),
 
-     "O" :  """cat testData/testCommonLogFmtXL.data | 
-                logparse --parser AccessLog \
+     "O" :  ("cat %s/testCommonLogFmtXL.data | "  %  testDataDir +
+             """logparse --parser AccessLog \
                    --format '%h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-agent}i"'  \
                    -f8,9
-             """,
+             """),
 
      "P" :  """logmerge -d' ' -f3 \
-                  --numeric testData/testRFC5424.data --parser SyslogRFC5424
-             """,
+                  --numeric %s/testRFC5424.data --parser SyslogRFC5424
+             """ %  testDataDir,
 
      "Q" :  """logmerge -d' ' -f1 \
-                   testData/TestAuth.data testData/testRFC5424.data
-             """,
+                   %s/TestAuth.data %s/testRFC5424.data
+             """ %  ( testDataDir, testDataDir) ,
        
-     "R" :  """cat testData/testCommonLogFmt.data | 
-                qps -r'^(.*?) org' --dateformat '%b %d, %Y %I:%M:%S %p'  \
+     "R" :  ("cat %s/testCommonLogFmt.data | " % testDataDir +
+             """ qps -r'^(.*?) org' --dateformat '%b %d, %Y %I:%M:%S %p'  \
                         -W15 --ignore 
-             """,
+             """ ),
      
      "S" :  """logmerge -d' ' -f1 \
-                   testData/testRFC5424.data testData/testRFC5424.data \
+                   %s/testRFC5424.data %s/testRFC5424.data \
                    --parser SyslogRFC5424
-             """,
+             """ % (  testDataDir,  testDataDir),
 
-     "Z" :   """PYTHONPATH="$HOME/src/logtools"
-               python3 ~/src/logtools/logtools/test/test_logtools.py
-             """
+     "Z" :   "%s  python3 %s" % ( ztestpypath,  ztestpgm )
     }
     
 if __name__ == '__main__':
@@ -219,6 +249,7 @@ if __name__ == '__main__':
 
         if nbErrors:
            logging.info(f"Execution of tests produced {nbErrors} errors\n\tFailed:{repr(errList)}")
+           sys.exit(1)
         else:
            logging.info("No errors produced")
             

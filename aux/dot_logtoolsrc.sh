@@ -22,8 +22,8 @@ cat  >"$DESTFILE" <<END
 # ------------------------------------------------------------
 
 [filterbots]
- bots_ua: ${BASEPATH}/logtools/data/examples/bots_useragents.txt
- bots_ips: ${BASEPATH}/logtools/data/examples//bots_hosts.txt
+ bots_ua: ${BASEPATH}/data/examples/bots_useragents.txt
+ bots_ips: ${BASEPATH}/data/examples//bots_hosts.txt
  ip_ua_re: ^(?P<ip>.*?) -(?:.*?"){5}(?P<ua>.*?)"
 
 

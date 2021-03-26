@@ -3,38 +3,50 @@
 <B>Derived Version Notice</B>: This is a derived version of <B>logtools</B>, 
    including a port to Python-3 and
    additional features. 
-   - The original version, by Adam Ever-Hadani  is available at
-     http://github.com/adamhadani. 
-   - This version, by  Alain Lichnewsky   is available at 
+   - The original version, for Python-2 (<I>as far as I know</I>), by Adam Ever-Hadani  is available at
+     http://github.com/adamhadani <IMG SRC="https://travis-ci.org/adamhadani/logtools.svg?branch=master"/>.
+   - This version, for <B>Python-3 only</B>, with additions and changes by  Alain Lichnewsky,   is available at 
      https://github.com/AlainLich/logtools
-     distributed <I>as is</I>, with no warranty, under the Apache 2.0 license.
+     distributed <I>as is</I>, with no warranty, under the Apache 2.0 license. For features see: 
+	 [PYTHON3-README.md](./PYTHON3-README.md)
 
 <B>Notes</B>: this version
    -  is not compatible with Python-2
-   -  has been tested in the following configuration
+   -  has been tested in the following configurations
 
       <TABLE>
+      <TH>
+	      <TD>Development</TD><TD>Github Actions</TD>
+	  </TH>
       <TR>
-	      <TD>System</TD><TD>Ubuntu 20.10</TD>
+	      <TD>Status</TD><TD>Tested</TD><TD>Not tested<BR>(in progress, errors remaining)</TD>
 	  </TR>
       <TR>
-	      <TD>Linux</TD><TD>5.8.0-25-generic </TD>
+	      <TD>System</TD><TD>Ubuntu 20.10</TD><TD>Ubuntu 20.04 LTS</TD>
 	  </TR>
       <TR>
-	      <TD>Python</TD><TD>3.8.6</TD>
+	      <TD>Linux</TD><TD>5.8.0-25-generic </TD><TD></TD>
 	  </TR>
       <TR>
-	      <TD>virtualenv</TD><TD>20.0.29+d</TD>
+	      <TD>Python</TD><TD>3.8.6</TD><TD>3.8.8</TD>
+	  </TR>
+      <TR>
+	      <TD>virtualenv</TD><TD>20.0.29+d</TD><TD>not used</TD>
 	  </TR>
       <TR>
 	      <TD>Used modules</TD><TD>see <A HREF="./requirements.txt">requirements.txt</A>
 		  </TD>
+		  <TD><A HREF="./requirements.txt">requirements.txt</A>, installed at startup</TD>
 	  </TR>
 	  <TR>
-	      <TD>Locale</TD><TD>fr_FR.UTF-8</TD>
+	      <TD>Locale</TD><TD>fr_FR.UTF-8</TD><TD>C.UTF-8</TD>
+	  </TR>
+	      <TR><TD>Status</TD><TD>OK on dev. machine</TD>
+	      <TD> <IMG SRC="https://github.com/AlainLich/logtools/actions/workflows/pythonExercise.yml/badge.svg?branch=ALPython3"/></TD>
 	  </TR>
       </TABLE>
    
+
 ----------------------------------------------------------
 
 ## <CENTER>Original README</CENTER>
@@ -109,7 +121,8 @@ you can easily install it if you have setuptools installed by running:
 Concerning the Python3 port, see  [PYTHON3-README.md](./PYTHON3-README.md)
 
 Supplemental documentation, extracted in the process of porting can be found
-at [MORE-DOC.md](./MORE-DOC.md).
+at [MORE-DOC.md](./MORE-DOC.md). For installation, much information can be
+gleaned from [Github Actions YAML](.github/workflows/pythonExercise.yml). 
 
 ## Console Scripts
 

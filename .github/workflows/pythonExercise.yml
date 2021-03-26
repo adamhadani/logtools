@@ -83,7 +83,7 @@ jobs:
       run: |        
         export ZTESTPGM="logtools/test/test_logtools.py"
         export TESTDATADIR="aux/testData"
-	export DEBUG="-"
+        export DEBUG="-"
         python aux/manTests.py Z -s INFO
         python aux/manTests.py A -s ERROR
         python aux/manTests.py + -s INFO

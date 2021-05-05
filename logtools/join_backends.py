@@ -30,11 +30,11 @@ import logging
 from functools import partial
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
+
 import json
+from sqlalchemy import create_engine
 
 from ._config import AttrDict
-
-from sqlsoup import SQLSoup
 
 __all__ = ['JoinBackend', 'SQLAlchemyJoinBackend']
 
@@ -82,21 +82,23 @@ class SQLAlchemyJoinBackend(JoinBackend):
     def connect(self):
         """Connect to remote join backend (DB)"""
         try:
-            self.db = SQLSoup(self.connect_string)
+            self.db = create_engine(self.connect_string)
         except Exception as err:
             self._emitDiagnostic( "connect to DB server", err)
             raise err
         
     def join(self, key):
+        engine = self.db
         try:
-            rp = self.db.bind.execute(self.query_stmt, key=key)
-            for row in rp.fetchall():
-                yield row # dict(zip(field_names, row))
+            with engine.connect() as connection:
+                result = connection.execute(self.query_stmt, key=key)
+                for row in result:
+                    yield row
         except Exception as err:
-            self._emitDiagnostic( "perform db.bind.execute or fetchall\n\t"
+            self._emitDiagnostic( "In engine.connect or in connection.execute\n\t"
                                   +f"SQL={self.query_stmt}\n\tkey={key} ",  err)
             raise err
-                
+        
                 
     def _create_query_stmt(self):
         """Create valid query statement string

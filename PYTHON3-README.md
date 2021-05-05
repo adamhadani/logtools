@@ -87,6 +87,39 @@ Following issues were encountered:
     I am probably stuck with SQLAlchemy and SQLsoup because of the problem at the top,
 	probably not worth it using SQLAlchemy and SQLsoup... Or will need to upgrade
 	these 2 things to versions current, compatible between them and with Mysql 8.0!!!
+	
+	Current info on SQLSoup: https://github.com/zzzeek/sqlsoup
+
+    Page https://sqlsoup.readthedocs.io/en/latest/tutorial.html#getting-ready-to-connect
+	says: 
+	
+	> SQLSoup effectively provides a coarse grained, alternative
+    > interface to working with the SQLAlchemy ORM, providing a “self
+    > configuring” interface for extremely rudimental operations. It’s
+    > somewhat akin to a “super novice mode” version of the ORM. While
+    > you can do a lot more with the SQLAlchemy ORM directly, SQLSoup
+    > will have you querying an existing database in just two lines of
+    > code.
+
+    > SQLSoup is really well suited to quick one-offs, early learning of
+    > SQLAlchemy, and small scripting activities. It can be used in larger
+    > applications such as web applications as well, but here you’ll begin
+    > to experience diminishing returns; in a substantial web application,
+    > it might be time to just switch to SQLAlchemy’s Object Relational
+    > Tutorial.
+	
+	Conclusion is to remove sqlsoup!! And check that SQLalchemy is compatible
+	with Mysql8.0
+
+
+### Moving to sqlalchemy
+
+1. Documentation for sqlalchemy: https://docs.sqlalchemy.org/en/14/index.html 
+  + a more tutorial thing at 
+    https://docs.sqlalchemy.org/en/14/core/engines.html#database-urls
+	
+1. Porting: from sqlsoup to sqlalchemy
+  + create_engine returns an `Engine` object 
 
 ### Added functionality
 

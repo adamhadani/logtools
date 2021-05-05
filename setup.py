@@ -79,8 +79,7 @@ This software is distributed under the Apache 2.0 license.
         "prettytable>=2.1.0",
         "python-dateutil>=2.8.1",
         "pytz>=2021.1",
-        "SQLAlchemy==0.7.9",                       #issue with upwards compat.
-        "sqlsoup==0.9.1",                          #issue with upwards compat.
+        "SQLAlchemy>=1.4.13",   # looking for compatibility with MySQL8.0
         "syslog-rfc5424-parser>=0.3.2",
         "wcwidth>=0.2.5"
     ],

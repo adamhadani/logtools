@@ -47,6 +47,47 @@ Following issues were encountered:
   The directory `aux` has been added with script `testStrptime.py` to test 
   under different locales.
   
+- when experimenting the use of ̀logjoin` with `mysql`
+  + installing the `PyMySQL` module proved tricky (On Linux/Ubuntu):
+    1. pip3 install mysql-connector
+	1. pip3 install PyMySQL
+	1. needed to add the following in `__init__.py`:
+	~~~
+	import pymysql
+    pymysql.install_as_MySQLdb()
+	~~~
+  + Note that SQLsoup documentation is found at
+    1. https://sqlsoup.readthedocs.io/en/latest/
+    1. https://docs.sqlalchemy.org/en/14/core/engines.html#sqlalchemy.create_engine 
+	
+  + For connecting, the string form of the URL is 
+     > dialect[+driver]://user:password@host/dbname[?key=value..], 
+	 where 
+	 + dialect is a database name such as mysql, oracle, postgresql, etc., and
+	 + driver the name of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. 
+	 Alternatively, the URL can be an instance of URL.
+     Example: `mysql://scott:tiger@hostname/dbname`
+
+  + Getting error: `1193, "Unknown system variable 'tx_isolation'"`, which is not new:
+    + https://github.com/sqlalchemy/sqlalchemy/issues/5161
+	 > something about your MySQL server is not sending out a version detection string
+	 > that is expected. Can you go to your MySQL console and send the results of:
+     > SELECT VERSION()
+
+   Conclusion:
+
+	 > transaction_isolation was added in MySQL 5.7.20 as an alias for 
+	 > tx_isolation, which is now deprecated and is removed in MySQL 8.0. 
+	 > Applications should be adjusted to use transaction_isolation in preference
+	 > to tx_isolation. PyMySQL/PyMySQL#614
+
+    All of this looks like an incompatibility between my version of MySQL (8.xx) and
+	the version of PyMySQL 
+
+    I am probably stuck with SQLAlchemy and SQLsoup because of the problem at the top,
+	probably not worth it using SQLAlchemy and SQLsoup... Or will need to upgrade
+	these 2 things to versions current, compatible between them and with Mysql 8.0!!!
+
 ### Added functionality
 
    See [PYTHON3-ADDITIONS](./PYTHON3-ADDITIONS.md). 

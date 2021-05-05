@@ -68,17 +68,34 @@ class SQLAlchemyJoinBackend(JoinBackend):
         self.query_stmt = self._create_query_stmt()
 
         self.connect()
-                
+        
+    def _emitDiagnostic(self, msg, err):
+        p = { "connect":self.connect_string,
+                  "remote_flds":self.remote_fields,
+                  "remote_name":self.remote_name, 
+                  "remote_key":self.remote_key,
+                  "query":self.query_stmt
+                }
+        pstr= "\n\t".join( f"{k:20}\t{v}"  for (k,v) in p.items() )
+        print(f"Error: Unable to {msg}\n\t{err}\n\t{pstr}", file=sys.stderr)
         
     def connect(self):
         """Connect to remote join backend (DB)"""
-        self.db = SQLSoup(self.connect_string)
-        
+        try:
+            self.db = SQLSoup(self.connect_string)
+        except Exception as err:
+            self._emitDiagnostic( "connect to DB server", err)
+            raise err
         
     def join(self, key):
-        rp = self.db.bind.execute(self.query_stmt, key=key)
-        for row in rp.fetchall():
-            yield row # dict(zip(field_names, row))
+        try:
+            rp = self.db.bind.execute(self.query_stmt, key=key)
+            for row in rp.fetchall():
+                yield row # dict(zip(field_names, row))
+        except Exception as err:
+            self._emitDiagnostic( "perform db.bind.execute or fetchall\n\t"
+                                  +f"SQL={self.query_stmt}\n\tkey={key} ",  err)
+            raise err
                 
                 
     def _create_query_stmt(self):

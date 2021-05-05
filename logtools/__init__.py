@@ -22,6 +22,16 @@
 
 import logging
 
+## This might be specific to Ubuntu+Python3: +++++++++++++++++++++++++++++++++
+## Had to:
+##     sudo pip3 install mysql-connector (not sure necessary)
+##     pip3 install PyMySQL
+
+import pymysql
+pymysql.install_as_MySQLdb()
+## END OF SPECIFIC TO Ubuntu+Python3:        +++++++++++++++++++++++++++++++++
+
+
 from ._config import *
 from ._filterbots import *
 from ._flattenjson import *
@@ -37,3 +47,4 @@ from ._filter import *
 from ._tail import *
 from ._sumstat import *
 from ._serve import *
+

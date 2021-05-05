@@ -59,7 +59,7 @@ def logparse_parse_args():
                                   dest="logLevSym",
                                   help="logging level (symbol)")
 
-    parser.add_option("-n","--num" , type=int , 
+    parser.add_option("-n","--num" , type=int ,
                                   dest="logLevVal",
                                   help="logging level (value)")
 
@@ -78,7 +78,7 @@ def logparse_parse_args():
 
     # Set the logging level
     setLoglevel(options)
-    
+
     return AttrDict(options.__dict__), args
 
 
@@ -101,18 +101,20 @@ def logparse(options, args, fh):
         key_func = lambda x: parser(x.strip()).by_index(field, raw=True)
         keys = [options.field]
     else:
-        # Field given as string
-
-        # Check how many fields are requested
-        keys = options.field.split(",")
-        L = len(keys)
-        if L == 1:
-            key_func = lambda x: parser(x.strip())[field]
+        if isinstance(parser, logtools.parsers2.JSONParserPlus):
+            key_func = logtools.parsers2.dpath_getter_gen(parser, keys, options.field)
         else:
-            # Multiple fields requested
-            is_indices = reduce(and_, (k.isdigit() for k in keys), True)
-            key_func = logtools.parsers.multikey_getter_gen(parser, keys,
-                                        is_indices=is_indices)
+            # Field given as string
+            # Check how many fields are requested
+            keys = options.field.split(",")
+            L = len(keys)
+            if L == 1:
+                key_func = lambda x: parser(x.strip())[field]
+            else:
+                # Multiple fields requested
+                is_indices = reduce(and_, (k.isdigit() for k in keys), True)
+                key_func = logtools.parsers.multikey_getter_gen(parser, keys,
+                                                                is_indices=is_indices)
 
     if options.header is True:
         yield '\t'.join(keys)
@@ -138,5 +140,7 @@ def logparse_main():
     options, args = logparse_parse_args()
     for row in logparse(options, args, fh=sys.stdin):
         if row:
+            if isinstance(row, dict):
+                row = str(row)
             print( row.encode('ascii', 'ignore') )
     return 0

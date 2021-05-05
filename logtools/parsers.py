@@ -36,11 +36,10 @@ from datetime import datetime
 from abc import ABCMeta, abstractmethod
 import json
 
-
 from ._config import AttrDict
 
-__all__ = ['multikey_getter_gen', 'unescape_json', 'LogParser', 'JSONParser', 'LogLine',
-           'AccessLog', 'CommonLogFormat', 'uWSGIParser']
+__all__ = ['multikey_getter_gen', 'unescape_json', 'LogParser', 'JSONParser', 
+           'LogLine', 'AccessLog', 'CommonLogFormat', 'uWSGIParser']
 
 
 def multikey_getter_gen(parser, keys, is_indices=False, delimiter="\t"):
@@ -149,12 +148,13 @@ class JSONParser(LogParser):
         # JSON logs are generally schema-less and so fields
         # can change between lines.
         self._logline_wrapper.fieldnames = parsed_row.keys()
-            
+
         data.clear()
         for k, v in parsed_row.items():
             data[k] = v
-
+        
         return data
+
     
 
 class AccessLog(LogParser):

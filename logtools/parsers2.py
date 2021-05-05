@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 #
-#  Licensed under the Apache License, Version 2.0 (the "License"); 
-#  you may not use this file except in compliance with the License. 
-#  You may obtain a copy of the License at 
-#  
-#      http://www.apache.org/licenses/LICENSE-2.0 
-#     
-#  Unless required by applicable law or agreed to in writing, software 
-#  distributed under the License is distributed on an "AS IS" BASIS, 
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-#  See the License for the specific language governing permissions and 
-#  limitations under the License. 
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
 #
 
 # ........................................ COPYRIGHT
@@ -21,7 +21,7 @@
 #
 """
 logtools.parsers2
-Additional parsers for some common log formats, 
+Additional parsers for some common log formats,
 These parsers can be used in a similar fashion as other logtools parsers
 programmaticaly and via CLI. Additional parameters may be required (still to be
 checked).
@@ -38,6 +38,9 @@ from functools import reduce
 from io import StringIO
 
 from syslog_rfc5424_parser import SyslogMessage, ParseError
+import json
+import dpath
+import dpath.util
 
 from ._config import AttrDict
 from .parsers import LogParser, LogLine
@@ -68,29 +71,29 @@ class SyslogRFC5424(LogParser):
     def parse(self, logline):
         "Parse log line "
         data = self._logline_wrapper
-        
+
         logging.debug( f"Parsing RFC5424 line:{repr(logline)}")
         try:
             parsed = SyslogMessage.parse(logline)
             pdict = parsed.as_dict()
-            
+
             data.fieldnames = pdict.keys()
             data.clear()
             for k, v in pdict.items():
                 data[k] = v
-                
+
             logging.debug( f"\tParsed(type(parsed)):{pdict}")
             return data
         except ParseError as err:
             logging.error( f"\tRFC5424 parse error:{err}")
-            
+
         data.fieldnames = []
-        data.clear()    
+        data.clear()
         return data
 
 
-  
-#   
+
+#
 # Addition to handle rsyslog RSYSLOG_TraditionalFileFormat (in a non compliant fashion)
 #
 # Documentation on "traditional templates" at url :
@@ -103,7 +106,7 @@ class SyslogRFC5424(LogParser):
 # Much documentation at https://github.com/rsyslog
 
 
-templateDefs = """ 
+templateDefs = """
 #
 # These are the templates considered; when extending keep in mind:
 #     - "FileFormat" must be first.
@@ -146,8 +149,8 @@ templateNotConsidered = """
 
 
 def prepareTemplateDict(tempStr):
-    """ Read the above set of templates and make dictionnaries permitting 
-        to access by name and also number. Numbers are convenient for 
+    """ Read the above set of templates and make dictionnaries permitting
+        to access by name and also number. Numbers are convenient for
         typing reasons; expect you utility to display the nnumber -> name mapping
         using function 'printAvailTemplates' below
 
@@ -162,19 +165,19 @@ def prepareTemplateDict(tempStr):
           )
     rex = re.compile("".join(rexs), re.VERBOSE)
     rexblank = re.compile("^(\s*|#( .*)?)\n?$")
-    
+
     tmplDict = {}
     tmplIdx  = {}
     def splitLine(l):
         nl = l.replace("\\\"","\\@")
         mobj = rex.match(nl)
-        
+
         if mobj:
             return mobj.groupdict()
         else:
             raise ValueError( f"NO MATCH for line {repr(l)}")
         return nl
-    
+
     with StringIO(tempStr) as input:
         i = -1
         for line in input:
@@ -197,15 +200,15 @@ def printAvailTemplates(tmplDict, tmplIdx, file = sys.stderr):
 
 
 class RSyParsing():
-    """ This class builds a rsyslog parser from its specs and then permits to 
+    """ This class builds a rsyslog parser from its specs and then permits to
         operate it.
     """
     # class level static tables
     tmplDict, tmplIdx =  prepareTemplateDict(templateDefs)
-    
+
     def __init__(self, name, spec, options):
         logging.debug(f"In {type(self).__init__}: name:{name}\n\t{spec}\n\t{options}")
-        
+
         self.name = name
         self.spec = spec
         self.options = options
@@ -213,7 +216,7 @@ class RSyParsing():
         self._compile()
 
         self._logline_wrapper = LogLine()
-        
+
     rexs = "^(?P<txt>[^%]+)?%(?P<replacer>[^%]+)%"
     rexends = "^(\s+|\\\\n)$"
     rexbads  = "^({|insert\s+into)"
@@ -247,7 +250,7 @@ class RSyParsing():
                 buildList.append(self._replacer(el['replacer']))
 
         build = "".join(buildList)
-        try : 
+        try :
             self.builtRex = re.compile(build)
             logging.debug(f"Compiled regexp {self.builtRex}")
         except re.error as err:
@@ -261,7 +264,7 @@ class RSyParsing():
     # 			 https://tools.ietf.org/html/rfc5234 (BNF def)
     # 			 https://tools.ietf.org/html/rfc3339 (Timestamp)
     #  unless otherwise noted. If you need compliance see class SyslogRFC5424,
-    #  making use of  https://github.com/EasyPost/syslog-rfc5424-parser. 
+    #  making use of  https://github.com/EasyPost/syslog-rfc5424-parser.
     #
     def A(x):
         "Provides abbreviations for recurring subpatterns"
@@ -288,19 +291,19 @@ class RSyParsing():
         'TIMESTAMP': ( "(" + A.tstampEmpirical +      # not compliant RFC:seen syslog
                        "|" + A.tstampEmpDpkg +        # not compliant RFC:seen dpkg.log
                        ")"
-                     ), 
+                     ),
         'syslogtag': "[^:]+:",
         'msg':".*",
         'PRI':"<[^>]{3,5}>"
         }
 
-    
+
     def _replacer(self, replId):
         # Notes:1) that property options are documented at
         #         https://www.rsyslog.com/doc/v8-stable/configuration/property_replacer.html
         #       2) I am not even trying to be compliant...., still want to parse
         #         template descriptions
-        splitRId = replId.split(":") 
+        splitRId = replId.split(":")
         if len(splitRId) > 1:
             logging.debug(f"Ignored property options:{splitRId[1:]}")
             replId = splitRId[0]
@@ -310,7 +313,7 @@ class RSyParsing():
                      +")" )
         else:
            raise ValueError(f"Regexp symbolic field name not found:{replId}")
-       
+
     def _uniqueNameGroups(self, nm):
         if nm in self.rexNamedGroups:
             self.rexNamedGroups[nm] += 1
@@ -323,7 +326,7 @@ class RSyParsing():
         "Parse log line "
         mobj =  self.builtRex.match(logline)
         data = self._logline_wrapper
-        
+
         logging.debug( f"Parsing RFC5424 line:{repr(logline)}")
 
         try:
@@ -334,22 +337,22 @@ class RSyParsing():
             else:
                 logging.error(f"RSyParsing({self.name}): No match for logline\n\t{repr(logline)}")
                 pdict = {}
-                
+
             data.fieldnames = pdict.keys()
             data.clear()
             for k, v in pdict.items():
                 data[k] = v
-                
+
             logging.debug( f"\tParsed(type(parsed)):{pdict}")
             return data
 
         except ParseError as err:
             logging.error( f"RSyParsing({self.name})\t parse error:{err}")
-            
+
         data.fieldnames = []
-        data.clear()    
-        return data        
-            
+        data.clear()
+        return data
+
 #
 # Here comes the parser for  RSYSLOG_TraditionalFileFormat style
 #
@@ -367,50 +370,92 @@ class RSysTradiVariant(LogParser):
         self.tableEntry = tableEntry
         spec  = RSyParsing.tmplDict[tableEntry]
         self.RSyParsing = RSyParsing( tableEntry, spec[0], spec[1])
-        
+
     def parse(self, logline):
         "Parse log line "
         data = self._logline_wrapper
-        
+
         logging.debug( f"Parsing RSysTradiVariant ({self.tableEntry}) line:{repr(logline)}")
         try:
             parsed = self.RSyParsing.parse(logline)
             logging.debug( f"**parsed = {type(parsed)}:\t{parsed}")
             pdict = parsed    # .as_dict()
-            
+
             data.fieldnames = pdict.keys()
             data.clear()
             for k, v in pdict.items():
                 data[k] = v
-                
+
             logging.debug( f"\tParsed(type(parsed)):{pdict}")
             return data
         except ParseError as err:
             logging.error( f"RSysTradiVariant  ({self.tableEntry})\t parse error:{err}")
-            
+
         data.fieldnames = []
-        data.clear()    
+        data.clear()
         return data
 
 def FileFormat():
     return RSysTradiVariant("FileFormat")
-    
+
 def TraditionalFileFormat():
     return RSysTradiVariant("TraditionalFileFormat")
-    
+
 def ForwardFormat():
     return RSysTradiVariant("ForwardFormat")
-    
+
 def TraditionalForwardFormat():
     return RSysTradiVariant("TraditionalForwardFormat")
-    
+
 def TestA():
     return RSysTradiVariant("TestA")
-    
+
 def TFFA():
     return RSysTradiVariant("TFFA")
-    
+
 def TFFB():
     return RSysTradiVariant("TFFB")
-    
 
+# ................................................................................
+#
+# Version that uses dpath (extended version) to select fields or subtrees
+# in the JSON representation. For details on available generalized keys,
+# see test material, markdown documentation and documentation on
+# dpath.
+# ................................................................................
+
+
+class JSONParserPlus(LogParser):
+    """\
+Parser implementation for JSON format logs, extended capabilities using
+dpath to select with multilevel keys or regexps
+
+Recall that the base class LogParser makes this class callable (applys method parse
+to a line)
+"""
+
+    def __init__(self):
+        LogParser.__init__(self)
+        self._logline_wrapper = LogLine()
+
+    def parse(self, line):
+        """Parse JSON line, allows multilevel keys with regexps"""
+        parsed_row = json.loads(line)
+
+        data = parsed_row
+
+        return data
+
+
+def dpath_getter_gen(parser, keys, fields):
+    """\
+Generator meta-function to return a function parsing a logline and returning
+multiple keys (tab-delimited)"""
+
+
+    def dpath_getter_fun(line, parser, keys, fields):
+        data = parser(line)
+        x = dpath.util.search(data, fields)
+        return x
+
+    return partial(dpath_getter_fun, parser=parser, keys=keys, fields=fields)

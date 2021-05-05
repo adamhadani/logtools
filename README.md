@@ -1,6 +1,28 @@
 # logtools
 
-<B>Derived Version Notice</B>: This is a derived version of <B>logtools</B>, 
+## TOC
+<!--TOC-->
+
+- [logtools](#logtools)
+  - [TOC](#toc)
+  - [Derived Version Notice](#derived-version-notice)
+  - [<CENTER>Original README</CENTER>](#original-readme)
+    - [A log files analysis / filtering framework.](#a-log-files-analysis--filtering-framework)
+  - [Installation](#installation)
+    - [Python2](#python2)
+    - [Python3](#python3)
+  - [Console Scripts](#console-scripts)
+  - [Configuration](#configuration)
+  - [Usage Examples](#usage-examples)
+  - [Credits](#credits)
+  - [Contact](#contact)
+  - [License](#license)
+
+<!--TOC-->
+
+
+## Derived Version Notice
+   This is a derived version of <B>logtools</B>, 
    including a port to Python-3 and
    additional features. 
    - The original version, for Python-2 (<I>as far as I know</I>), by Adam Ever-Hadani  is available at
@@ -8,8 +30,10 @@
    - This version, for <B>Python-3 only</B>, with additions and changes by  Alain Lichnewsky,   is available at 
      https://github.com/AlainLich/logtools
      distributed <I>as is</I>, with no warranty, under the Apache 2.0 license. For features see: 
-	 [PYTHON3-README.md](./PYTHON3-README.md)
-
+	 [PYTHON3-README.md](./PYTHON3-README.md). For local applications, see 
+	 [LOCAL-LOGS.md](./LOCAL-LOGS.md) (last link only works if installation features this information,
+	 typically not distributed via Github).
+	 
 <B>Notes</B>: this version
    -  is not compatible with Python-2
    -  has been tested in the following configurations

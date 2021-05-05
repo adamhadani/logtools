@@ -1,5 +1,17 @@
 # Cheatsheet on format selection
 
+## TOC
+<!--TOC-->
+
+- [Cheatsheet on format selection](#cheatsheet-on-format-selection)
+  - [TOC](#toc)
+  - [Goal and summary](#goal-and-summary)
+  - [Date](#date)
+
+<!--TOC-->
+
+## Goal and summary
+
 According to the look of a log, which format to look for first!
 
   - <I>Devised as a self-help, will expand this to cover tests 

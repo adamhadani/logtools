@@ -1,5 +1,19 @@
 # Python-3 port
 
+## TOC
+<!--TOC-->
+
+- [Python-3 port](#python-3-port)
+  - [TOC](#toc)
+  - [Note](#note)
+    - [Intent and issues found](#intent-and-issues-found)
+    - [Added functionality](#added-functionality)
+    - [Test and operative environment](#test-and-operative-environment)
+    - [Installation](#installation)
+    - [First experiments](#first-experiments)
+
+<!--TOC-->
+
 ## Note
 
 These are short notes documenting the Python-3 port, which is still to

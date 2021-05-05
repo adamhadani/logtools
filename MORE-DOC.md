@@ -1,5 +1,29 @@
 # More documentation extracted from source
 
+## TOC
+<!--TOC-->
+
+- [More documentation extracted from source](#more-documentation-extracted-from-source)
+  - [TOC](#toc)
+  - [Summary](#summary)
+  - [Per File / Script](#per-file--script)
+    - [`logtools/parsers.py`](#logtoolsparserspy)
+    - [`logtools/_filter.py`](#logtools_filterpy)
+    - [`logtools/_filterbots.py`](#logtools_filterbotspy)
+    - [`logtools._flattenjson`](#logtools_flattenjson)
+    - [`logtools._join`](#logtools_join)
+    - [`logtools._merge`](#logtools_merge)
+    - [`logtools._plot`](#logtools_plot)
+    - [`logtools._qps`](#logtools_qps)
+    - [`logtools._sample`](#logtools_sample)
+    - [`logtools._serve`](#logtools_serve)
+    - [`logtools._sumstat`](#logtools_sumstat)
+    - [`logtools._tail`](#logtools_tail)
+    - [`logtools._urlparse`](#logtools_urlparse)
+
+<!--TOC-->
+
+## Summary
 Included here is additional information extracted by reading the code.
 
 

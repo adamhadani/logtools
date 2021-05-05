@@ -1,6 +1,18 @@
 
 # Additional features in Python-3 port
 
+## TOC
+<!--TOC-->
+
+- [Additional features in Python-3 port](#additional-features-in-python-3-port)
+  - [TOC](#toc)
+  - [Note](#note)
+  - [Intent](#intent)
+    - [Added functionality](#added-functionality)
+
+<!--TOC-->
+
+
 ## Note
 
 These are short notes documenting functions added when porting to Python-3,

@@ -199,8 +199,10 @@ testDict={
     }
     
 if __name__ == '__main__':
-    description = """ 
-    Run tests according to key:
+    description = """\
+Run tests according to key:
++	all tests with following (letter) keys
+
 """
     
     def mainPgm():

@@ -7,6 +7,7 @@
   - [TOC](#toc)
   - [Note](#note)
     - [Intent and issues found](#intent-and-issues-found)
+    - [Moving to sqlalchemy](#moving-to-sqlalchemy)
     - [Added functionality](#added-functionality)
     - [Test and operative environment](#test-and-operative-environment)
     - [Installation](#installation)

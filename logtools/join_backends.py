@@ -77,7 +77,7 @@ class SQLAlchemyJoinBackend(JoinBackend):
                   "query":self.query_stmt
                 }
         pstr= "\n\t".join( f"{k:20}\t{v}"  for (k,v) in p.items() )
-        print(f"Error: Unable to {msg}\n\t{err}\n\t{pstr}", file=sys.stderr)
+        print(f"Error: {msg}\n\t{err}\n\t{pstr}", file=sys.stderr)
         
     def connect(self):
         """Connect to remote join backend (DB)"""
@@ -106,11 +106,23 @@ class SQLAlchemyJoinBackend(JoinBackend):
         Unfortunately, there is inconcistency in syntax
         across different drivers"""
         connstr = self.connect_string
-        if connstr.startswith("sqlite"):
-            query_stmt = """SELECT {0} FROM {1} WHERE {2} = :key""".format(self.remote_fields, 
-                                                self.remote_name, self.remote_key)            
+
+
+        #
+        # Generalize by authorizing removing the WHERE clause; likely a
+        # more general mechanism will be inserted to add to the SQL stmt
+        # or a more general mechanism to emit the SQL
+        #
+        if self.remote_key != "-":
+            if connstr.startswith("sqlite"):
+                query_stmt2 = """WHERE {0} = :key""".format(self.remote_key)            
+            else:
+                query_stmt2 = """WHERE {0} = %(key)s""".format(self.remote_key)
         else:
-            query_stmt = """SELECT {0} FROM {1} WHERE {2} = %(key)s""".format(self.remote_fields, 
-                                        self.remote_name, self.remote_key)
-        
-        return query_stmt
+            query_stmt2 = ""
+            
+        query_stmt1 =  """SELECT {0} FROM {1} """.format(self.remote_fields, 
+                                        self.remote_name)
+
+            
+        return query_stmt1 + query_stmt2

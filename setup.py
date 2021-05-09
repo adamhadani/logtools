@@ -27,7 +27,8 @@ setup(
     author_email = '',
     url          = 'http://github.com/AlainLich/logtools',
     keywords     = ['logging', 'sampling', 'geoip', 'filterbots', 'aggregate',
-                    'logparse', 'logmerge', 'logjoin', 'urlparse', 'logplot', 'qps', 'filter'],
+                    'logparse', 'logmerge', 'logjoin', 'urlparse', 'logplot',
+                    'logdb', 'qps', 'filter'],
     classifiers = [
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.8.6",
@@ -63,17 +64,10 @@ This software is distributed under the Apache 2.0 license.
     include_package_data = False,
 
     install_requires = [
-        #"pygooglechart>=0.2.1", # Optional dependency, seems broken for now
-        #"prettytable>=0.5",     # from master branch
-        #"sqlalchemy==0.7.9",
-        #"sqlsoup>=0.9.1",
-        #"acora>=2.2",
-        #"python-dateutil>=2.1"
-        #"acora>=2.2",           # ------------------ 
         "greenlet>=1.0.0",
-        "lark-parser==0.6.7",    # ran into issue on Github,
-                                 # lark-parser 0.11.2 is installed but lark-parser==0.6.* is required by
-                                 # {'syslog-rfc5424-parser'}
+        "lark-parser==0.6.7",  # ran into issue on Github,
+                               # lark-parser 0.11.2 is installed but lark-parser==0.6.* is required by
+                               # {'syslog-rfc5424-parser'}
         "numpy>=1.20.1",
         "pandas>=1.2.3",
         "prettytable>=2.1.0",
@@ -92,6 +86,7 @@ This software is distributed under the Apache 2.0 license.
             'logparse = logtools:logparse_main',
             'logmerge = logtools:logmerge_main',
             'logjoin = logtools:logjoin_main',
+            'logdb = logtools:logdb_main',
             'logplot = logtools:logplot_main',
             'logsample = logtools:logsample_main',
             'logfilter = logtools:logfilter_main',

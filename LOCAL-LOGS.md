@@ -14,6 +14,7 @@ may attempt to use this information or not
   - [TOC](#toc)
   - [Available logs on (default) Ubuntu installation](#available-logs-on-default-ubuntu-installation)
   - [Logs from Docker or containers](#logs-from-docker-or-containers)
+  - [Logs brought back from CI (Github's Actions, Travis)](#logs-brought-back-from-ci-githubs-actions-travis)
 
 <!--TOC-->
 
@@ -167,3 +168,51 @@ First, lets look at `/var/log`:
   1. Xorg.0.log : see above
 
 ## Logs from Docker or containers
+
+Logs from the docker service are obtained with the command
+`journalctl -u docker.service`.
+
+There is a possibility to output docker logs in json format,
+see https://docs.docker.com/config/containers/logging/json-file/. 
+
+
+Sample for Mysql running in its own container
+
+  ~~~
+[Entrypoint] Starting MySQL 8.0.23-1.1.19
+ 2021-05-07T07:55:51.633047Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.0.23) starting as process 22
+ 2021-05-07T07:55:51.664377Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+ 2021-05-07T07:55:52.311873Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+ 2021-05-07T07:55:52.773285Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Bind-address: '::' port: 33060, socket: /var/run/mysqld/mysqlx.sock
+ 2021-05-07T07:55:52.886201Z 0 [System] [MY-010229] [Server] Starting XA crash recovery...
+ 2021-05-07T07:55:52.905041Z 0 [System] [MY-010232] [Server] XA crash recovery finished.
+ 2021-05-07T07:55:53.002431Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+ 2021-05-07T07:55:53.003129Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+ 2021-05-07T07:55:53.145283Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.0.23'  socket: '/var/lib/mysql/mysql.sock'  port: 3306  MySQL Community Server - GPL.
+  ~~~
+
+## Logs brought back from CI (Github's Actions, Travis)
+
+Github's Actions
+  Regular log, sample (check time whether local or GMT).
+  
+  Sample:
+  ~~~
+2021-04-22T20:35:11.7928868Z ##[section]Starting: Request a runner to run this job
+2021-04-22T20:35:12.2027644Z Can't find any online and idle self-hosted runner in current repository that matches the required labels: 'ubuntu-latest'
+2021-04-22T20:35:12.2027713Z Can't find any online and idle self-hosted runner in current repository's account/organization that matches the required labels: 'ubuntu-latest'
+2021-04-22T20:35:12.2028058Z Found online and idle hosted runner in current repository's account/organization that matches the required labels: 'ubuntu-latest'
+2021-04-22T20:35:12.3605053Z ##[section]Finishing: Request a runner to run this job
+2021-04-22T20:35:19.0693521Z Current runner version: '2.278.0'
+2021-04-22T20:35:19.0729329Z ##[group]Operating System
+2021-04-22T20:35:19.0730380Z Ubuntu
+2021-04-22T20:35:19.0731025Z 20.04.2
+2021-04-22T20:35:19.0731509Z LTS
+2021-04-22T20:35:19.0732176Z ##[endgroup]
+  ~~~
+
+
+Travis
+
+  Looks like text interspersed with terminal control escape sequences, 
+  unstructured (!)

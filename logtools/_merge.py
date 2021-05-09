@@ -38,7 +38,8 @@ import logtools.parsers
 import logtools.parsers2
 from ._config import logtools_config, interpolate_config, AttrDict, setLoglevel
 from .parsers2 import FileFormat , TraditionalFileFormat, ForwardFormat
-from .parsers2 import TraditionalForwardFormat, TestA, TFFA,  TFFB
+from .parsers2 import TraditionalForwardFormat
+from .utils import getObj
 
 
 __all__ = ['logmerge_parse_args', 'logmerge', 'logmerge_main']
@@ -105,8 +106,7 @@ def logmerge(options, args):
     key_func = None
     if options.get('parser', None):
         # Use a parser to extract field to merge/sort by
-        parser = eval(options.parser, { **vars(logtools.parsers),
-                                        **vars(logtools.parsers2) }, {})()
+        parser = getObj(options.parser, (logtools.parsers, logtools.parsers2))()
 
         if field.isdigit():            
             extract_func = lambda x: parser(x.strip()).by_index(int(field)-1)

@@ -31,6 +31,7 @@ from operator import and_
 from optparse import OptionParser
 
 from ._config import logtools_config, interpolate_config, AttrDict, setLoglevel
+from .utils import getObj
 import logtools.parsers
 
 __all__ = ['filterbots_parse_args', 'filterbots', 
@@ -200,7 +201,7 @@ def filterbots(fh, ip_ua_re, bots_ua, bots_ips,
                 
     else:
         # Custom parser specified, use field-based matching
-        parser = eval(parser, vars(logtools.parsers), {})()
+        parser = getObj(parser, (logtools.parsers,))()
         try:
             fields_map = dict([tuple(k.split(':')) for k in ip_ua_fields.split(',')])
         except ValueError:

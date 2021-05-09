@@ -14,18 +14,17 @@
 #
 # ........................................ NOTICE
 #
-# This file has been derived and modified from a source licensed under Apache Version 2.0.
-# See files NOTICE and README.md for more details.
+# ........................................ COPYRIGHT
 #
+# (C) Alain Lichnewsky, 2021
+#     https://github.com/AlainLich
 # ........................................ ******
+#
 
 """
-logtools._join
-
-Perform a join between log stream and
-some other arbitrary source of data.
-Can be used with pluggable drivers e.g
-to join against database, other files etc.
+logtools._db
+Perform various database operations based on information collected in a logstream,
+and possibly from other sources.
 """
 import re
 import sys
@@ -40,6 +39,7 @@ from operator import and_
 import logtools.parsers
 import logtools.parsers2
 from .join_backends import *
+from ._join import jsonKeyExtract
 from ._config import logtools_config, interpolate_config, AttrDict, setLoglevel
 from .utils import flatten, ucodeNorm, getObj
 
@@ -48,22 +48,11 @@ import dpath.util
 
 
 
-__all__ = ['logjoin_parse_args', 'logjoin', 'logjoin_main']
+__all__ = ['logdb_parse_args', 'logdb', 'logdb_main']
 
-def jsonKeyExtract(jsonIn,selector):
-    """\
-Extract values that correspond to selector from a list of dict in json
-form. The result is flattened recursively.
-    """
-    ret =  flatten(dpath.util.values(jsonIn, selector))
-    logging.debug(f"In jsonKeyExtract:\n\tjsonIn={jsonIn}\n\tselector={selector}" +
-                  f"\n\treturning:\t{ret}" )
-
-    return ret
-
-def logjoin_parse_args():
+def logdb_parse_args():
     usage = "%prog  [tag option]*\n"
-    parser = OptionParser(usage=usage + "\n"+ logjoin.__doc__)
+    parser = OptionParser(usage=usage + "\n" + logdb.__doc__ )
 
     parser.add_option("-d", "--delimiter", dest="delimiter",
                       help="Delimiter character for field-separation")
@@ -77,26 +66,26 @@ def logjoin_parse_args():
     parser.add_option( "--in", dest="inFileName",
                            help="Input file, if omitted stdin is used")
 
-    parser.add_option( "--out-encoding", dest="output_encoding",
-                           help="Encoding for output; accepted values: 'None' "
-                                + " '' or ‘NFKD’: (backwards compat)"
-    )
 
     # ........................................
-    parser.add_option("-b", "--backend", dest="backend",
-                      help="Backend to use for joining. Currently available backends: 'sqlalchemy'")
-    parser.add_option("-f", "--field", dest="field",
-                      help="Index of field to use as field to join on")
-    parser.add_option("-C", "--join-connect-string", dest="join_connect_string",
+    parser.add_option("-b", "--dbOperator", dest="dbOperator",
+                      help="DbOperator to use for joining. Currently available dbOperators: 'sqlalchemy'")
+    parser.add_option("-C", "--join-connect-string", dest="dbOp_connect_string",
                       help="Connection string (e.g sqlalchemy db URI)")
-    parser.add_option("-F", "--join-remote-fields", dest="join_remote_fields",
-                      help="Fields to include from right join clause")
-    parser.add_option("-N", "--join-remote-name", dest="join_remote_name",
-                      help="Name of resource to join to (e.g file name, table name)")
-    parser.add_option("-K", "--join-remote-key", dest="join_remote_key",
+
+    parser.add_option("-f", "--field", dest="field",
+                      help="Index of field to use as field to operate on")
+
+    parser.add_option("-F", "--join-remote-fields", dest="dbOp_remote_fields",
+                      help="Fields to operate on")
+
+    parser.add_option("-N", "--join-remote-name", dest="dbOp_remote_name",
+                      help="Name of resource to operate on (e.g file name, table name)")
+
+    parser.add_option("-K", "--join-remote-key", dest="dbOp_remote_key",
                       help="Name of remote key field to join on (e.g table field, file column index)")
 
-    parser.add_option("-P", "--profile", dest="profile", default='logjoin',
+    parser.add_option("-P", "--profile", dest="profile", default='dbOp',
                       help="Configuration profile (section in configuration file)")
 
     # logging level for debug and other information
@@ -115,16 +104,13 @@ def logjoin_parse_args():
     options.field  = interpolate_config(options.field, options.profile, 'field')
     options.delimiter = interpolate_config(options.delimiter, options.profile, 'delimiter', default=' ')
 
-    options.backend = interpolate_config(options.backend, options.profile, 'backend')
-    options.output_encoding = interpolate_config(options.output_encoding, options.profile,
-                                                'output_encoding')
-
+    options.dbOperator = interpolate_config(options.dbOperator, options.profile, 'dbOperator')
     options.frontend = interpolate_config(options.frontend, options.profile, 'frontend')
 
-    options.join_connect_string = interpolate_config(options.join_connect_string, options.profile, 'join_connect_string')
-    options.join_remote_fields = interpolate_config(options.join_remote_fields, options.profile, 'join_remote_fields')
-    options.join_remote_name = interpolate_config(options.join_remote_name, options.profile, 'join_remote_name')
-    options.join_remote_key = interpolate_config(options.join_remote_key, options.profile, 'join_remote_key')
+    options.dbOp_connect_string = interpolate_config(options.dbOp_connect_string, options.profile, 'dbOp_connect_string')
+    options.dbOp_remote_fields = interpolate_config(options.dbOp_remote_fields, options.profile, 'dbOp_remote_fields')
+    options.dbOp_remote_name = interpolate_config(options.dbOp_remote_name, options.profile, 'dbOp_remote_name')
+    options.dbOp_remote_key = interpolate_config(options.dbOp_remote_key, options.profile, 'dbOp_remote_key')
 
     # Set the logging level
     setLoglevel(options)
@@ -132,31 +118,36 @@ def logjoin_parse_args():
     return AttrDict(options.__dict__), args
 
 
-def logjoin(fh, **options):
+def logdb(fh, **options):
     """
-Function: Perform a join between new information and information in a database
-          table
+Function: Perform misc. operations between new logstream  information and information
+          in a database
+
    - front-end : option 'parser' will result filtering the input by indicated
                  front-end parser. Our code is close to logparse. It remains to be
                  seen if this is useful  or could be done using logparse.
 
-   - backend(s) take arguments from CL options or configuration file,
-         this will depend on the backends available
-         + SQLAlchemyJoinBackend :
+   - dbOperator(s) take arguments from CL options or configuration file,
+         db functions are selected by keyword dbOperator among available.
+
 
     Keyword arguments:
-          field:                field(s) to join from the input
-          keys:                 keys to be use in frontend
+?          field:                field(s) to join from the input
+?          keys:                 keys to be use in frontend
           delimiter:
-          backend:
+          dbOperator:            back end to effect operations on data base
           frontend:             function returning iterator to filter incoming data
-          join_connect_string:
-          join_remote_fields:
-          join_remote_name:
-          join_remote_key:
+          fe_keys:              keys for selection in front end
+          in:                   input file
+
+          dbOp_connect_string:
+          dbOp_remote_fields:
+          dbOp_remote_name:
+          dbOp_remote_key:
 
     If absent on the command line, keywords may be filled from ~/.logtoolsrc, section
-    "logjoin" (may be overriden by flag -P)
+    "dbOp" (may be overriden by flag -P)
+
 """
     options=AttrDict(options)
 
@@ -171,11 +162,12 @@ Function: Perform a join between new information and information in a database
     fe_returns_Json = False
     # front end selection and parametrization
     if options.get('frontend', None):
-        # Use a frontend parser to extract field to merge/sort
+        # Use a frontend parser to extract field to merge/sor
         frontend =  getObj(options.frontend, (logtools.parsers, logtools.parsers2))()
+
         if isinstance(frontend, logtools.parsers2.JSONParserPlus):
-            extract_func = logtools.parsers2.dpath_getter_gen(frontend, options.field,
-                                                              options.keys)
+            extract_func = logtools.parsers2.dpath_getter_gen_mult(frontend, options.field,
+                                                                   options)
             fe_returns_Json =  frontend.fe_returns_Json()
         else:
             # Field given as string
@@ -202,47 +194,49 @@ Function: Perform a join between new information and information in a database
 
 
 
-    # backend selection and parametrization
-    backend_impl = {
-        "sqlalchemy": SQLAlchemyJoinBackend,
-        "sqlalchemyV0": SQLAlchemyJoinBackendV0    # keep the non ORM version (Base class! )
-    }[options.backend](remote_fields=options.join_remote_fields,
-                       remote_name=options.join_remote_name,
-                       remote_key=options.join_remote_key,
-                       connect_string=options.join_connect_string)
+    # dbOperator selection and parametrization
+    tbl = {
+        "SQLAlcDbOp": SQLAlchemyDbOperator,
+    }
+    try:
+        dbOperator_impl = tbl[options.dbOperator](remote_fields=options.dbOp_remote_fields,
+                                                  remote_name=options.dbOp_remote_name,
+                                                  remote_key=options.dbOp_remote_key,
+                                                  connect_string=options.dbOp_connect_string)
+    except KeyError as err:
+        print(f"{err}\nThe --dbOperator flag should point at an entry in:{tbl.keys()}",
+              file=sys.stderr)
+        sys.exit(2)
+    except Exception as err:
+        print(f"{err}\nError in connecting to the data base server", file=sys.stderr)
+        sys.exit(2
+        )
 
-
-    # perform the join
+    #   See what happens, we probably need to check that the class has adequate parent(s)
+    dbOperator_impl.createDeferredClasses()
+    dbOperator_impl.prepareDeferred()
+        
+    # perform the operation
     for row in map(extract_func, fh):
         if fe_returns_Json:
-            key = jsonKeyExtract(row,field)
+            value = jsonKeyExtract(row,field)
         else:
-            key = row[field]
-        for join_row in backend_impl.join(key):
-            yield key, str(row) + " => " + delimiter + delimiter.join(map(str, join_row))
+            value = row[field]
+        for dbOp_row in dbOperator_impl.operate(field, value,row ):
+            yield value, str(row) + " => " + delimiter + delimiter.join(map(str, dbOp_row))
 
 
 
-def logjoin_main():
+def logdb_main():
     """Console entry-point"""
-    options, args = logjoin_parse_args()
+    options, args = logdb_parse_args()
     if options.inFileName:
         fh = open(options.inFileName, "r")
     else:
         fh= sys.stdin
 
-    logging.info(f"options.output_encoding=({type(options.output_encoding)})'{options.output_encoding}'")
-    if options.output_encoding is not None and options.output_encoding.lower() != 'none':
-        if options.output_encoding == 'NFKD' or  options.output_encoding=='':
-            trFn =  ucodeNorm
-        else:
-           raise NotImplementedError(f"--out-encoding, value {options.output_encoding}" +
-                                      " not accepted")
-    else:
-        trFn =  lambda x:x
-
-    for key, row in logjoin(fh=fh, *args,  **options):
-        print( trFn(row), file = sys.stdout )
+    for key, row in logdb(fh=fh, *args,  **options):
+        print( row, file = sys.stdout )
 
     if options.inFileName:
         fh.close()

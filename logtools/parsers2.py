@@ -36,14 +36,17 @@ from datetime import datetime
 from abc import ABCMeta, abstractmethod
 from functools import reduce
 from io import StringIO
+from copy import copy
 
 from syslog_rfc5424_parser import SyslogMessage, ParseError
 import json
 import dpath
 import dpath.util
 
+import logtools._config as _config
 from ._config import AttrDict
 from .parsers import LogParser, LogLine
+
 
 #
 # Little utility function ( could move to utils.py)
@@ -129,16 +132,23 @@ templateDefs = """
 #$template TraditionalForwardFormat,"<%PRI%>%TIMESTAMP% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%"
 
 # ----------------------------------------------------------------------
-# The stuff below is really for testing only
+# Docker log as output by command:  docker container logs <container-name>
+# ----------------------------------------------------------------------
+#$template DockerCLog,"%TIMESTAMP% %NUM% %bracket% %bracket% %bracket% %msg%"
 
-#$template TestA,"%HOSTNAME%"
-#$template TestB,"%HOSTNAME%\\n"
-#$template TFFA,"%TIMESTAMP% %HOSTNAME%\\n"
-#$template TFFB,"%TIMESTAMP% %HOSTNAME% %syslogtag%"
+# ----------------------------------------------------------------------
+
+# To add  user specific templates, open a section RSysTradiVariant
+# and insert an entry 'file' designating a file where templates are entered
+# with the above format. The built function(s) will be added to module 'parser2'
+
+# ----------------------------------------------------------------------
+
 
 """
 #
-# These are proposed templates for which I have abandonned (for now ? )
+# These are proposed templates for which I do not add here, however, concerning the
+# second, see the JSON support in "class JSONParser" (parser.py)
 #
 templateNotConsidered = """
 #$template StdSQLFormat,"insert into SystemEvents (Message, Facility, FromHost, Priority, DeviceReportedTime, ReceivedAt, InfoUnitID, SysLogTag) values ('%msg%', %syslogfacility%, '%HOSTNAME%', %syslogpriority%, '%timereported:::date-mysql%', '%timegenerated:::date-mysql%', %iut%, '%syslogtag%')",SQL
@@ -146,6 +156,17 @@ templateNotConsidered = """
 #$template jsonRfc5424Template,"{\\"type\\":\\"mytype1\\",\\"host\\":\\"%HOSTNAME%\\",\\"message\\":\\"<%PRI%>1 %TIMESTAMP:::date-rfc3339% %HOSTNAME% %APP-NAME% %PROCID% %MSGID% %STRUCTURED-DATA% %msg:::json%\\"}\\n"
 
 """
+
+# A template consists of a template directive, a name, the actual template
+# text and optional options.
+_rexs= ( "^(\#?\$?template)\s+",                 # template directive
+        "(?P<name>[A-Za-z0-9_@]+)\s*,\s*",      # name
+        "\"(?P<template>[^\"]*)\""              # template
+        "(\s*,\s*(?P<option>[A-Za-z]+))*\s*$"   # option part, case insensitive
+      )
+_rex = re.compile("".join(_rexs), re.VERBOSE)
+_rexblank = re.compile("^(\s*|#( .*)?)\n?$")
+
 
 
 def prepareTemplateDict(tempStr):
@@ -156,21 +177,21 @@ def prepareTemplateDict(tempStr):
 
         This may require augmenting the parser selection mechanism in parser.py.
     """
-    # A template consists of a template directive, a name, the actual template
-    # text and optional options.
-    rexs= ( "^(\#?\$?template)\s+",                 # template directive
-            "(?P<name>[A-Za-z0-9_@]+)\s*,\s*",      # name
-            "\"(?P<template>[^\"]*)\""              # template
-            "(\s*,\s*(?P<option>[A-Za-z]+))*\s*$"   # option part, case insensitive
-          )
-    rex = re.compile("".join(rexs), re.VERBOSE)
-    rexblank = re.compile("^(\s*|#( .*)?)\n?$")
 
     tmplDict = {}
     tmplIdx  = {}
+
+    with StringIO(tempStr) as input:
+         return addToTemplateDict(input, {}, {})
+
+
+def addToTemplateDict(lines, tmplDict, tmplIdx, addFunction=False):
+    """ Append templates to the dictionnaries, makes prepareTemplateDict modular
+        so that we may add templates from configuration files
+    """
     def splitLine(l):
         nl = l.replace("\\\"","\\@")
-        mobj = rex.match(nl)
+        mobj = _rex.match(nl)
 
         if mobj:
             return mobj.groupdict()
@@ -178,20 +199,28 @@ def prepareTemplateDict(tempStr):
             raise ValueError( f"NO MATCH for line {repr(l)}")
         return nl
 
-    with StringIO(tempStr) as input:
-        i = -1
-        for line in input:
-            if rexblank.match(line):
-                continue
-            i += 1
-            flds = splitLine(line)
-            name = flds['name']
-            if name in tmplDict :
-                raise RuntimeError(f"Multiply defined template name {name}")
-            tmplDict[name] = (flds['template'], flds['option'], i)
-            tmplIdx[i] = name
+    i = len(tmplIdx)-1
+    for line in lines:
+        if _rexblank.match(line):
+            continue
+        i += 1
+        flds = splitLine(line)
+        name = flds['name']
+        if name in tmplDict :
+            raise RuntimeError(f"Multiply defined template name {name}")
+        tmplDict[name] = (flds['template'], flds['option'], i)
+        tmplIdx[i] = name
+        
+        if addFunction:
+            thisModule = sys.modules[__name__]
+            def fun( nm=None):
+                return  RSysTradiVariant(nm)
+            # The binding of arg (nm) and of fun is tricky
+            setattr( thisModule , name  , partial(copy(fun), nm=name))
+
     return (tmplDict, tmplIdx)
 
+    
 
 def printAvailTemplates(tmplDict, tmplIdx, file = sys.stderr):
     tmplnames = tmplDict.keys()
@@ -199,6 +228,18 @@ def printAvailTemplates(tmplDict, tmplIdx, file = sys.stderr):
     print(f"Number associations: {tmplIdx}", file = file)
 
 
+def addConfigFileSection():
+    config = _config.logtools_config
+    if "RSysTradiVariant" in config.sections():
+        if "file" in config["RSysTradiVariant"]:
+            with open(config["RSysTradiVariant"]["file"], "r") as fileTemplates:
+                 (RSyParsing.tmplDict, RSyParsing.tmplIdx) = \
+                     addToTemplateDict(fileTemplates,
+                                       RSyParsing.tmplDict, RSyParsing.tmplIdx,
+                                       addFunction = True) 
+
+
+    
 class RSyParsing():
     """ This class builds a rsyslog parser from its specs and then permits to
         operate it.
@@ -207,15 +248,15 @@ class RSyParsing():
     tmplDict, tmplIdx =  prepareTemplateDict(templateDefs)
 
     def __init__(self, name, spec, options):
-        logging.debug(f"In {type(self).__init__}: name:{name}\n\t{spec}\n\t{options}")
+        logging.debug(f"In {type(self)}{self}.__init__: name:{name}\n\t{spec}\n\t{options}")
 
         self.name = name
         self.spec = spec
         self.options = options
-        self.rexNamedGroups = {}
+        self.rexNamedGroups = {}        
         self._compile()
-
         self._logline_wrapper = LogLine()
+        
 
     rexs = "^(?P<txt>[^%]+)?%(?P<replacer>[^%]+)%"
     rexends = "^(\s+|\\\\n)$"
@@ -273,6 +314,7 @@ class RSyParsing():
     A.lets            = "[A-Za-z]+"
     A.Lets            = "[A-Z][A-Za-z]*"
     A.digits          = "\d+"
+    A.decnum          = "\d+(.\d+)?"
     A.let_dig         = "([A-Za-z]|\d)"
     A.let_digS        = "([A-Za-z]|\d)+"
     A.let_dig_hyp_pt  = "(" + A.let_dig + "|[.-])"
@@ -281,8 +323,8 @@ class RSyParsing():
     A.let_dig_hypS    = "(" + A.let_dig + "|[-])+"
     A.tstampEmpirical = ( A.Lets + "\s" +  A.digits + "\s" +
                           A.digits + ":" + A.digits  + ":" + A.digits )
-    A.tstampEmpDpkg   = (  A.digits + "-" + A.digits + "-" + A.digits + "\s" +
-                           A.digits + ":" + A.digits + ":" + A.digits )
+    A.tstampEmpDpkg   = (  A.digits + "-" + A.digits + "-" + A.digits + "(\s|T)" +
+                           A.digits + ":" + A.digits + ":" + A.decnum +  A.let + "?")
 
     syslogFldRexDict = {
         'HOSTNAME' : "(" + A.let_dig + A.let_dig_hyp_pt + "*" + A.let_digS + \
@@ -292,7 +334,9 @@ class RSyParsing():
                        "|" + A.tstampEmpDpkg +        # not compliant RFC:seen dpkg.log
                        ")"
                      ),
+        'NUM':   A.digits,
         'syslogtag': "[^:]+:",
+        'bracket'  : '\[[^[]*\]',
         'msg':".*",
         'PRI':"<[^>]{3,5}>"
         }
@@ -407,14 +451,9 @@ def ForwardFormat():
 def TraditionalForwardFormat():
     return RSysTradiVariant("TraditionalForwardFormat")
 
-def TestA():
-    return RSysTradiVariant("TestA")
+def DockerCLog():
+    return RSysTradiVariant("DockerCLog")
 
-def TFFA():
-    return RSysTradiVariant("TFFA")
-
-def TFFB():
-    return RSysTradiVariant("TFFB")
 
 # ................................................................................
 #
@@ -438,24 +477,57 @@ to a line)
         LogParser.__init__(self)
         self._logline_wrapper = LogLine()
 
+    def fe_returns_Json(self):
+        "Indicate that this returns JSON"
+        return True
+        
     def parse(self, line):
         """Parse JSON line, allows multilevel keys with regexps"""
-        parsed_row = json.loads(line)
-
-        data = parsed_row
-
+        try:
+            parsed_row = json.loads(line)
+            data = parsed_row
+        except Exception as err:
+            print(f"In {type(self)}.parse:\n\t{err}\n\tcould not parse JSON from:'{line}'",
+                  file=sys.stderr)
+            print(f"\ntype(line)={type(line)}", file=sys.stderr)
+            data = {"raw":line}
+            
         return data
 
 
-def dpath_getter_gen(parser, keys, fields):
+def dpath_getter_gen(parser, fields, options=None):
     """\
 Generator meta-function to return a function parsing a logline and returning
-multiple keys (tab-delimited)"""
+multiple options (tab-delimited)"""
 
 
-    def dpath_getter_fun(line, parser, keys, fields):
+    def dpath_getter_fun(line, parser, options, fields):
         data = parser(line)
         x = dpath.util.search(data, fields)
+        logging.debug(f"In dpath_getter_fun:line={line},\tparser={parser},\toptions={options}," +
+                      f"\tfields={fields}\treturning:{x}")
         return x
 
-    return partial(dpath_getter_fun, parser=parser, keys=keys, fields=fields)
+    return partial(dpath_getter_fun, parser=parser, options=options, fields=fields)
+
+
+def dpath_getter_gen_mult(parser,  fields, options = None):
+    """\
+Generator meta-function to return a function parsing a logline and returning
+multiple options (tab-delimited)
+
+This version is prepared to handle cases where multiple keys are required,
+in practice this would cover cases where we want to 'or' in ways constrained 
+by dpath
+
+It is not clear at this point that 2 functions are really needed!!!
+"""
+    print(f"In dpath_getter_gen_mult options={options}, fields={fields}", file=sys.stderr)
+    def dpath_getter_mult_fun(line, parser, options, fields):
+        data = parser(line)
+        x = dpath.util.search(data, fields)
+        logging.debug(f"In dpath_getter_fun:line={line},\tparser={parser},\toptions={options}," +
+                      f"\tfields={fields}\treturning:{x}")
+        return x
+
+    return partial(dpath_getter_mult_fun, parser=parser, options=options, fields=fields)

@@ -36,6 +36,7 @@ from optparse import OptionParser
 import dateutil.parser
 
 from ._config import logtools_config, interpolate_config, AttrDict
+from .utils import getObj
 import logtools.parsers
 
 __all__ = ['logtail_parse_args', 'logtail', 
@@ -103,7 +104,7 @@ def logtail(fh, date_format, start_date, field, parser=None, delimiter=None,
     _is_match_func = _is_match
     if parser:
         # Custom parser specified, use field-based matching
-        parser = eval(parser, vars(logtools.parsers), {})()
+        parser = getObj(parser, (logtools.parsers,))()
         is_indices = field.isdigit()
         if is_indices:
             # Field index based matching

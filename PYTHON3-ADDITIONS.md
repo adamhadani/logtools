@@ -21,21 +21,25 @@ still to be considered experimental
 ## Intent
 
 The idea was to make the package more usable in my own context, which concerns
-Linux/Ubuntu produced logs. 
+Linux/Ubuntu or Docker produced logs. 
 
 Other aspects:
  - emphasis on `fr_FR.UTF-8` locale
  - most logs are in `RSYSLOG_TraditionalFileFormat`
- 
-### Added functionality
+ - found `logjoin` interesting, but running under `Mysql 8.0` which requires an up to date 
+   version of the DB interface `SQLAlchemy`. 
+   This prompted removal of `SQLSoup` and move to current version of
+   `SQLAlchemy`, with interest on the ORM. 
+   
+## Added functionality
  
 1. added CLI flags to customize the level of logging; not customizable from 
-   ~/.logtoolsrc (propagates slowly to various entries)
+   ~/.logtoolsrc (implementation propagates slowly to various entries)
     - adds flags `-s` (symbolic designation like ̀-s DEBUG`)  `-n` (numerical
 	 like `-n 10`)
 	 
 	 
-2. Added RFC 5424 parser `SyslogRFC5424`, here ̀-f`supports symbolic field selection.
+1. Added RFC 5424 parser `SyslogRFC5424`, here ̀-f`supports symbolic field selection.
    This addition makes use of package `syslog_rfc5424_parser` from 
    https://github.com/EasyPost/syslog-rfc5424-parser. 
 
@@ -45,7 +49,7 @@ Other aspects:
 		 
 		 Field names can be found running with flag `-s DEBUG`	 
 
-3. Added a facility to handle logs specified by "traditional templates" in the style
+1. Added a facility to handle logs specified by "traditional templates" in the style
    defined at url   https://rsyslog-5-8-6-doc.neocities.org/rsyslog_conf_templates.html
    - <B>This is not compliant to said specification/standard</B>, only in <I>same style</I>
    - This is implemented (mostly) in `logtools/parsers2.py`
@@ -63,8 +67,26 @@ Other aspects:
      + Fields can be selected by field number or by using the property (symbol) appearing 
 	   in the template (for now, look for `templateDefs`  in `logtools/parsers2.py`).
 
+     + these formats forms a set extensible via configuration file(s):
+       requires adding to `~/.logtoolsrc`
+       ~~~
+       RSysTradiVariant]
+       HOME: <your home dir>
+       file: ${HOME}/.logtools.d/<your extension file>
+       ~~~
+	   
+	   and in the extension file:
+	   
+       ~~~
+	   #$template TestA,"%HOSTNAME%"
+       #$template TFFA,"%TIMESTAMP% %HOSTNAME%\n"
+       #$template TFFB,"%TIMESTAMP% %HOSTNAME% %syslogtag%"
+       #$template TFFC1,"%TIMESTAMP%"
+       ~~~
+
+	   
    - Usable with /var/log/{syslog,kern.log,auth.log} (on the Ubuntu Linux configuration
-     described)
+     described) and ̀docker container logs` (one of my use cases)
 	 
    Examples of use:
     ```
@@ -75,3 +97,161 @@ Other aspects:
       cat testData/testCommonLogFmt.data | logparse --parser CommonLogFormat  \
 	                                      -s INFO -f4								
     ```
+
+1. Parsing of JSON Data
+  + supported in `logjoin` via frontend interface
+
+1. Changes in `logjoin`. 
+  + Data Base interface
+    + removed all `SQLSoup` dependencies; moving to `SQLAlchemy`. This option
+	  was selected because `SQLSoup` was found incompatible with newer versions 
+      of  `SQLAlchemy`, making `Mysql 8.0` unavailable.
+    + supports `Mysql 8.0`
+    + only testing with  `Mysql 8.0` DB
+  + added `frontend` filtering
+    + frontend may return JSON, internally as (recursive dict of list)...
+	+ permits to ingest JSON data (see tests)
+  + added a (parameterizable) notion of `backend`
+    + performs database operations depending of flow of data streaming out of `frontend`
+	+ collect SQL Schema (tables) information from SQL server after connection,
+	  this may be used to simplify emitting more sophisticated queries
+    + generates SELECT SQL (for parameters in CLI or `~/.logtoolsrc`) using 
+	  SQLAlchemy using either ORM or Core. 
+	  
+  + support of additional data base transactions:
+    + table creation (for now table wired in, ... this may become parametrizable)
+	+ able to use SQLAlchemy via non ORM connections and OPRM sessions
+	+ able to use "mapped table"
+	
+
+1. Changes in backend filtering
+  + started with difficulties when piping into applications expecting ready to parse
+    JSON structures as lines
+  + distinguish form of returned data (string, binary, with filtering)
+    - not systematic yet
+  	
+1. Changes  to ̀flattenjson`:
+  + added --raw to dispense with utf-8 encoding, therefore can pipe to xargs,
+	   did not change default for backwards compatibility. This could have a CLI 
+	   like `--output-encoding`in `logjoin`
+
+1. Addition of `logdb`
+  + This provides for additional db related operations, looking at:
+    - filling a database table from data collected from a log stream
+
+  + Using Deferred Base and (still experimenting with)  creation of a simple database schema,
+   see classes `SQLAlchemyDbOperator` and `SQLAlchemyORMBackBase`.
+   
+   + Able to enter in a tree-like database schema the content of JSON (here from a Docker inspect 
+   command:
+   ~~~   
+   {'TOP': [ {'IPAM': 
+               {'Driver': 'default', 
+                'Options': {}, 
+				'Config': [ { 'Subnet': '172.19.0.0/16', 
+				              'Gateway': '172.19.0.1'}]}, 
+		      'Containers': {'4cf07fa937da4b6ad844b3a6ca22a8eb167dc503544becda8789774a6e605c5b': 
+			                   {'Name': 'mysql1', 
+							   'EndpointID': '7edb7b1e866957f0de6150c73c78b70717a6bb833794009509f1002dec622f41', 
+							   'MacAddress': '02:42:ac:13:00:02', 
+							   'IPv4Address': '172.19.0.2/16', 
+							   'IPv6Address': ''}, 
+						      '517acb5295aba5cc347d7aae88b525abf7faef26f5c481f2b82636b0619a192b': 
+							   {'Name': 'mysql-workbench', 
+							    'EndpointID': '5255215cc33826d3b90973aaed786d3b3e2b620ddbe6a837c6ae060fc8ce61e4', 
+								'MacAddress': '02:42:ac:13:00:03', 
+								'IPv4Address': '172.19.0.3/16', 
+								'IPv6Address': ''}}}]}
+   ~~~
+   
+   ~~~
+    id,parent_id,name,nval
+    1000,NULL,RootNode,2021-05-17T15:10:25.642125
+    1001,1000,RangeStart,1010
+    1010,1000,**TOP**,TREEPOS.LIST
+    1011,1010,0,TREEPOS.TOP
+    1012,1011,Driver,default
+    1013,1011,Options,TREEPOS.EMPTY_TREE
+    1014,1011,Config,TREEPOS.LIST
+    1015,1014,0,TREEPOS.TOP
+    1016,1015,Subnet,172.19.0.0/16
+    1017,1015,Gateway,172.19.0.1
+    1018,1010,1,TREEPOS.TOP
+    1019,1018,4cf07fa937da4b6ad844b3a6ca22a8eb167dc503544becda8789774a6e605c5b,TREEPOS.TOP
+    1020,1019,Name,mysql1
+    1021,1019,EndpointID,7edb7b1e866957f0de6150c73c78b70717a6bb833794009509f1002dec622f41
+    1022,1019,MacAddress,02:42:ac:13:00:02
+    1023,1019,IPv4Address,172.19.0.2/16
+    1024,1019,IPv6Address,
+    1025,1018,517acb5295aba5cc347d7aae88b525abf7faef26f5c481f2b82636b0619a192b,TREEPOS.TOP
+    1026,1025,Name,mysql-workbench
+    1027,1025,EndpointID,5255215cc33826d3b90973aaed786d3b3e2b620ddbe6a837c6ae060fc8ce61e4
+    1028,1025,MacAddress,02:42:ac:13:00:03
+    1029,1025,IPv4Address,172.19.0.3/16
+    1030,1025,IPv6Address,
+    1031,1000,RangeEnd,1030
+   ~~~
+
+
+  Still **in progress**, in above example, the selection mechanism has removed 'IPAM' and 'Containers'
+  keys.... which is obviously not a terrific idea!!
+
+## Non functional changes
+
+1. removed most of the `eval` function calls by function `utils.getObj`,
+   mostly to avoid code injection and hard to understand error messages.
+
+## Ongoing development
+
+The issues here should be resolved before this file hits Github!
+
+### Issues
+Failing tests:
+  1. Test F, F1, F1b, F1c: 
+    + syntax of -f (field)
+	+ identification of (multilevel) keys in json produced by JSONParserPlus
+	+ need to understand function flatten
+	
+	
+More tests:
+  1. figure out what to do with ̀tox`
+  1. coverage tests (?)
+  1. decide how to test with database, including in CI (Github Actions)
+  
+ 
+Improvements:
+  1. change --raw in flattenjson to use  `--output-encoding`like `logjoin`
+  1. document aux/parseRsyslogd.py
+	 
+  
+### Findings 
+  1. flattenjson has (very) limited functionality...
+    + added --raw to dispense with utf-8 encoding, therefore can pipe to xargs,
+	  did not change default for backwards compatibility.
+
+  1. need to extend _join.py functionality to handle JSON input
+
+  1. There are questions about transitionning in SQLAlchemy, 
+  https://docs.sqlalchemy.org/en/14/tutorial/index.html
+  
+  >  The new SQLAlchemy Tutorial is now integrated between Core and ORM
+  >  and serves as a unified introduction to SQLAlchemy as a whole. In
+  >  the new 2.0 style of working, fully available in the 1.4 release,
+  >  the ORM now uses Core-style querying with the select() construct,
+  >  and transactional semantics between Core connections and ORM
+  >  sessions are equivalent. Take note of the blue border styles for
+  >  each section, that will tell you how “ORM-ish” a particular topic
+  > is!
+
+  I will see and may document here impact for this project!
+  
+  Concerning  SQLAlchemy, there are further projects/tools worth looking at:
+  
+  + https://alembic.sqlalchemy.org/en/latest/  is a migration tool:
+  > ''For management of an application database schema over the long term
+  > however, a schema management tool such as Alembic, which builds upon
+  > SQLAlchemy, is likely a better choice, as it can manage and
+  > orchestrate the process of incrementally altering a fixed database
+  > schema over time as the design of the application changes.''
+
+

@@ -29,10 +29,14 @@
      http://github.com/adamhadani <IMG SRC="https://travis-ci.org/adamhadani/logtools.svg?branch=master"/>.
    - This version, for <B>Python-3 only</B>, with additions and changes by  Alain Lichnewsky,   is available at 
      https://github.com/AlainLich/logtools
-     distributed <I>as is</I>, with no warranty, under the Apache 2.0 license. For features see: 
-	 [PYTHON3-README.md](./PYTHON3-README.md). For local applications, see 
-	 [LOCAL-LOGS.md](./LOCAL-LOGS.md) (last link only works if installation features this information,
-	 typically not distributed via Github).
+     distributed <I>as is</I>, with no warranty, under the Apache 2.0 license. 
+	 + For features see
+	   [PYTHON3-README.md](./PYTHON3-README.md) 
+	   and [PYTHON3-ADDITIONS.md](./PYTHON3-ADDITIONS.md).
+	   
+	  + For local applications, see 
+	   [LOCAL-LOGS.md](./LOCAL-LOGS.md) (this link only works if installation features 
+	   this information, typically not distributed via Github).
 	 
 <B>Notes</B>: this version
    -  is not compatible with Python-2

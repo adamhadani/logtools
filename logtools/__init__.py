@@ -23,6 +23,10 @@
 import logging
 
 ## This might be specific to Ubuntu+Python3: +++++++++++++++++++++++++++++++++
+##
+## used by sqlalchemy/dialects/mysql/mysqldb.py", line 118, in dbapi
+## in class MySQLDialect_mysqldb
+#
 ## Had to:
 ##     sudo pip3 install mysql-connector (not sure necessary)
 ##     pip3 install PyMySQL
@@ -37,6 +41,7 @@ from ._filterbots import *
 from ._flattenjson import *
 from ._geoip import *
 from ._join import *
+from ._db import *
 from ._merge import *
 from ._parse import *
 from ._urlparse import *

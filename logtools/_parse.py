@@ -29,12 +29,14 @@ import logging
 from operator import and_
 from optparse import OptionParser
 from functools import reduce
+import json
 
 import logtools.parsers
 import logtools.parsers2
 from ._config import interpolate_config, AttrDict, setLoglevel
 from .parsers2 import FileFormat , TraditionalFileFormat, ForwardFormat
-from .parsers2 import TraditionalForwardFormat, TestA, TFFA,  TFFB
+from .parsers2 import TraditionalForwardFormat
+from .utils    import getObj
 
 __all__ = ['logparse_parse_args', 'logparse', 'logparse_main']
 
@@ -55,6 +57,11 @@ def logparse_parse_args():
     parser.add_option("-P", "--profile", dest="profile", default='logparse',
                       help="Configuration profile (section in configuration file)")  # noqa
 
+    parser.add_option("-R", "--raw", dest="raw", default=None, action="store_true",
+                      help="When set output is not encoded for UTF-8")  
+                      ## default kept for compatibility
+
+    # logging level for debug and other information
     parser.add_option("-s","--sym" , type = str,
                                   dest="logLevSym",
                                   help="logging level (symbol)")
@@ -75,6 +82,8 @@ def logparse_parse_args():
                                         default=False, type=bool)
     options.header = interpolate_config(options.header, options.profile, 'header',
                                         default=False, type=bool)
+    options.raw = interpolate_config(options.raw, options.profile, 'raw')
+
 
     # Set the logging level
     setLoglevel(options)
@@ -87,8 +96,11 @@ def logparse(options, args, fh):
     parser class and emit specified field(s)"""
 
     field = options.field
-    parser = eval(options.parser, { **vars(logtools.parsers), **vars(logtools.parsers2) },
-                  {})()
+    logtools.parsers2.addConfigFileSection()
+
+    
+    parser = getObj(options.parser, (logtools.parsers, logtools.parsers2))()
+     
     if options.get('format', None):
         parser.set_format(options.format)
 
@@ -102,7 +114,7 @@ def logparse(options, args, fh):
         keys = [options.field]
     else:
         if isinstance(parser, logtools.parsers2.JSONParserPlus):
-            key_func = logtools.parsers2.dpath_getter_gen(parser, keys, options.field)
+            key_func = logtools.parsers2.dpath_getter_gen(parser, options.field, options)
         else:
             # Field given as string
             # Check how many fields are requested
@@ -138,9 +150,13 @@ def logparse(options, args, fh):
 def logparse_main():
     """Console entry-point"""
     options, args = logparse_parse_args()
+    
     for row in logparse(options, args, fh=sys.stdin):
         if row:
             if isinstance(row, dict):
-                row = str(row)
-            print( row.encode('ascii', 'ignore') )
+                json.dump(row, sys.stdout)
+            elif options.raw:
+                print(row)
+            else:
+                print( row.encode('ascii', 'ignore') )
     return 0

@@ -8,9 +8,12 @@
 #
 # Assist with building table of contents in Markdown
 #
+SHELL= /bin/bash
 PYTHON= python3
 MD-TOC-PGM= $(PYTHON) -m md_toc --in-place
 MD-TOC-OPTIONS= github
+
+PYDIR= logtools
 
 MARKDOWNFILES=$(wildcard *.md)
 
@@ -41,3 +44,10 @@ md-tocs: $(MARKDOWNFILES)
 .PHONY: doxy
 doxy:
 	doxygen aux/logtools.doxyfile
+
+#
+# Generate UML with pyreverse
+#
+.PHONY: doUML
+doUML:
+	$(MAKE) -C aux 

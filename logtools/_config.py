@@ -30,11 +30,11 @@ import os
 import sys
 import logging
 
-from configparser import ConfigParser, NoOptionError, NoSectionError
+from configparser import ConfigParser, NoOptionError, NoSectionError, ExtendedInterpolation
 
 __all__ = ['logtools_config', 'interpolate_config', 'AttrDict', 'setLoglevel']
 
-logtools_config = ConfigParser()
+logtools_config = ConfigParser( interpolation = ExtendedInterpolation())
 logtools_config_paths = ['/etc/logtools.cfg', os.path.expanduser('~/.logtoolsrc')]
 logtools_config.read(logtools_config_paths)
 

@@ -1,0 +1,12 @@
+#----------------------- Additional info to be used with pyreverse output
+#....................... for
+
+"DB_Tree_Maker" -> "SQLAlchemyDbOperator"   : composition deferred_base_protocol
+"TreeNode"      -> "DB_Tree_Maker"    : aggregation generate
+
+#"AffineBase" -> "Draw3DBasics"       : composition  displayList
+#"RenderingBase" -> "Draw3DBasics"       : composition rendererInfo 
+#"FlexShader" -> "ShaderResourceAndSwitchGlu" : composition resourceDB
+#"VisFlexResource"  ->  "ShaderResourceAndSwitchVis"  : composition resourceDB
+#"Camera"    ->  "Draw3DSceneBasics"  : composition  viewpoint
+#"Camera"     -> "ViewerBase"         : composition  viewpoint

@@ -34,6 +34,7 @@ from optparse import OptionParser
 import acora
 
 from ._config import logtools_config, interpolate_config, AttrDict
+from  .utils import getObj
 import logtools.parsers
 
 __all__ = ['logfilter_parse_args', 'logfilter', 
@@ -180,7 +181,7 @@ def logfilter(fh, blacklist, field, parser=None, reverse=False,
     _is_blacklisted_func = _is_blacklisted
     if parser:
         # Custom parser specified, use field-based matching
-        parser = eval(parser, vars(logtools.parsers), {})()
+        parser = getObj(parser, (logtools.parsers,))()
         fields = field.split(',')
         is_indices = reduce(and_, (k.isdigit() for k in fields), True)
         if is_indices:

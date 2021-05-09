@@ -88,6 +88,12 @@ class LogParser(object):
         Some parsers can use this to specify
         a format string"""
         
+    def fe_returns_Json(self):
+        """This indicator of a class returning JSON is False by default.
+           This is used to facilitate integration of parsers returning JSON 
+           as (recursive) dict of list.
+        """
+        return False
         
 class LogLine(dict):
     """Instrumented dictionary that allows

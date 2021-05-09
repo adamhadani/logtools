@@ -1,4 +1,9 @@
-#!/home/alain/test/VirtualEnvSandbox/logtools/venvSandBox/bin/python3
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# -*- mode: Python -*-
+#
+# (C) Alain Lichnewsky, 2021
+#
 
 import os
 import sys
@@ -17,17 +22,23 @@ if __name__ == '__main__':
     path  = ["/home/alain/src/logtools"]
     path.extend(sys.path)
     sys.path  = path
-    ps = '\n\t'.join(sys.path)
-    print( f"sys.path:{ps}")
+    if "-d" in sys.argv:
+        ps = '\n\t'.join(sys.path)
+        print( f"sys.path:{ps}", file = sys.stderr)
+
 
 import logtools
 from logtools._config import setLoglevel
-from logtools.parsers2 import count, tmplDict, tmplIdx, RSyParsing, printAvailTemplates
+from logtools.parsers2 import count, RSyParsing, printAvailTemplates
 
 
 if __name__ == '__main__':
     description =""" 
     This builds and tests syslog template based parser(s)
+
+    Example:
+            docker container logs mysql1  2>/dev/stdout >/dev/null | \
+	    ~/src/logtools/aux/parseRsyslogd.py -v -d --testfile /dev/stdin
     """
 
 
@@ -71,16 +82,17 @@ if __name__ == '__main__':
             if options.doDebug:
                 sys.stderr.write (f"options:{repr(options)}\n")
             setLoglevel(options)
-                
+
+            
             c = count(lambda x: x is not None, (options.tmpltnum, options.tmpltname))
             if c == 0:
                 options.tmpltnum = 1
                 options.tmpltname = 'TraditionalFileFormat'
             elif c  == 1:
                 if options.tmpltnum is not None:
-                    options.tmpltname =  tmplIdx[ options.tmpltnum ] 
+                    options.tmpltname = RSyParsing.tmplIdx[ options.tmpltnum ] 
                 elif options.tmpltname:
-                    options.tmpltnum =   tmplDict[options.tmpltname][2]
+                    options.tmpltnum = RSyParsing.tmplDict[options.tmpltname][2]
                 else:
                     raise ValueError( "Incorrect specification of flags --tmpltname and --tmpltnum" )
             else:
@@ -89,9 +101,10 @@ if __name__ == '__main__':
                 sys.exit(1)
                 
             logging.info(  f"Testing pattern  {options.tmpltname} { options.tmpltnum}\n"
-                          +f"\t{tmplDict[options.tmpltname]}")
+                          +f"\t{RSyParsing.tmplDict[options.tmpltname]}")
             
-            rsymParser = RSyParsing( options.tmpltname, *tmplDict[options.tmpltname][0:2])
+            rsymParser = RSyParsing( options.tmpltname,
+                                     *RSyParsing.tmplDict[options.tmpltname][0:2])
             if options.testFileName:
                 testParser( options.testFileName, rsymParser)
             

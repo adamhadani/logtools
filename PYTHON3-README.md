@@ -5,17 +5,18 @@
 
 - [Python-3 port](#python-3-port)
   - [TOC](#toc)
-  - [Note](#note)
+  - [Notes](#notes)
     - [Intent and issues found](#intent-and-issues-found)
     - [Moving to sqlalchemy](#moving-to-sqlalchemy)
-    - [Added functionality](#added-functionality)
+  - [Added functionality](#added-functionality)
+  - [Test and operations](#test-and-operations)
     - [Test and operative environment](#test-and-operative-environment)
     - [Installation](#installation)
     - [First experiments](#first-experiments)
 
 <!--TOC-->
 
-## Note
+## Notes
 
 These are short notes documenting the Python-3 port, which is still to
 be considered experimental.
@@ -33,12 +34,18 @@ Following issues were encountered:
 - the `sqlsoup` package uses features of `SQLAlchemy`  ( `MapperExtension` ) which have 
   been deprecated (then suppressed since version 0.7; see
   https://docs.sqlalchemy.org/en/13/orm/deprecated.html ).
-  + Current versions are `sqlsoup 0.9.1` and  `SQLAlchemy 1.4.0b3`. 
-  + This port has been made requiring specific older
-    versions. It is highly recommended to operate under `virtualenv`; `
-    setup.py`has been changed accordingly. 
-  + A file [requirements.txt](./requirements.txt) has been added to document this, and
-    can be used with `pip3`.
+  + Workable but abandonned (after `commit f63db028b5f14cd2aa` on May 5, 2021) story:
+    + Current versions are `sqlsoup 0.9.1` and  `SQLAlchemy 1.4.0b3`. 
+    + Make the port to require specific older
+      versions. This suggests operate under `virtualenv`; ` setup.py` had been changed
+	  accordingly. 
+    + A file [requirements.txt](./requirements.txt) has been added to document this, and
+      can be used with `pip3`.
+  + Current approach:
+    + Removed all `SQLsoup` dependencies
+	+ Used `SQLAlchemy` instead (`version >= 1.4.13`)
+	+ Attempting to use the higher abstraction ORM, for query preparation and
+	  possibly exploitation. 
   
 - the package's usage of `datetime.strptime` in my locale `"fr_FR.UTF-8"`was found
   problematic ( `testQps` <I>fails when parsing date</I> `11/Oct/2000:14:01:14 -0700`
@@ -46,7 +53,8 @@ Following issues were encountered:
   disabled statements `locale.setlocale(locale.LC_ALL, "")`in 
   `_qps.py` and `_plot.py`. 
   The directory `aux` has been added with script `testStrptime.py` to test 
-  under different locales.
+  under different locales. Multiple locales where tested in the CI (mostly
+  Github's Actions framework)
   
 - when experimenting the use of ̀logjoin` with `mysql`
   + installing the `PyMySQL` module proved tricky (On Linux/Ubuntu):
@@ -57,60 +65,21 @@ Following issues were encountered:
 	import pymysql
     pymysql.install_as_MySQLdb()
 	~~~
-  + Note that SQLsoup documentation is found at
-    1. https://sqlsoup.readthedocs.io/en/latest/
-    1. https://docs.sqlalchemy.org/en/14/core/engines.html#sqlalchemy.create_engine 
 	
   + For connecting, the string form of the URL is 
      > dialect[+driver]://user:password@host/dbname[?key=value..], 
+	 
+     Example: `mysql://scott:tiger@hostname/dbname`
 	 where 
 	 + dialect is a database name such as mysql, oracle, postgresql, etc., and
 	 + driver the name of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. 
-	 Alternatively, the URL can be an instance of URL.
-     Example: `mysql://scott:tiger@hostname/dbname`
+	 + Alternatively, the URL can be an instance of URL class.
+     + this parameter may be set in ~/.logtoolsrc
 
-  + Getting error: `1193, "Unknown system variable 'tx_isolation'"`, which is not new:
-    + https://github.com/sqlalchemy/sqlalchemy/issues/5161
-	 > something about your MySQL server is not sending out a version detection string
-	 > that is expected. Can you go to your MySQL console and send the results of:
-     > SELECT VERSION()
+  + this is required when using SQLAlchemy
 
-   Conclusion:
-
-	 > transaction_isolation was added in MySQL 5.7.20 as an alias for 
-	 > tx_isolation, which is now deprecated and is removed in MySQL 8.0. 
-	 > Applications should be adjusted to use transaction_isolation in preference
-	 > to tx_isolation. PyMySQL/PyMySQL#614
-
-    All of this looks like an incompatibility between my version of MySQL (8.xx) and
-	the version of PyMySQL 
-
-    I am probably stuck with SQLAlchemy and SQLsoup because of the problem at the top,
-	probably not worth it using SQLAlchemy and SQLsoup... Or will need to upgrade
-	these 2 things to versions current, compatible between them and with Mysql 8.0!!!
-	
-	Current info on SQLSoup: https://github.com/zzzeek/sqlsoup
-
-    Page https://sqlsoup.readthedocs.io/en/latest/tutorial.html#getting-ready-to-connect
-	says: 
-	
-	> SQLSoup effectively provides a coarse grained, alternative
-    > interface to working with the SQLAlchemy ORM, providing a “self
-    > configuring” interface for extremely rudimental operations. It’s
-    > somewhat akin to a “super novice mode” version of the ORM. While
-    > you can do a lot more with the SQLAlchemy ORM directly, SQLSoup
-    > will have you querying an existing database in just two lines of
-    > code.
-
-    > SQLSoup is really well suited to quick one-offs, early learning of
-    > SQLAlchemy, and small scripting activities. It can be used in larger
-    > applications such as web applications as well, but here you’ll begin
-    > to experience diminishing returns; in a substantial web application,
-    > it might be time to just switch to SQLAlchemy’s Object Relational
-    > Tutorial.
-	
-	Conclusion is to remove sqlsoup!! And check that SQLalchemy is compatible
-	with Mysql8.0
+  + Finally decided to use an up to date version of SQLAlchemy to handle 
+     MySQL (8.xx). Updated version of PyMySQL: see above about package selection 
 
 
 ### Moving to sqlalchemy
@@ -122,12 +91,12 @@ Following issues were encountered:
 1. Porting: from sqlsoup to sqlalchemy
   + create_engine returns an `Engine` object 
 
-### Added functionality
+## Added functionality
 
    See [PYTHON3-ADDITIONS](./PYTHON3-ADDITIONS.md). 
    In [FORMAT-CHEATSHEET](./FORMAT-CHEATSHEET.md), some help for parser format selection
 
-
+## Test and operations
   
 ### Test and operative environment
  This is really setting up the development / maintenance environment:
@@ -230,3 +199,19 @@ filterbots -s ERROR -r ".*sudo:(?P<ua>[^:]+).*COMMAND=(?P<ip>\S+).*"  --print
 		 cat testData/TestAuth.data  | \
 		     testLogparse --parser TraditionalFileFormat -f TIMESTAMP -s ERROR	
 		 ```
+         Among capabilities, handle Docker log format:
+		 
+		 ```
+		 docker container logs mysql1  2>/dev/stdout >/dev/null| head -2| \
+		 testLogparse  --parser   DockerCLog --raw \
+		               -f TIMESTAMP,NUM,bracket,bracket1,bracket2,msg  -s ERROR
+		 ```
+		 where DockerCLog is defined in parsers2.py, but could also be supplied
+		 via configuration file in section `RSysTradiVariant`, outputs
+					   
+		 ```
+	     2021-04-26T...Z	0	[System]	[MY-010116]	[Server]	.../mysqld () starting ...
+         2021-04-26T...Z	1	[System]	[MY-013576]	[InnoDB]	InnoDB initialization start	
+		 ```
+		
+					   

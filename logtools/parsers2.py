@@ -522,7 +522,7 @@ by dpath
 
 It is not clear at this point that 2 functions are really needed!!!
 """
-    print(f"In dpath_getter_gen_mult options={options}, fields={fields}", file=sys.stderr)
+    logging.debug(f"In dpath_getter_gen_mult options={options}, fields={fields}")
     def dpath_getter_mult_fun(line, parser, options, fields):
         data = parser(line)
         x = dpath.util.search(data, fields)

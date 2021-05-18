@@ -52,7 +52,6 @@ except Exception:
     from sqlalchemy.sql import select
 # END ORM transition ............................................................... ++
 
-from .ext_db import DB_Tree_Maker,  dictOfDictIterator, TREEPOS
 
 
 Base = declarative_base()  # used for "mapped classes",
@@ -227,7 +226,7 @@ class SQLAlchemyORMBackBase(SQLAlchemyBackBase):
         self.metadata= Base.metadata
         self.session = None        # forSQLAlch Session
         self.reflectedBase = None  # for using  DeferredReflection 
-        self.reflectedList = []  # for using  DeferredReflection 
+        self.reflectedDict= {}  # for using  DeferredReflection 
           # see https://docs.sqlalchemy.org/en/14/orm/declarative_tables.html
           
         SQLAlchemyBackBase.__init__(self, remote_fields, remote_name,
@@ -266,15 +265,15 @@ class SQLAlchemyORMBackBase(SQLAlchemyBackBase):
             self.reflectedBase = Reflected    
         return (self.reflectedBase, Base)
 
-    def registerReflected(self,cl):
+    def registerReflected(self, clName, cl):
         """ register class that will need preparation, to be effected by method
             prepareDeferred
         """
-        self.reflectedList.append(cl)
+        self.reflectedDict[clName]=cl
 
     def prepareDeferred(self):
-        for cl in self.reflectedList:
-            logging.debug(f"about to prepare for class:{cl}")
+        for (clNm,cl) in self.reflectedDict.items():
+            logging.debug(f"about to prepare for class '{clNm}':{cl}")
             cl.prepare(self.db.engine)
     # ................................................................................
 
@@ -395,138 +394,38 @@ class SQLAlchemyDbOperator(SQLAlchemyORMBackBase):
           - use SQLAlchemy higher level tools (ORM) for query creation,
           - first use: fill database from input (log) stream
 
+
+        Expect to use derived classes specializing over a specific DB schema or table,
+        e.g. NestedTreeDbOperator in ext_db.py
     """
     def __init__(self, remote_fields, remote_name, remote_key, connect_string):
 
         SQLAlchemyORMBackBase.__init__(self, remote_fields, remote_name,
                                              remote_key, connect_string)
 
-    def createDeferredClasses(self):
+    def createDeferredClasses(self, outerClass):
         """
         This creates the classes which are handled via the  Deferred Base protocol/paradigm
 
+        Arg: outerClass is a class which has a method 'mkClasses' that will make
+             application oriented classes compliant with the Deferred Base protocol of ORM
+
         """
         rbase,base = self.getReflectedBase()
-        self.db_tree_maker =  DB_Tree_Maker(rbase, base) 
-        self.classDict =  self.db_tree_maker.mkClasses()
+        self.db_gen_outer =  outerClass(rbase, base) 
+        self.classDict =  self.db_gen_outer.mkClasses()
        
         for clNm,cl in self.classDict.items():
-            self.registerReflected(cl)
+            self.registerReflected(clNm, cl)
             logging.debug(f"In {type(self)}.createDeferredClasses, registered {clNm}:{cl}")
-
+            
              
     def operate(self, field, value, row):
         """ perform the operate query :
         """
         self._operate_init()
-
         return self._operate_fill(field, value, row)
     
-    def _operate_init(self):
-        # fetch uniqueId from tree with parent_id == 0 
-        self.uniqueId = self._fetch_unique_id()
-        self.dateIdent = datetime.today().isoformat(timespec='microseconds')
-        self.parentStack = []
-
-    def _store_unique_id(self):
-        TreeNode =  self.classDict["TreeNode"]
-        node = (self.session.query(TreeNode).filter_by(id=0))[0]
-        print(f"In store unique type(node)={type(node)}{node}", file=sys.stderr)
-        nid = str( (self.uniqueId + 99) // 100  * 100)
-        node.nval= nid
-        logging.debug(f"New First Avail unique id:{nid}")
-        self.session.commit()
-    
-    def _fetch_unique_id(self):
-        """ Fetch the first avaiable UniqueId, create the special entry if it 
-            does not exist.
-        """
-        # At locations 0..99, we store special stuff
-        #  0 : nval = next available unique id, parent = None, name="FirstAvailUID", 
-        #
-        TreeNode =  self.classDict["TreeNode"]
-        uid = None
-        for nval in self.session.query(TreeNode.nval).filter_by(id=0):
-            uid = int(nval[0])
-        if uid is None:
-            node = TreeNode(0, "FirstAvailUID", nval=1000)
-            self.session.add(node)
-            self.session.commit()
-            uid = 1000
-        return uid
-    
-    def _operate_fill(self, field, value, row):
-        """ Fill from a dict of dict
-        """
-
-        # RootNode is special, identify each input by date time, permit
-        #          to version, delete old stuff etc...
-        #          it is likely that the range of uniqueIds will be stuffed somewhere
-        #          to avoid an awkward query
-        #          Reserve RootNode.Id + 1,...., RootNode.Id+9 for special nodes
-        #              RootNode.Id + 1 : begin unique Id range for a session
-        #                          + 2 : end  unique Id  range (but in range!)
-
-        firstAvailUniqueId =  self.uniqueId + 10
-        root_parent_id = self.uniqueId
-        self.enterNode(self.dateIdent, ["RootNode"])
-        self.enterNode( firstAvailUniqueId, ["RangeStart"], parent_id = root_parent_id,
-                        fillOnly = True)
-        self.uniqueId = firstAvailUniqueId
-        
-        for (val, path) in dictOfDictIterator(value):
-            logging.debug(f"Walking: path={path}, val={val}")
-            if val in (TREEPOS.LIST,TREEPOS.TOP):
-               self.enterNode(val, path)
-            elif val == TREEPOS.POP:
-               self.popNode(val, path)
-            else:
-               self.enterNode(val, path, fillOnly=True)
-
-        rootnode = self.parentStack[0]
-        self.session.add(rootnode)
-
-        self.enterNode( self.uniqueId-1, ["RangeEnd"], parent_id = root_parent_id,
-                        fillOnly = True)
-        
-        logging.debug(f"Committing!!")      
-        self.session.commit()
-        self._store_unique_id()
-        
-        return ()
-        
-    def enterNode(self, val, pos, fillOnly=False, parent_id=None):
-        """
-            Enter a node in the DB table, if fillOnly is False, the
-            node is also entered on the parentStack, and will need to be 
-            popped.
-              - fillOnly == True: filling a tree node or a list node
-              - fillOnly == False: entering a new nested level of list or tree node
-        """
-        TreeNode =  self.classDict["TreeNode"]
-        args={}
-        if parent_id is None:
-            args['parent'] = self.parentStack[-1].id  if len(self.parentStack) > 0 else None
-        else:
-            args['parent'] = parent_id
-        args['nval'] = val 
-        sid = pos if isinstance(pos, str) else ( pos[-1] if len(pos)>0 else "**TOP**" )
-        
-        node = TreeNode(self.uniqueId, sid, **args)
-        self.session.add(node)
-        
-        if not fillOnly:
-            self.parentStack.append(node)
-        self.uniqueId+=1
-
-        logging.debug(f"In {type(self)}.enterNode: pos={pos} uniqueId={self.uniqueId-1}"
-                      +f"\n\tstack len={len(self.parentStack)}"
-                      +f"\n\targs={args}" )
-
-
-        
-    def popNode(self, val, pos):
-        self.parentStack.pop()
 
     def _create_query_stmts(self):
         pass                

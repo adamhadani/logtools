@@ -136,14 +136,17 @@ Other aspects:
 	   like `--output-encoding`in `logjoin`
 
 1. Addition of `logdb`
-  + This provides for additional db related operations, looking at:
+  +  This uses quite general SQLAlchemy ORM tools, using Classes `SQLAlchemyDbOperator` 
+     and `SQLAlchemyORMBackBase`, for providing 
+     DB related operations, implemented in CLI program `testLogdb`, like:
     - filling a database table from data collected from a log stream
 
-  + Using Deferred Base and (still experimenting with)  creation of a simple database schema,
-   see classes `SQLAlchemyDbOperator` and `SQLAlchemyORMBackBase`.
-   
-   + Able to enter in a tree-like database schema the content of JSON (here from a Docker inspect 
-   command:
+  + this feature is parametrized by CLI or config file; for now a single
+    case has been implemented:
+	
+    + SQLAlchemyDbOperator (parm. `dbOperator: SQLAlcDbOp`
+	  in `~/.logtoolsrc`) which provides for entering in a tree-like database schema the 
+      content of  JSON (here from a Docker `inspect`   command):
    ~~~   
    {'TOP': [ {'IPAM': 
                {'Driver': 'default', 
@@ -193,9 +196,12 @@ Other aspects:
    ~~~
 
 
-  Still **in progress**, in above example, the selection mechanism has removed 'IPAM' and 'Containers'
-  keys.... which is obviously not a terrific idea!!
-
+  Still **in progress**:
+  + in above example, the selection mechanism has removed 'IPAM' 
+    and 'Containers'  keys.... which is obviously not a terrific idea!!
+  + structurally, all methods dependent on the DB schema should be moved to
+    file ̀ext_db.py`. 
+  
 ## Non functional changes
 
 1. removed most of the `eval` function calls by function `utils.getObj`,
@@ -229,21 +235,10 @@ Improvements:
     + added --raw to dispense with utf-8 encoding, therefore can pipe to xargs,
 	  did not change default for backwards compatibility.
 
-  1. need to extend _join.py functionality to handle JSON input
-
-  1. There are questions about transitionning in SQLAlchemy, 
-  https://docs.sqlalchemy.org/en/14/tutorial/index.html
-  
-  >  The new SQLAlchemy Tutorial is now integrated between Core and ORM
-  >  and serves as a unified introduction to SQLAlchemy as a whole. In
-  >  the new 2.0 style of working, fully available in the 1.4 release,
-  >  the ORM now uses Core-style querying with the select() construct,
-  >  and transactional semantics between Core connections and ORM
-  >  sessions are equivalent. Take note of the blue border styles for
-  >  each section, that will tell you how “ORM-ish” a particular topic
-  > is!
-
-  I will see and may document here impact for this project!
+  1. Questions about transitionning in SQLAlchemy, found
+     https://docs.sqlalchemy.org/en/14/tutorial/index.html, have been resolved
+	 by keeping some Core based classes and moving to ORM for `_db.py` and CLI 
+	 `logdb`
   
   Concerning  SQLAlchemy, there are further projects/tools worth looking at:
   

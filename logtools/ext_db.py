@@ -64,6 +64,7 @@ except Exception:
     from sqlalchemy.sql import select
 # END ORM transition ............................................................... ++
 
+from .join_backends import SQLAlchemyDbOperator
 
 
 class DB_Tree_Maker():
@@ -146,8 +147,129 @@ class DB_Tree_Maker():
                     + "".join([c.dump(_indent + 1) for c in self.children.values()])
                 )
 
-        return {"TreeNode": TreeNode}
 
+            
+        return {"TreeNode": TreeNode}
+    
+
+class NestedTreeDbOperator( SQLAlchemyDbOperator ):
+    """ Specialization to enter JSON as nested (recursive) trees in a DB table
+
+    """
+
+    def __init__(self, remote_fields, remote_name, remote_key, connect_string):
+
+        SQLAlchemyDbOperator.__init__(self, remote_fields, remote_name,
+                                            remote_key, connect_string)
+
+    
+    def _operate_init(self):
+        # fetch uniqueId from tree with parent_id == 0 
+        self.uniqueId = self._fetch_unique_id()
+        self.dateIdent = datetime.today().isoformat(timespec='microseconds')
+        self.parentStack = []
+
+    def _store_unique_id(self):
+        TreeNode =  self.classDict["TreeNode"]
+        node = (self.session.query(TreeNode).filter_by(id=0))[0]
+        nid = str( (self.uniqueId + 99) // 100  * 100)
+        node.nval= nid
+        logging.debug(f"New First Avail unique id:{nid}")
+        self.session.commit()
+
+    def _fetch_unique_id(self):
+        """ Fetch the first avaiable UniqueId, create the special entry if it 
+            does not exist.
+        """
+        # At locations 0..99, we store special stuff
+        #  0 : nval = next available unique id, parent = None, name="FirstAvailUID", 
+        #
+        TreeNode =  self.classDict["TreeNode"]
+        uid = None
+        for nval in self.session.query(TreeNode.nval).filter_by(id=0):
+            uid = int(nval[0])
+        if uid is None:
+            node = TreeNode(0, "FirstAvailUID", nval=1000)
+            self.session.add(node)
+            self.session.commit()
+            uid = 1000
+        return uid
+
+    def _operate_fill(self, field, value, row):
+        """ Fill from a dict of dict
+        """
+
+        # RootNode is special, identify each input by date time, permit
+        #          to version, delete old stuff etc...
+        #          it is likely that the range of uniqueIds will be stuffed somewhere
+        #          to avoid an awkward query
+        #          Reserve RootNode.Id + 1,...., RootNode.Id+9 for special nodes
+        #              RootNode.Id + 1 : begin unique Id range for a session
+        #                          + 2 : end  unique Id  range (but in range!)
+
+        firstAvailUniqueId =  self.uniqueId + 10
+        root_parent_id = self.uniqueId
+        self.enterNode(self.dateIdent, ["RootNode"])
+        self.enterNode( firstAvailUniqueId, ["RangeStart"], parent_id = root_parent_id,
+                        fillOnly = True)
+        self.uniqueId = firstAvailUniqueId
+
+        for (val, path) in dictOfDictIterator(value):
+            logging.debug(f"Walking: path={path}, val={val}")
+            if val in (TREEPOS.LIST,TREEPOS.TOP):
+               self.enterNode(val, path)
+            elif val == TREEPOS.POP:
+               self.popNode(val, path)
+            else:
+               self.enterNode(val, path, fillOnly=True)
+
+        rootnode = self.parentStack[0]
+        self.session.add(rootnode)
+
+        self.enterNode( self.uniqueId-1, ["RangeEnd"], parent_id = root_parent_id,
+                        fillOnly = True)
+
+        logging.debug(f"Committing!!")      
+        self.session.commit()
+        self._store_unique_id()
+
+        return ()
+
+    def enterNode(self, val, pos, fillOnly=False, parent_id=None):
+        """
+            Enter a node in the DB table, if fillOnly is False, the
+            node is also entered on the parentStack, and will need to be 
+            popped.
+              - fillOnly == True: filling a tree node or a list node
+              - fillOnly == False: entering a new nested level of list or tree node
+        """
+        TreeNode =  self.classDict["TreeNode"]
+        args={}
+        if parent_id is None:
+            args['parent'] = self.parentStack[-1].id  if len(self.parentStack) > 0 else None
+        else:
+            args['parent'] = parent_id
+        args['nval'] = val 
+        sid = pos if isinstance(pos, str) else ( pos[-1] if len(pos)>0 else "**TOP**" )
+
+        node = TreeNode(self.uniqueId, sid, **args)
+        self.session.add(node)
+
+        if not fillOnly:
+            self.parentStack.append(node)
+        self.uniqueId+=1
+
+        logging.debug(f"In {type(self)}.enterNode: pos={pos} uniqueId={self.uniqueId-1}"
+                      +f"\n\tstack len={len(self.parentStack)}"
+                      +f"\n\targs={args}" )
+
+
+
+    def popNode(self, val, pos):
+        self.parentStack.pop()
+
+
+    
 class TREEPOS(Enum):
     """ Used in dictOfDictIteratorclass to characterize place in walked tree
     """
@@ -158,7 +280,8 @@ class TREEPOS(Enum):
 
     
 def dictOfDictIterator(dodTree, pos=None):
-    """ Walk iterator built with yield
+    """ Walk iterator built with yield, to analyze a Dict of (list of) Dict structure,
+        for instance obtained from JSON
     """
         
     if pos is None:
@@ -199,88 +322,3 @@ def dictOfDictIterator(dodTree, pos=None):
     else:
         yield (dodTree,pos)
 
-# ................................................................................
-# Test stuff
-# ................................................................................
-if __name__ == "__main__":
-    import unittest
-    from hypothesis import given, assume, settings, HealthCheck
-    import hypothesis.strategies as st
-
-
-    MAX_SAMPLES = None
-    if "-v" in sys.argv:
-        MAX_SAMPLES = 5
-        MAX_LEAVES = 8
-
-    settings.register_profile("default", suppress_health_check=(HealthCheck.too_slow,))
-    settings.load_profile(os.getenv(u'HYPOTHESIS_PROFILE', 'default'))
-    if MAX_SAMPLES is None:
-        MAX_LEAVES = 20
-        MAX_SAMPLES = 50
-    
-    ALPHABET = ('A', 'B', 'C', ' ')
-    ALPHABETK = ('a', 'b', 'c', '-')
-
-    random_key_int = st.integers(0, 100)
-    random_key_str = st.text(alphabet=ALPHABETK, min_size=2)
-    random_key = random_key_str | random_key_int
-    random_segments = st.lists(random_key, max_size=4)
-    random_leaf = random_key_int | st.text(alphabet=ALPHABET, min_size=2)
-
-    random_thing = st.recursive(
-        random_leaf,
-        lambda children: (st.lists(children, max_size=3)
-                          | st.dictionaries( random_key_str
-                                             | st.text(min_size=1, alphabet=ALPHABET),
-                                             children)),
-        max_leaves=MAX_LEAVES)
-
-    random_node = random_thing.filter(lambda thing: (isinstance(thing, dict)
-                                                     and len(thing)>1) )
-
-
-    #
-    # Run under unittest
-    #
-    class TestEncoding(unittest.TestCase):
-        DO_DEBUG_PRINT = False
-
-        @settings(max_examples=MAX_SAMPLES)
-        @given(random_node)
-        def test_walker(self, node):
-            '''
-            Test the yielding walker
-            '''
-            print(f"Entered test_walker, node={node}", file=sys.stderr)
-            for r in dictOfDictIterator(node):
-#                for z in r:
-#                    print(f"\tz={z}")   
-                print(f"\tr={r[1]}\t->\t{r[0]}")   
-
-    
-if __name__ == "__main__":
-    if "-h" in sys.argv:
-        description = """\
-This may run either under tox or standalone. When standalone
-flags -h and -v are recognized, other flags are dealt with by unittest.main
-and may select test cases.
-
-Flags:
-    -h print this help and quit
-    -v print information messages on stderr; also reduces MAX_SAMPLES to 50
-
-Autonomous CLI syntax:
-    python3 ext_db.py [-h] [-v] [TestWalker[.<testname>]]
-
-    e.g.     python3 TestEncoding.test_match_re
-"""
-        print(description)
-        sys.exit(0)
-
-    if "-v" in sys.argv:
-        sys.argv = [x for x in sys.argv if x != "-v"]
-        TestEncoding.DO_DEBUG_PRINT = True
-        sys.stderr.write("Set verbose mode\n")
-
-    unittest.main()

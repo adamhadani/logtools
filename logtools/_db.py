@@ -42,7 +42,7 @@ from .join_backends import *
 from ._join import jsonKeyExtract
 from ._config import logtools_config, interpolate_config, AttrDict, setLoglevel
 from .utils import flatten, ucodeNorm, getObj
-
+from .ext_db import DB_Tree_Maker, NestedTreeDbOperator
 import dpath
 import dpath.util
 
@@ -196,7 +196,7 @@ Function: Perform misc. operations between new logstream  information and inform
 
     # dbOperator selection and parametrization
     tbl = {
-        "SQLAlcDbOp": SQLAlchemyDbOperator,
+        "SQLAlcDbOp": NestedTreeDbOperator,
     }
     try:
         dbOperator_impl = tbl[options.dbOperator](remote_fields=options.dbOp_remote_fields,
@@ -213,7 +213,7 @@ Function: Perform misc. operations between new logstream  information and inform
         )
 
     #   See what happens, we probably need to check that the class has adequate parent(s)
-    dbOperator_impl.createDeferredClasses()
+    dbOperator_impl.createDeferredClasses( DB_Tree_Maker)
     dbOperator_impl.prepareDeferred()
         
     # perform the operation

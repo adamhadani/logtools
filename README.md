@@ -69,6 +69,15 @@
 	  <TR>
 	      <TD>Locale</TD><TD>fr_FR.UTF-8</TD><TD>C.UTF-8</TD>
 	  </TR>
+	  <TR>
+	      <TD rowspan="3">Mysql</TD><TD>DockerHub reference</TD><TD></TD>
+	  </TR>
+	  <TR>
+	      <TD>mysql/mysql-server:latest</TD><TD></TD>
+	  </TR>
+	  <TR>
+	      <TD>2021-01-19T14:27:35</TD><TD></TD>
+	  </TR>
 	      <TR><TD>Status</TD><TD>OK on dev. machine</TD>
 	      <TD> <IMG SRC="https://github.com/AlainLich/logtools/actions/workflows/pythonExercise.yml/badge.svg?branch=ALPython3"/></TD>
 	  </TR>

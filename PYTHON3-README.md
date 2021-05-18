@@ -88,8 +88,12 @@ Following issues were encountered:
   + a more tutorial thing at 
     https://docs.sqlalchemy.org/en/14/core/engines.html#database-urls
 	
-1. Porting: from sqlsoup to sqlalchemy
-  + create_engine returns an `Engine` object 
+1. Used SQLAlchemy as follows:
+   + minor support of Core tools sufficient to run logjoin
+   + more extensive support of ORM, in logjoin and logdb (added). 
+   + ORM to be prioritized for future developments
+   
+   + only tested with mysql as database server.
 
 ## Added functionality
 
@@ -99,7 +103,10 @@ Following issues were encountered:
 ## Test and operations
   
 ### Test and operative environment
- This is really setting up the development / maintenance environment:
+ This is really setting up the development / maintenance environment; I developped
+ the habit to use virtualenv with precisely versionned Python packages when 
+ trying to operate with SQLSoup, since this entailed compatiblility issues. 
+ It is probably not necessary now.
  
  - setup a `virtualenv`environment, requiring Python 3.8.6, ( or whatever version 
    you want to use.  Python 3.8.6 happens to be the native Python-3 on my system,
@@ -131,18 +138,23 @@ Following issues were encountered:
    $v/venvSandBox/bin/python3 setup.py install
 ```
 
- ### First experiments
  
- - configuration: 
+### Configuration 
    - establish a  `~/.logtoolsrc` file, which will used for setting 
-     parameters or defaults
-   - as configuration files are named in   `~/.logtoolsrc`, create and populate them,
-     for empty files are OK if there is no blacklist:
+     parameters or defaults. There are many fields needed from this configuration,
+	 some of which can be overriden from the command line.
+	 + for doing this, a model can be found in aux/dot_logtoolsrc.sh, which 
+	   creates test configuration file(s) for CI in Github's Action system
+   - For the following configuration files, named in   `~/.logtoolsrc`, create and populate them,
+     empty files are acceptable if there is no blacklist:
 ```
 touch bots_hosts.txt         # File designated in ~/.logtoolsrc
 touch bots_useragents.txt    # File designated in ~/.logtoolsrc
  ```
-	 
+
+
+### First experiments
+
  - `filterbots`: 
    1. extract log entries corresponding to some ̀sudo` uses. <I>Notice that 
    we are using the `-s` flag to define the level of output</I>
@@ -214,4 +226,48 @@ filterbots -s ERROR -r ".*sudo:(?P<ua>[^:]+).*COMMAND=(?P<ip>\S+).*"  --print
          2021-04-26T...Z	1	[System]	[MY-013576]	[InnoDB]	InnoDB initialization start	
 		 ```
 		
-					   
+	  5. Added `logdb`, performing more database operations from logs:				   
+
+         As an example, exploiting docker's inspect output 
+
+         ~~~
+         docker image inspect nginx | \
+	     wrapList2Json.py | \
+	     testLogparse --parser JSONParserPlus -f "TOP" | head -1 | \
+	     testLogdb -f "TOP/*/{RepoTags|Config}/{Env}" --frontend JSONParserPlus \
+    	                 --join-remote-key "application" \
+			             --join-remote-name EventTable 
+         ~~~ 
+   
+		 Enters the following in the database, which is reminiscent of "Triple Store" for
+		 RDF, and borrows ideas from `SQLAlchemy/example/code/adjacencyList.py`
+		 
+         ~~~
+         id,parent_id,name,nval
+         1000,NULL,RootNode,2021-05-17T15:10:25.642125
+         1001,1000,RangeStart,1010
+         1010,1000,**TOP**,TREEPOS.LIST
+         1011,1010,0,TREEPOS.TOP
+         1012,1011,Driver,default
+         1013,1011,Options,TREEPOS.EMPTY_TREE
+         1014,1011,Config,TREEPOS.LIST
+         1015,1014,0,TREEPOS.TOP
+         1016,1015,Subnet,172.19.0.0/16
+         1017,1015,Gateway,172.19.0.1
+         1018,1010,1,TREEPOS.TOP
+         1019,1018,4cf07fa937da4b6ad844b3a6ca22a8eb167dc503544becda8789774a6e605c5b,TREEPOS.TOP
+         1020,1019,Name,mysql1
+         1021,1019,EndpointID,7edb7b1e866957f0de6150c73c78b70717a6bb833794009509f1002dec622f41
+         1022,1019,MacAddress,02:42:ac:13:00:02
+         1023,1019,IPv4Address,172.19.0.2/16
+         1024,1019,IPv6Address,
+         1025,1018,517acb5295aba5cc347d7aae88b525abf7faef26f5c481f2b82636b0619a192b,TREEPOS.TOP
+         1026,1025,Name,mysql-workbench
+         1027,1025,EndpointID,5255215cc33826d3b90973aaed786d3b3e2b620ddbe6a837c6ae060fc8ce61e4
+         1028,1025,MacAddress,02:42:ac:13:00:03
+         1029,1025,IPv4Address,172.19.0.3/16
+         1030,1025,IPv6Address,
+         1031,1000,RangeEnd,1030
+          ~~~
+
+		 

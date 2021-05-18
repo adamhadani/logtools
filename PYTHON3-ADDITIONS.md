@@ -136,15 +136,20 @@ Other aspects:
 	   like `--output-encoding`in `logjoin`
 
 1. Addition of `logdb`
+
+  This focuses on the performance of quite general ORM supported database operations,
+  the first examples performing additions and updates based on the incoming flow
+  of data from the logs
   +  This uses quite general SQLAlchemy ORM tools, using Classes `SQLAlchemyDbOperator` 
      and `SQLAlchemyORMBackBase`, for providing 
-     DB related operations, implemented in CLI program `testLogdb`, like:
+     DB related operations, implemented in CLI program `logdb`, like:
     - filling a database table from data collected from a log stream
-
+  + this is implemented with some generality in classes  `SQLAlchemyORMBackBase` 
+    and `SQLAlchemyDbOperator` 
   + this feature is parametrized by CLI or config file; for now a single
     case has been implemented:
 	
-    + SQLAlchemyDbOperator (parm. `dbOperator: SQLAlcDbOp`
+    +  `NestedTreeDbOperator ` (parm. `dbOperator: SQLAlcDbOp`
 	  in `~/.logtoolsrc`) which provides for entering in a tree-like database schema the 
       content of  JSON (here from a Docker `inspect`   command):
    ~~~   

@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+
+
+# This script prepares :
+#    a file with MYSQL database privileges (with secret stuff), probably poorly located
+#    in aux/testData (TBD!!) by generating a shell script and rewriting the privilege
+#    file
+
+#  Arguments
+#      1) first argument: PATH leading to logtools package source
+#      2) second arg: full path of SQL file with privilege values
+#      3) : path of .cnf file for root with password
+#      4) : path of .cnf file for root with default password
+#      5) : path of .cnf file for user with password
+BASEPATH="$1"
+arg2="$2"
+rootCNF="$3"
+rootCNFDefault="$4"
+userCNF="$5"
+DESTFILE="${arg2:=${HOME}/aux/testData/ActionsMysqlTest/scripts/rewstartCreateUserw.sh}"
+
+echo "In dot_logtoolsrc.sh"
+echo "   substituting : $BASEPATH to \$BASEPATH, emitting $DESTFILE"
+echo "   entering USER DB passwd via environment variable USER_DB_PASS"
+
+# Keep this file for myself
+maskOrig=$(umask -p)
+umask 0077
+cat  >"$DESTFILE" <<END
+/* 
+ *    Administrative setup of Mysql server, for testing when running a server
+ *    on a Github Actions VM
+ *
+*/
+
+/* This creates the user(s) and their privileges when sourced as mysql 'root' .
+ *  This file is located at on development host  and in loaded VM: 
+ *  - aux/testData/ActionsMysqlTest/mysql/startCreateUser.sql 
+ *  
+ *    '**USERPASS**' has been substituted by using the Github.secrets mechanism
+ *    '**ROOTPASS**' has been substituted by using the Github.secrets mechanism
+*/
+
+/* This assumes that the user running the script effectively has the Mysql rootpass
+   set up by default for the Mysql server in the Github VM; now it will be changed
+   according to the secret
+*/
+
+ALTER USER 'root'@'localhost' IDENTIFIED BY  '${ROOT_DB_PASS}';
+ALTER USER 'root'@'127.0.0.1' IDENTIFIED BY  '${ROOT_DB_PASS}';
+FLUSH PRIVILEGES;
+
+CREATE USER 'user'@'localhost'  IDENTIFIED BY '${USER_DB_PASS}';
+CREATE USER 'user'@'127.0.0.1'  IDENTIFIED BY '${USER_DB_PASS}';
+
+
+/* This creates a DB that user user cares about; all tables for this test in this DB */
+CREATE DATABASE logfromtool;
+
+GRANT ALL PRIVILEGES ON logfromtool.*  TO 'user'@'localhost';
+GRANT ALL PRIVILEGES ON logfromtool.*  TO 'user'@'127.0.0.1';
+
+FLUSH PRIVILEGES;
+
+/* Show the situation */
+SELECT host,user FROM mysql.user;
+
+END
+
+echo "Produced script file $DESTFILE, containing secret passwords"
+
+cat >"$rootCNF" <<EOF
+# This is for user root once configured
+#
+[client]
+password=${ROOT_DB_PASS}
+
+# See:
+# 6.1.2.1 End-User Guidelines for Password Security
+EOF
+echo "Produced script file $rootCNF, containing secret root password"
+
+cat >"$rootCNFDefault" <<EOF
+# This is the default provided for root
+[client]
+password=${ROOT_ORIG_DB_PASS}
+
+# See:
+# 6.1.2.1 End-User Guidelines for Password Security
+EOF
+echo "Produced script file $rootCNFDefault, containing not so secret root original password"
+
+
+cat >"$userCNF" <<EOF
+[client]
+password=${USER_DB_PASS}
+
+# See:
+# 6.1.2.1 End-User Guidelines for Password Security
+EOF
+echo "Produced script file $userCNF, containing secret user password"
+
+
+# reset umask
+$maskOrig

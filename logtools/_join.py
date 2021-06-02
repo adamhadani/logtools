@@ -41,12 +41,13 @@ import logtools.parsers
 import logtools.parsers2
 from .join_backends import *
 from ._config import logtools_config, interpolate_config, AttrDict, setLoglevel
+from ._config import checkDpath
 from .utils import flatten, ucodeNorm, getObj
 
 import dpath
 import dpath.util
 
-
+checkDpath()
 
 __all__ = ['logjoin_parse_args', 'logjoin', 'logjoin_main']
 

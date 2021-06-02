@@ -34,9 +34,13 @@ import json
 import logtools.parsers
 import logtools.parsers2
 from ._config import interpolate_config, AttrDict, setLoglevel
+from ._config import checkDpath
+
 from .parsers2 import FileFormat , TraditionalFileFormat, ForwardFormat
 from .parsers2 import TraditionalForwardFormat
 from .utils    import getObj
+
+checkDpath()
 
 __all__ = ['logparse_parse_args', 'logparse', 'logparse_main']
 

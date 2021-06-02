@@ -1,0 +1,253 @@
+name: Test python package logtools
+    # ------------------------------------------------------------
+    # (C) Alain Lichnewsky, 2021
+    #
+    # For running under Github's Actions
+    #
+    # First idea: perform tests on the server using a dockerized
+    #    mysql and its client. Of course, do not run mysql-workbench!
+    #
+    #
+    # There is a default mysql installation under Github.Actions, which
+    # is used here.
+    #
+    #    Documentation at :
+    #    https://github.com/actions/virtual-environments/blob/main/images \
+    #                               /linux/Ubuntu2004-README.md
+    #    with following details:
+    #    Mysql (client):  MySQL 8.0.25
+    #    MySQL Server  : (user:root password:root)
+    #        MySQL service is disabled by default. Use the following command as
+    #        a part of your job to start the service:
+    #                   'sudo systemctl start mysql.service'
+    #
+    #    Also included sqlite3 3.31.1
+    #
+    # ------------------------------------------------------------
+    # There is an example at https://github.com/marketplace/actions/setup-mysql
+    # which runs a Mysql in a container after shutting down the default mysql
+    # Source cloned at ~/src/Github/mysql-action/
+    # ------------------------------------------------------------
+
+on:
+    workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+          python-version: '3.8'
+          architecture: 'x64'
+
+    # ------------------------------------------------------------
+    # Later see about caching pip dependencies
+    #   https://docs.github.com/en/actions/guides/building-and-testing-python
+    # ------------------------------------------------------------
+
+    - name: Ascertain configuration
+      #
+      #    Collect information concerning $HOME (for ~/.logtoolsrc setup)
+      #                                   location of file loaded from Github/
+      #    Also show $LANG ( Locale may be relevant in processing of dates )
+      run: |
+        echo Working dir $(pwd)
+        echo Files at this location:
+        ls -ltha
+        echo HOME: $HOME
+        echo LANG: $LANG
+      #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      #    ** here :: **
+      #  pythonLocation: /opt/hostedtoolcache/Python/3.8.8/x64
+      #  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.8.8/x64/lib
+      #  Working dir /home/runner/work/logtools/logtools
+      #  HOME: /home/runner
+      #  LANG: C.UTF-8
+      #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    - name: Prepare for Python installs
+      # We start by upgrading pip, if needed (?)
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+
+    - name: Install full featured dpath from my own github repo
+            # Need to load dpath from my repository; otherwise the setup.py will
+            # install the default version without the special features
+
+            # Repo information: origin/AL-addRegexp
+            #                   https://github.com/AlainLich/dpath-python.git
+            # Using https://github.com/actions/checkout for all required
+            # information on actions/checkout@v2
+
+    - uses: actions/checkout@v2
+      with:
+          # Repository name with owner. For example, actions/checkout
+          # Default: ${{ github.repository }}
+          repository: 'AlainLich/dpath-python'
+
+          # The branch, tag or SHA to checkout. When checking out the repository
+          # that triggered a workflow, this defaults to the reference or SHA for
+          # that event. Otherwise, uses the default branch.
+          ref: 'AL-addRegexp'
+
+          # Relative path under $GITHUB_WORKSPACE to place the repository
+          path: 'pythonSrc'
+
+    - name: Install dpath with config
+      run: |
+        cd ${HOME}/pythonSrc
+        python setup.py install
+
+
+    - name: Install other python dependencies
+      # Take into account the requirements and setup.py built in dependencies
+      # At this point, I do not think that more packages are needed for testing
+      # purposes!
+      #
+      run: |
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        python setup.py install
+        if [ $? -eq 0 ] ; then
+            echo Installed dpath successfully
+        else
+            echo FAILURE IN INSTALLATION OF dpath
+        fi
+
+
+    - name: Install .logtoolsrc
+      #
+      #     File ~/.logtoolsrc is used by the package to setup defaults
+      #          absence results in failure; it contains filepaths and thus
+      #          must be adapted to actual filepaths
+      #     Warning: this file contains secrets that need to be handled in the
+      #              bash script. For Github repository, the secrets are,
+      #              accessible by any collaborator
+      env:
+          ROOT_DB_PASS:${{secrets.MYSQL_DB_ROOT_PASS}}
+          USER_DB_PASS:${{secrets.MYSQL_DB_USER_PASS}}
+      run: |
+        echo executing: aux/dot_logtoolsrc.sh $(pwd) "${HOME}/.logtoolsrc"
+        aux/dot_logtoolsrc.sh $(pwd) "${HOME}/.logtoolsrc"
+        echo Files in  home dir: "$HOME"
+        ls -ltha ~
+
+    - name: Launch and configure Mysql server
+      #  this starts the service and preloads authorizations so that non root
+      #  access may occur. Also need to:
+      #    1/ set user privileges, by editing and running
+      #       aux/testData/ActionsMysqlTest/mysql/startCreateUser.sql
+      #
+      #    2/ preload any data that we want to be in database tables
+      #       a) table: define fields and preload data
+      #       b) table: define fields, should be able to start cold (test)
+      #
+      env:
+          ROOT_DB_PASS:${{secrets.MYSQL_DB_ROOT_PASS}}
+          ROOT_ORIG_DB_PASS:${{secrets.MYSQL_DB_ROOT_ORIG_PASS}}
+          USER_DB_PASS:${{secrets.MYSQL_DB_USER_PASS}}
+      run: |
+        sudo systemctl start mysql.service
+        #
+        #
+        # Sleep so that the mysql server gets a chance to get started
+        # service mysqld status. To get some info :
+        #
+        #   1) check if the service got started
+        #      systemctl status cron.service
+        #
+        #   2) this shows possible values
+        #      systemctl --state=help
+        #   3) this lists sockets being waited on/serviced
+        #      systemctl list-sockets --all
+        #
+        sleep 15
+        # wait a bit for the mysql server to get started
+        for i in {1..20} ; do
+            activity=$(systemctl is-active mysql)
+            if [ ${activity} = "active" ] ; then
+               echo Mysql service active at iteration $i
+               break
+            fi
+            sleep 15
+        done
+        #
+        # Now run the configuration script and inject the data with mysql client
+        #   Arg1: BASEPATH
+        #   Arg2: location of generated file (with secrets) (create a hidden
+        #         directory to contain secrets)!
+        maskOrig=$(umask -p)
+        umask 0077
+        mkdir aux/.secrets
+        # reset umask
+        $maskOrig
+        #
+        # This will prepare for user creation in Mysql, set privileges,
+        # uses the fact that the default 'root' user has password 'root' and
+        # the port is 3306.
+        createUFile=aux/.secrets/startCreateUser.sql
+        rootCNFDefault=aux/.secrets/rootDft.cnf
+        rootCNFFile=aux/.secrets/root.cnf
+        userCNFFile=aux/.secrets/user.cnf
+        aux/mysql_config.sh ${createUFile} ${rootCNFFile} ${rootCNFDefault} ${userCNFFile}
+        #
+        # Concerning passwords man (mysql client ) says:
+        #  To avoid giving the password on the command line, use an option file.
+        #  See Section 6.1.2.1, “End-User Guidelines for Password Security”.
+        #
+        # Selected to hide the default root password in yet another secret!
+        # Watch here must use root default password
+        mysql -u root --default-file=${rootCNFDefault} <${createUFile}
+        #
+        # now, inject the table structure and data connecting as a user
+        # with the secret password.
+        #
+        cat ${createTblFile} ${fillTblFile} | \
+            mysql -u user --default-file=${userCNFFile}
+
+
+    - name: Non Database Tests
+      #     This will probably be removed (done in separate script) once the
+      #     DB tests are setup, for now it enables to check the Python and file
+      #     parts before embarking on a more ambitious plan
+      #
+      #     Test Z : runs logtools/test/test_logtools.py
+      #     Test A : runs a test scenario
+      #     Test + : runs all tests
+      #
+      #     These are redundant, ordered by increasing dependency on the
+      #     environment: Z:self contained, A requires 1 data file,
+      #
+      #     Parameter -s ZZZ indicates logging level; INFO, ERROR and DEBUG are of
+      #     interest
+      #     Environment variables: documented in aux/matTests.py
+      #     Note that if DEBUG not set, some tests suppress error output
+      run: |
+        export ZTESTPGM="logtools/test/test_logtools.py"
+        export TESTDATADIR="aux/testData"
+        export DEBUG="-"
+        python aux/manTests.py Z -s INFO
+        python aux/manTests.py A -s ERROR
+        python aux/manTests.py + -s INFO
+
+    - name: Mysql Tests
+      #
+      #   testDB.sh with parameter sets
+      #
+      run: |
+        export PATH=${PATH}:aux/testData/ActionsMysqlTest/scripts
+        testDB.sh -s sDBJ
+        testDB.sh -s sDBOP
+
+    - name: Dump Values in database
+      # Using SELECT sql verb rather than mysqldump, since we are only getting
+      # the log back, and this seems easier to read.
+      # Also, only table 'tree' gets modified / filled
+      run: |
+        userCNFFile=aux/.secrets/user.cnf
+        echo "SELECT * FROM logfromtool.tree;" |
+            mysql -u user --default-file=${userCNFFile} <<EOF

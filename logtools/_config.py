@@ -93,3 +93,44 @@ def setLoglevel(options):
         print( f"Unexpected error\n\t{err}", file = sys.stderr)
         raise
 
+
+def checkDpath(doExtended=True):
+    """
+    This checks that we are using a full featured (i.e. extended when compared with
+    standard package distribution) dpath module, able to recognize segments with 're'
+    regexps.
+ 
+    The option is then set according to argument doExtended (default:True).
+
+    Experimental method used since we do not control the releases of dpath.
+    """
+    import dpath
+    
+    if hasattr(dpath.options,"DPATH_ACCEPT_RE_REGEXP"):
+        dpath.options.DPATH_ACCEPT_RE_REGEXP = doExtended
+        return
+    
+    if doExtended:
+        return
+    
+    if ( 'dpath'  in logtools_config.sections()
+         and logtools_config['dpath'].get('no-dpath-warning').lower()=="true"):
+        return
+    
+    js={"Env":True, "Cmd":True}
+    selPath = '{(Env|Cmd)}'
+    x = dpath.util.search(js, selPath)
+
+    if  len(x) != 2:
+        wmsg="""\
+    You are using a version of dpath which does not support 're' regexps style
+    matching. Nested dict/json keys will be limited to bash globs. You may load a
+    full featured dpath from  https://github.com/AlainLich/dpath-python.
+
+    You can suppress this warning by adding key 'no-dpath-warning: True' in section 'dpath' of
+    your configuration file '~/.logtoolsrc'.
+
+    """
+        logging.warn(wmsg)
+
+        

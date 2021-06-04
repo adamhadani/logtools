@@ -98,7 +98,7 @@ jobs:
                 # Using https://github.com/actions/checkout for all required
                 # information on actions/checkout@v2
 
-        - uses: actions/checkout@v2
+          uses: actions/checkout@v2
           with:
               # Repository name with owner. For example, actions/checkout
               # Default: ${{ github.repository }}

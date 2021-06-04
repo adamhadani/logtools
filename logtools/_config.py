@@ -110,7 +110,7 @@ def checkDpath(doExtended=True):
         dpath.options.DPATH_ACCEPT_RE_REGEXP = doExtended
         return
     
-    if doExtended:
+    if not doExtended:
         return
     
     if ( 'dpath'  in logtools_config.sections()

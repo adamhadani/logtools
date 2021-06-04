@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
 # ------------------------------------------------------------------------------
-# This script is installed in aux/scripts and is used to run Mysql DB tests
-# on Github Actions hosted VM
+#
+# This script is installed in /aux/testData/ActionsMysqlTest/scripts
+# and is used to run Mysql DB tests on Github Actions hosted VM
+#
 # ------------------------------------------------------------------------------
 
 ECHO=""
@@ -32,48 +34,8 @@ function checkEnv () {
 function doTestByName () {
     testNm=$1
     case ${testNm} in
-        Ef2)  dockerFinder.py -I  idba -n nginx --fmt json| \
-    	     logparse --parser JSONParserPlus -f "{attrs}" | \
-    	     logjoin -f 1 ${DEBUGLEVEL}
-    	     # OK
-    	;;
-        Ef3)  dockerFinder.py -I  idba -n nginx --fmt json| \
-    	     logparse --parser JSONParserPlus -f "{attrs}" | \
-    	     logjoin -f 0 ${DEBUGLEVEL}
-    	     # OK
-    	;;
-	
-        #  ..................................................
-        #  recall that currently we have the following fields in the DB table XXXX TBD
-    	#  Field,Type,Null,Key,Default,Extra
-    	#  idtestTable,int,NO,PRI,NULL,
-    	#  date,date,YES,,NULL,
-    	#  application,varchar(45),YES,,NULL,
-    	#  priority,varchar(45),YES,,NULL,
-    	#  Message,varchar(255),YES,,NULL,
-            #  ..................................................
-        Ef4)  dockerFinder.py -I  idba -n nginx --fmt json| \
-    	     logparse --parser JSONParserPlus -f "{attrs}" | \
-    	     logjoin -f 0 -F 'date,application,priority' \
-			 ${DEBUGLEVEL}
-                 # OK
-    	  ;;
-        Ef5)  dockerFinder.py -I  idba -n nginx --fmt json| \
-    	     logparse --parser JSONParserPlus -f "{attrs}" | \
-    	     logjoin -f 0 -F '*' \
-			 ${DEBUGLEVEL}
-                # OK
-    	  ;;
-
-        DB1) dockerFinder.py -I  idba -n nginx --fmt json | \
-	     logparse --parser JSONParserPlus -f "{attrs}" | \
-	     logjoin -f attrs/RepoTags --frontend JSONParserPlus \
-    	                --join-remote-key application \
-    	                -F date,application,priority ${DEBUGLEVEL}
-    	 # OK
-	     ;;
-
-        DB2) docker image inspect nginx | \
+ 
+        DB2) docker image inspect ubuntu | \
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP" | \
 	     logjoin -f "**/RepoTags" --frontend JSONParserPlus \
@@ -82,7 +44,7 @@ function doTestByName () {
 	     ;;
 	
         # the following DB2* test several syntaxes for selecting in -logjoin
-        DB2a) docker image inspect nginx |
+        DB2a) docker image inspect ubuntu |
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP"  |  \
 	     logjoin -f "*/0/RepoTags" --frontend JSONParserPlus \
@@ -91,7 +53,7 @@ function doTestByName () {
 	      ;;
 	
 	# here we have multiple keys, see how we want this to pan out (extension??)
-        DB2b) docker image inspect nginx |
+        DB2b) docker image inspect ubuntu |
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP"  |  \
 	     logjoin -f "**/{RepoTags|Created}" --frontend JSONParserPlus \
@@ -100,7 +62,7 @@ function doTestByName () {
 	      ;;
 	
 	# here we hve an empty key, then we will need to define desirable behaviour
-        DB2c) docker image inspect nginx |
+        DB2c) docker image inspect ubuntu |
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP"  |  \
 	     logjoin -f "**/Zorro" --frontend JSONParserPlus \
@@ -109,7 +71,7 @@ function doTestByName () {
 	     ;;
 
         # same as DB3W, uses the non ORM backend using flag --backend
-	DB3w) docker image inspect nginx | \
+	DB3w) docker image inspect ubuntu | \
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP" | \
 	     logjoin -f "**/RepoTags" --frontend JSONParserPlus \
@@ -122,7 +84,7 @@ function doTestByName () {
 	
 	# these are intended for exploring the V2 / ORM based version
 	# backend specified in ~/.logtoolsrc
-	DB3W) docker image inspect nginx | \
+	DB3W) docker image inspect ubuntu | \
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP" | \
 	     logjoin -f "**/RepoTags" --frontend JSONParserPlus \
@@ -134,7 +96,7 @@ function doTestByName () {
 
         # test suppression of the where clause, otherwise it is the same
 	# in practice this uses metadata loaded from server, and tests it 
-	DB3WW) docker image inspect nginx | \
+	DB3WW) docker image inspect ubuntu | \
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP" | \
 	     logjoin -f "**/RepoTags" --frontend JSONParserPlus \
@@ -145,7 +107,7 @@ function doTestByName () {
 
 	# test/demo the logdb capabilities
 	#
-	DBOP1) docker image inspect nginx | \
+	DBOP1) docker image inspect ubuntu | \
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP" |  \
 	     logdb -f "TOP/*/{RepoTags|Config}/{Env}" --frontend JSONParserPlus \
@@ -181,29 +143,14 @@ function msg() {
 function doTestSet () {
     testSetNm=$1
     case  "${testSetNm}" in
-	sA) msg "testing logparse with prerecorded json from docker"
-	    tset=( 1 2 3 )
-	    ;;
-	sB) msg "testing logparse with docker JSON from dockerFinder, requires [~/].dockerTools.cfg"
-	    tset=( a A AA c C )
-	    ;;
-
-        sC) msg "testing logjoin with docker JSON from dockerFinder,  requires [~/].dockerTools.cfg"
-            tset=( D E  Ef2 Ef3 Ef4 Ef5 Ef6 F1b F1c FL FS FS1 )
-	    ;;
 
 	sDBJ) msg "testing Logjoin with database"
-	    tset=( DB1 DB2 DB2a DB3w DB3W DB3WW)
+	    tset=( DB2 DB2a DB3w DB3W DB3WW)
 	    ;;
 	
 	sDBOP) msg "testing Logdb with database operations (insertion)"
-	    tset=( DBOP1 )
+	    tset=( DBOP1 DBOP2)
 	    ;;
-	
-	sBad) msg "These are the problematic tests, in some cases inconsistent flags..."
-	      tset=( Ef1 F F1 FJ DB2b DB2c )
-	      ;;
-	
 	*) echo "incorrect test set name: ${testSetNm}" >/dev/stderr
 	   exit 3
     esac

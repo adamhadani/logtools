@@ -7,20 +7,17 @@
 #    file
 
 #  Arguments
-#      1) first argument: PATH leading to logtools package source
-#      2) second arg: full path of SQL file with privilege values
-#      3) : path of .cnf file for root with password
-#      4) : path of .cnf file for root with default password
-#      5) : path of .cnf file for user with password
-BASEPATH="$1"
-arg2="$2"
-rootCNF="$3"
-rootCNFDefault="$4"
-userCNF="$5"
+#      1) second arg: full path of SQL file with privilege values
+#      2) : path of .cnf file for root with password
+#      3) : path of .cnf file for root with default password
+#      4) : path of .cnf file for user with password
+arg2="$1"
+rootCNF="$2"
+rootCNFDefault="$3"
+userCNF="$4"
 DESTFILE="${arg2:=${HOME}/aux/testData/ActionsMysqlTest/scripts/rewstartCreateUserw.sh}"
 
 echo "In dot_logtoolsrc.sh"
-echo "   substituting : $BASEPATH to \$BASEPATH, emitting $DESTFILE"
 echo "   entering USER DB passwd via environment variable USER_DB_PASS"
 
 # Keep this file for myself

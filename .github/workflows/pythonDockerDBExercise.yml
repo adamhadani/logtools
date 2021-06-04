@@ -41,19 +41,13 @@ jobs:
             # Warning: this file contains secrets that need to be handled
             #          in the  bash script. For Github repository, the secrets
             #          are accessible by any collaborator.
-            ROOT_DB_PASS:${{secrets.MYSQL_DB_ROOT_PASS}}
-            # Hides the default 'root' user password (which is 'root' !)
-            # but this is an exercise!
-            ROOT_ORIG_DB_PASS:${{secrets.MYSQL_DB_ROOT_ORIG_PASS}}
-            USER_DB_PASS:${{secrets.MYSQL_DB_USER_PASS}}
-            #
-            # These are used in bash inline code, for consistency they are
-            # global in 'build' step
-            #
-            createUFile:aux/.secrets/startCreateUser.sql
-            rootCNFDefault:aux/.secrets/rootDft.cnf
-            rootCNFFile:aux/.secrets/root.cnf
-            userCNFFile:aux/.secrets/user.cnf
+            ROOT_DB_PASS: ${{ secrets.MYSQL_DB_ROOT_PASS }}
+            ROOT_ORIG_DB_PASS: ${{ secrets.MYSQL_DB_ROOT_ORIG_PASS }}
+            USER_DB_PASS: ${{ secrets.MYSQL_DB_USER_PASS }}
+            createUFile: aux/.secrets/startCreateUser.sql
+            rootCNFDefault: aux/.secrets/rootDft.cnf
+            rootCNFFile: aux/.secrets/root.cnf
+            userCNFFile: aux/.secrets/user.cnf
 
 
         steps:

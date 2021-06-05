@@ -48,7 +48,12 @@ jobs:
             rootCNFDefault: aux/.secrets/rootDft.cnf
             rootCNFFile: aux/.secrets/root.cnf
             userCNFFile: aux/.secrets/user.cnf
-
+            #
+            # Define some paths
+            #
+            srcDpath: ${HOME}/work/logtools/srcDpath
+            repoPath: ${HOME}/work/logtools/logtools/
+            scriptsAMT: ${repoPath}/aux/testData/ActionsMysqlTest/scripts
 
         steps:
         - uses: actions/checkout@v2
@@ -64,15 +69,23 @@ jobs:
         # https://docs.github.com/en/actions/guides/building-and-testing-python
         # ------------------------------------------------------------
 
-        - name: Ascertain configuration
+        - name: Ascertain configuration and add some paths
           #
           #    Collect information concerning $HOME (for ~/.logtoolsrc setup)
           #    i.e. location of file loaded from Github/
           #    Also show $LANG ( Locale may be relevant in processing of dates )
           run: |
+            if [ ! -d ${srcDpath} ] ; then
+                mkdir -p ${srcDpath}
+            fi
+            echo Home dir $HOME
+            echo files at this location
+            ls -ltha $HOME
+            echo "+++++"
             echo Working dir $(pwd)
             echo Files at this location:
             ls -ltha
+            echo "+++++"
             echo HOME: $HOME
             echo LANG: $LANG
           #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -110,31 +123,34 @@ jobs:
               # branch.
               ref: 'AL-addRegexp'
 
-              # Relative path under $GITHUB_WORKSPACE to place the repository
-              path: 'pythonSrc'
+              # Absolute path to place the repository
+              path: ${srcDpath}
 
         - name: Install dpath with config
           run: |
-            cd ${HOME}/pythonSrc
+            cd ${srcDpath}
+            echo Files in the dpath directory just loaded
+            ls -ltha
             python setup.py install
-
+            if [ $? -eq 0 ] ; then
+                echo Installed dpath successfully in ${srcDpath}
+                ls -ltha ${srcDpath}
+            else
+                echo FAILURE IN INSTALLATION OF dpath
+            fi
 
         - name: Install other python dependencies
+          if: always()
           # Take into account the requirements and setup.py built in
           # dependencies. At this point, I do not think that more packages are
           # needed for testing purposes!
           #
           run: |
             if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-            python setup.py install
-            if [ $? -eq 0 ] ; then
-                echo Installed dpath successfully
-            else
-                echo FAILURE IN INSTALLATION OF dpath
-            fi
 
 
         - name: Install .logtoolsrc
+          if: always()
           #
           #     File ~/.logtoolsrc is used by the package to setup defaults
           #      - absence results in failure; it contains filepaths and secret
@@ -146,6 +162,7 @@ jobs:
             ls -ltha ~
 
         - name: Confirm list of available docker images
+          if: always()
           #
           #  These are to be used as source of data via inspect in script
           #  testDB.sh
@@ -157,6 +174,7 @@ jobs:
             echo "----------------"
 
         - name: Launch and configure Mysql server
+          if: always()
           #  This starts the service and preloads authorizations so that non
           #  root access may occur. Also need to:
           #    1/ set user privileges, by editing and running
@@ -255,9 +273,10 @@ jobs:
           #   testDB.sh with parameter sets
           #
           run: |
-            export PATH=${PATH}:aux/testData/ActionsMysqlTest/scripts
+            export PATH=${PATH}:${scriptsAMT}
             testDB.sh -s sDBJ
             testDB.sh -s sDBOP
+
 
         - name: Dump Values in database
           if: always()
@@ -266,7 +285,7 @@ jobs:
           # Also, only table 'tree' gets modified / filled
           run: |
             echo "SELECT * FROM logfromtool.tree;" |
-                mysql -u user --default-file=${userCNFFile} <<EOF
+                mysql -u user --defaults-file=${userCNFFile}
 
 
         - name: Close mysql server

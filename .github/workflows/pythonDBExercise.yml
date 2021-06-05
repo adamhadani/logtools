@@ -55,9 +55,8 @@ jobs:
             #
             # Define some paths
             #
-            srcDpath: ${{ env.HOME }}/work/logtools/srcDpath
-            repoPath: ${{ env.HOME }}/work/logtools/logtools/
-            scriptsAMT: ${{ env.repoPath }}/aux/testData/ActionsMysqlTest/scripts
+            src_Dpath_path: ${{ env.GITHUB_WORKSPACE }}/../srcDpath
+            AMTS_PATH: ${{ env.GITHUB_WORKSPACE }}/aux/testData/ActionsMysqlTest/scripts
 
         steps:
         - uses: actions/checkout@v2
@@ -79,8 +78,8 @@ jobs:
           #    i.e. location of file loaded from Github/
           #    Also show $LANG ( Locale may be relevant in processing of dates )
           run: |
-            if [ ! -d ${srcDpath} ] ; then
-                mkdir -p ${srcDpath}
+            if [ ! -d ${src_Dpath_path} ] ; then
+                mkdir -p ${src_Dpath_path}
             fi
             echo Home dir $HOME
             echo files at this location
@@ -128,17 +127,17 @@ jobs:
               ref: 'AL-addRegexp'
 
               # Absolute path to place the repository
-              path: ${{ env.srcDpath }}
+              path: ${{ env.src_Dpath_path }}
 
         - name: Install dpath with config
           run: |
-            cd ${srcDpath}
+            cd ${src_Dpath_path}
             echo Files in the dpath directory $(pwd) just loaded
             ls -ltha
             python setup.py install
             if [ $? -eq 0 ] ; then
-                echo Installed dpath successfully in ${srcDpath}
-                ls -ltha ${srcDpath}
+                echo Installed dpath successfully in ${src_Dpath_path}
+                ls -ltha ${src_Dpath_path}
             else
                 echo FAILURE IN INSTALLATION OF dpath
             fi
@@ -276,7 +275,7 @@ jobs:
           #   testDB.sh with parameter sets
           #
           run: |
-            export PATH=${PATH}:${scriptsAMT}
+            export PATH=${PATH}:${AMTS_PATH}
             echo PATH "${PATH}"
             hash -r
             which testDB.sh

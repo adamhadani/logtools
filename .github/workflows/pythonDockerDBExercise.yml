@@ -1,4 +1,4 @@
-name: Test python package logtools
+name: Test python package logtools with database features
     # ------------------------------------------------------------
     # (C) Alain Lichnewsky, 2021
     #
@@ -44,6 +44,10 @@ jobs:
             ROOT_DB_PASS: ${{ secrets.MYSQL_DB_ROOT_PASS }}
             ROOT_ORIG_DB_PASS: ${{ secrets.MYSQL_DB_ROOT_ORIG_PASS }}
             USER_DB_PASS: ${{ secrets.MYSQL_DB_USER_PASS }}
+            #
+            # These are used in bash inline code, for consistency they are
+            # global in 'build' step
+            #
             createUFile: aux/.secrets/startCreateUser.sql
             rootCNFDefault: aux/.secrets/rootDft.cnf
             rootCNFFile: aux/.secrets/root.cnf
@@ -51,9 +55,9 @@ jobs:
             #
             # Define some paths
             #
-            srcDpath: ${HOME}/work/logtools/srcDpath
-            repoPath: ${HOME}/work/logtools/logtools/
-            scriptsAMT: ${repoPath}/aux/testData/ActionsMysqlTest/scripts
+            srcDpath: ${{ HOME }}/work/logtools/srcDpath
+            repoPath: ${{ HOME }}/work/logtools/logtools/
+            scriptsAMT: ${{ repoPath }}/aux/testData/ActionsMysqlTest/scripts
 
         steps:
         - uses: actions/checkout@v2
@@ -124,12 +128,12 @@ jobs:
               ref: 'AL-addRegexp'
 
               # Absolute path to place the repository
-              path: ${srcDpath}
+              path: ${{ srcDpath }}
 
         - name: Install dpath with config
           run: |
             cd ${srcDpath}
-            echo Files in the dpath directory just loaded
+            echo Files in the dpath directory $(pwd) just loaded
             ls -ltha
             python setup.py install
             if [ $? -eq 0 ] ; then
@@ -168,8 +172,7 @@ jobs:
           #  testDB.sh
           #
           run: |
-            docker image ls
-            echo "----------------"
+            echo "Available docker images"
             docker image ls -a
             echo "----------------"
 
@@ -234,13 +237,13 @@ jobs:
             #
             # Selected to hide the default root password in yet another secret!
             # Watch out: here must use root default password
-            mysql -u root --default-file=${rootCNFDefault} <${createUFile}
+            mysql -u root --defaults-file=${rootCNFDefault} <${createUFile}
             #
             # now, inject the table structure and data connecting as a user
             # with the secret password.
             #
             cat ${createTblFile} ${fillTblFile} | \
-                mysql -u user --default-file=${userCNFFile}
+                mysql -u user --defaults-file=${userCNFFile}
 
 
         - name: Non Database Tests
@@ -274,6 +277,10 @@ jobs:
           #
           run: |
             export PATH=${PATH}:${scriptsAMT}
+            echo PATH "${PATH}"
+            hash -r
+            which testDB.sh
+            ls -lth $(which testDB.sh)
             testDB.sh -s sDBJ
             testDB.sh -s sDBOP
 

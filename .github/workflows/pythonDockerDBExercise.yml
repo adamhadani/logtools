@@ -55,9 +55,9 @@ jobs:
             #
             # Define some paths
             #
-            srcDpath: ${{ HOME }}/work/logtools/srcDpath
-            repoPath: ${{ HOME }}/work/logtools/logtools/
-            scriptsAMT: ${{ repoPath }}/aux/testData/ActionsMysqlTest/scripts
+            srcDpath: ${{ env.HOME }}/work/logtools/srcDpath
+            repoPath: ${{ env.HOME }}/work/logtools/logtools/
+            scriptsAMT: ${{ env.repoPath }}/aux/testData/ActionsMysqlTest/scripts
 
         steps:
         - uses: actions/checkout@v2
@@ -128,7 +128,7 @@ jobs:
               ref: 'AL-addRegexp'
 
               # Absolute path to place the repository
-              path: ${{ srcDpath }}
+              path: ${{ env.srcDpath }}
 
         - name: Install dpath with config
           run: |

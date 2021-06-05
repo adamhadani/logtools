@@ -52,11 +52,6 @@ jobs:
             rootCNFDefault: aux/.secrets/rootDft.cnf
             rootCNFFile: aux/.secrets/root.cnf
             userCNFFile: aux/.secrets/user.cnf
-            #
-            # Define some paths
-            #
-            src_Dpath_path: ${{ GITHUB_WORKSPACE }}/../srcDpath
-            AMTS_PATH: ${{ GITHUB_WORKSPACE }}/aux/testData/ActionsMysqlTest/scripts
 
         steps:
         - uses: actions/checkout@v2
@@ -77,6 +72,12 @@ jobs:
           #    Collect information concerning $HOME (for ~/.logtoolsrc setup)
           #    i.e. location of file loaded from Github/
           #    Also show $LANG ( Locale may be relevant in processing of dates )
+          env:
+              #
+              # Define some paths
+              #
+              src_Dpath_path: ${{ env.GITHUB_WORKSPACE }}/../srcDpath
+
           run: |
             if [ ! -d ${src_Dpath_path} ] ; then
                 mkdir -p ${src_Dpath_path}
@@ -114,6 +115,12 @@ jobs:
                 # Using https://github.com/actions/checkout for all required
                 # information on actions/checkout@v2
 
+          env:
+              #
+              # Define some paths
+              #
+              src_Dpath_path: ${{ env.GITHUB_WORKSPACE }}/../srcDpath
+
           uses: actions/checkout@v2
           with:
               # Repository name with owner. For example, actions/checkout
@@ -130,6 +137,12 @@ jobs:
               path: ${{ env.src_Dpath_path }}
 
         - name: Install dpath with config
+          env:
+              #
+              # Define some paths
+              #
+              src_Dpath_path: ${{ env.GITHUB_WORKSPACE }}/../srcDpath
+
           run: |
             cd ${src_Dpath_path}
             echo Files in the dpath directory $(pwd) just loaded
@@ -274,6 +287,11 @@ jobs:
           #
           #   testDB.sh with parameter sets
           #
+          env:
+              #
+              # Define some paths
+              #
+              AMTS_PATH: ${{ env.GITHUB_WORKSPACE }}/aux/testData/ActionsMysqlTest/scripts
           run: |
             export PATH=${PATH}:${AMTS_PATH}
             echo PATH "${PATH}"

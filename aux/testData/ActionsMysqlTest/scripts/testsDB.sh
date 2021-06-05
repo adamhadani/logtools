@@ -5,6 +5,7 @@
 # This script is installed in /aux/testData/ActionsMysqlTest/scripts
 # and is used to run Mysql DB tests on Github Actions hosted VM
 #
+# The available docker images in the VM used are listed at bottom
 # ------------------------------------------------------------------------------
 
 ECHO=""
@@ -213,4 +214,27 @@ case ${doProc} in
 
 esac;
 
-
+# ---------------------------------------------------------------------
+# docker images available in VM (observed 6/5/21)
+# ---------------------------------------------------------------------
+#
+# REPOSITORY       TAG         IMAGE ID       CREATED       SIZE
+#
+# ubuntu           16.04       9ff95a467e45   2 weeks ago   135MB
+# ubuntu           18.04       81bcf752ac3d   2 weeks ago   63.1MB
+# node             14          9153ee3e2ced   3 weeks ago   943MB
+# node             14-alpine   8e69714aa82b   3 weeks ago   117MB
+# node             12          d2035012c0a2   3 weeks ago   917MB
+# buildpack-deps   stretch     c7dc37a15db1   3 weeks ago   835MB
+# buildpack-deps   buster      827c35559861   3 weeks ago   804MB
+# debian           9           acf04b8ccc37   3 weeks ago   101MB
+# debian           10          4a7a1f401734   3 weeks ago   114MB
+# ubuntu           20.04       7e0aa2d69a15   6 weeks ago   72.7MB
+# node             10-alpine   aa67ba258e18   7 weeks ago   82.7MB
+# node             12-alpine   deeae3752431   7 weeks ago   88.9MB
+# alpine           3.11        e389ae589224   7 weeks ago   5.61MB
+# alpine           3.12        13621d1b12d4   7 weeks ago   5.58MB
+# alpine           3.13        6dbb9cc54074   7 weeks ago   5.61MB
+# node             10          28dca6642db8   8 weeks ago   910MB
+# ---------------------------------------------------------------------
+# 

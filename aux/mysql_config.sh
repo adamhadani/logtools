@@ -26,8 +26,18 @@ umask 0077
 cat  >"$DESTFILE" <<END
 /* 
  *    Administrative setup of Mysql server, for testing when running a server
- *    on a Github Actions VM
- *
+ *    on a Github Actions VM. 
+ *    
+ *    This assumes that we are starting/configuring  the Default MySQL, which
+ *    may be installed and started by Github Actions, with port is 3306.
+ *    Details https://github.com/mirromutth/mysql-action#the-default-mysql, 
+ *    docker images (plus info on running) at https://hub.docker.com/_/mysql.
+ * 
+ *    Available packages in Github VMs are described at  
+ *    https://github.com/actions/virtual-environments, from which
+ *    ubuntu-latest is accessible at 
+ *    https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
+ * 
 */
 
 /* This creates the user(s) and their privileges when sourced as mysql 'root' .
@@ -40,11 +50,15 @@ cat  >"$DESTFILE" <<END
 
 /* This assumes that the user running the script effectively has the Mysql rootpass
    set up by default for the Mysql server in the Github VM; now it will be changed
-   according to the secret
+   according to the secret:
 */
 
 ALTER USER 'root'@'localhost' IDENTIFIED BY  '${ROOT_DB_PASS}';
-ALTER USER 'root'@'127.0.0.1' IDENTIFIED BY  '${ROOT_DB_PASS}';
+
+/* Found experimentally that 'root'@'127.0.0.1 does not exist in the reference Mysql, 
+ * as set up by Github. I tend to prefer to have both versions (localhost and 127.0.0.1)
+*/
+CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY '${ROOT_DB_PASS}';
 FLUSH PRIVILEGES;
 
 CREATE USER 'user'@'localhost'  IDENTIFIED BY '${USER_DB_PASS}';

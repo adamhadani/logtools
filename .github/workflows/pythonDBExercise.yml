@@ -208,10 +208,10 @@ jobs:
             #   3) this lists sockets being waited on/serviced
             #      systemctl list-sockets --all
             #
-            sleepStep=5
+            sleepStep=1
             sleep ${sleepStep}
-            # wait a bit for the mysql server to get started
-            for i in {1..20} ; do
+            # wait a bit for the mysql server to get started if required
+            for i in {1..60} ; do
                 activity=$(systemctl is-active mysql)
                 if [ ${activity} = "active" ] ; then
                    echo Mysql service active at iter $i : $(expr ${i} \* ${sleepStep} )s
@@ -256,6 +256,7 @@ jobs:
 
 
         - name: Non Database Tests
+          if: always()
           #     This will probably be removed (done in separate script) once the
           #     DB tests are setup, for now it enables to check the Python and
           #     file parts before embarking on a more ambitious plan.

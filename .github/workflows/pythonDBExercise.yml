@@ -55,8 +55,8 @@ jobs:
             #
             # Define some paths
             #
-            src_Dpath_path: ${{ env.GITHUB_WORKSPACE }}/../srcDpath
-            AMTS_PATH: ${{ env.GITHUB_WORKSPACE }}/aux/testData/ActionsMysqlTest/scripts
+            src_Dpath_path: ${{ GITHUB_WORKSPACE }}/../srcDpath
+            AMTS_PATH: ${{ GITHUB_WORKSPACE }}/aux/testData/ActionsMysqlTest/scripts
 
         steps:
         - uses: actions/checkout@v2

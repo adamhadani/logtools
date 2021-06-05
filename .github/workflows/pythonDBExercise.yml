@@ -53,6 +53,15 @@ jobs:
             rootCNFFile: aux/.secrets/root.cnf
             userCNFFile: aux/.secrets/user.cnf
 
+            #  From:
+            #  https://docs.github.com/en/actions/reference/environment-variables
+            #  ``The workspace directory is a copy of your repository if your
+            #    workflow uses the actions/checkout action. If you don't use
+            #    the actions/checkout action, the directory will be empty.''
+            #  So using a handwired  version (TB CHECKED LATER, not modular)
+            src_Dpath_path: /home/runner/work/lib/srcDpath
+            AMTS_PATH: /home/runner/work/logtools/logtools/aux/testData/ActionsMysqlTest/scripts
+
         steps:
         - uses: actions/checkout@v2
 
@@ -72,12 +81,7 @@ jobs:
           #    Collect information concerning $HOME (for ~/.logtoolsrc setup)
           #    i.e. location of file loaded from Github/
           #    Also show $LANG ( Locale may be relevant in processing of dates )
-          env:
-              #
-              # Define some paths
-              #
-              src_Dpath_path: ${{ env.GITHUB_WORKSPACE }}/../srcDpath
-
+          #
           run: |
             if [ ! -d ${src_Dpath_path} ] ; then
                 mkdir -p ${src_Dpath_path}
@@ -115,11 +119,6 @@ jobs:
                 # Using https://github.com/actions/checkout for all required
                 # information on actions/checkout@v2
 
-          env:
-              #
-              # Define some paths
-              #
-              src_Dpath_path: ${{ env.GITHUB_WORKSPACE }}/../srcDpath
 
           uses: actions/checkout@v2
           with:
@@ -137,11 +136,6 @@ jobs:
               path: ${{ env.src_Dpath_path }}
 
         - name: Install dpath with config
-          env:
-              #
-              # Define some paths
-              #
-              src_Dpath_path: ${{ env.GITHUB_WORKSPACE }}/../srcDpath
 
           run: |
             cd ${src_Dpath_path}
@@ -214,15 +208,16 @@ jobs:
             #   3) this lists sockets being waited on/serviced
             #      systemctl list-sockets --all
             #
-            sleep 15
+            sleepStep=5
+            sleep ${sleepStep}
             # wait a bit for the mysql server to get started
             for i in {1..20} ; do
                 activity=$(systemctl is-active mysql)
                 if [ ${activity} = "active" ] ; then
-                   echo Mysql service active at iteration $i
+                   echo Mysql service active at iter $i : $(expr ${i} \* ${sleepStep} )s
                    break
                 fi
-                sleep 15
+                sleep ${sleepStep}
             done
             #
             # Now run the configuration script and inject the data with mysql
@@ -248,14 +243,16 @@ jobs:
             #  Security”.
             #
             # Selected to hide the default root password in yet another secret!
-            # Watch out: here must use root default password
-            mysql -u root --defaults-file=${rootCNFDefault} <${createUFile}
+            # WATCH OUT: here must use root default password
+            # ALSO NOTE that the options used to specify option files must
+            # precede any other options
+            mysql  --defaults-file=${rootCNFDefault} -u root <${createUFile}
             #
             # now, inject the table structure and data connecting as a user
             # with the secret password.
             #
             cat ${createTblFile} ${fillTblFile} | \
-                mysql -u user --defaults-file=${userCNFFile}
+                mysql --defaults-file=${userCNFFile} -u user
 
 
         - name: Non Database Tests
@@ -287,15 +284,12 @@ jobs:
           #
           #   testDB.sh with parameter sets
           #
-          env:
-              #
-              # Define some paths
-              #
-              AMTS_PATH: ${{ env.GITHUB_WORKSPACE }}/aux/testData/ActionsMysqlTest/scripts
           run: |
             export PATH=${PATH}:${AMTS_PATH}
             echo PATH "${PATH}"
             hash -r
+            echo checking last path component dir
+            ls -lth ${AMTS_PATH}
             which testDB.sh
             ls -lth $(which testDB.sh)
             testDB.sh -s sDBJ
@@ -309,7 +303,7 @@ jobs:
           # Also, only table 'tree' gets modified / filled
           run: |
             echo "SELECT * FROM logfromtool.tree;" |
-                mysql -u user --defaults-file=${userCNFFile}
+                mysql --defaults-file=${userCNFFile} -u user
 
 
         - name: Close mysql server

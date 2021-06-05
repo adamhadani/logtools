@@ -17,7 +17,7 @@ rootCNFDefault="$3"
 userCNF="$4"
 DESTFILE="${arg2:=${HOME}/aux/testData/ActionsMysqlTest/scripts/rewstartCreateUserw.sh}"
 
-echo "In dot_logtoolsrc.sh"
+echo "In mysql_config.sh"
 echo "   entering USER DB passwd via environment variable USER_DB_PASS"
 
 # Keep this file for myself

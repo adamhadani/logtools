@@ -21,7 +21,7 @@ Arguments:
     -h       : print this help
     -d       : debug mode, only echo commands, implemented by local var DEBUGLEVEL
     -v       : verbose
-    -t  xx   : execute test xx 
+    -t  xx   : execute test xx
     -s  xx   : execute test set xx
 EOF
 
@@ -30,7 +30,8 @@ EOF
 
 
 function checkEnv () {
-    # this function is used in the development version 
+    # this function is used in the development version
+    return 0
 }
 
 
@@ -38,7 +39,7 @@ function checkEnv () {
 function doTestByName () {
     testNm=$1
     case ${testNm} in
- 
+
         DB2) docker image inspect ubuntu | \
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP" | \
@@ -46,7 +47,7 @@ function doTestByName () {
     	                --join-remote-key application \
     	                -F date,application,priority ${DEBUGLEVEL}
 	     ;;
-	
+
         # the following DB2* test several syntaxes for selecting in -logjoin
         DB2a) docker image inspect ubuntu |
 	     wrapList2Json.py | \
@@ -55,7 +56,7 @@ function doTestByName () {
     	                --join-remote-key application \
     	                -F date,application,priority ${DEBUGLEVEL}
 	      ;;
-	
+
 	# here we have multiple keys, see how we want this to pan out (extension??)
         DB2b) docker image inspect ubuntu |
 	     wrapList2Json.py | \
@@ -64,7 +65,7 @@ function doTestByName () {
     	                --join-remote-key application \
     	                -F date,application,priority ${DEBUGLEVEL}
 	      ;;
-	
+
 	# here we hve an empty key, then we will need to define desirable behaviour
         DB2c) docker image inspect ubuntu |
 	     wrapList2Json.py | \
@@ -82,10 +83,10 @@ function doTestByName () {
 			 --backend sqlalchemyV0 \
     	                 --join-remote-key application \
 			 --join-remote-name EventTable \
-    	                 -F user_id,application,message ${DEBUGLEVEL} 
+    	                 -F user_id,application,message ${DEBUGLEVEL}
 	     ;;
 
-	
+
 	# these are intended for exploring the V2 / ORM based version
 	# backend specified in ~/.logtoolsrc
 	DB3W) docker image inspect ubuntu | \
@@ -99,7 +100,7 @@ function doTestByName () {
 	     ;;
 
         # test suppression of the where clause, otherwise it is the same
-	# in practice this uses metadata loaded from server, and tests it 
+	# in practice this uses metadata loaded from server, and tests it
 	DB3WW) docker image inspect ubuntu | \
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP" | \
@@ -128,11 +129,11 @@ function doTestByName () {
 			 --join-remote-name EventTable \
     	                  ${DEBUGLEVEL}
 	     ;;
-	
+
         *)
     	echo parameter testNm=${testNm} not accepted
     	exit 1
-    	
+
     esac
     r=$?
     echo returned $r >/dev/stderr
@@ -151,7 +152,7 @@ function doTestSet () {
 	sDBJ) msg "testing Logjoin with database"
 	    tset=( DB2 DB2a DB3w DB3W DB3WW)
 	    ;;
-	
+
 	sDBOP) msg "testing Logdb with database operations (insertion)"
 	    tset=( DBOP1 DBOP2)
 	    ;;
@@ -160,7 +161,7 @@ function doTestSet () {
     esac
 
     for t in ${tset[@]} ; do
-	echo "** Entering test ${t} **"	    
+	echo "** Entering test ${t} **"
 	doTestByName ${t}
 	echo "** Test ${t} returned $? **"
 	echo ""
@@ -179,7 +180,7 @@ while getopts "dhvt:s:" opt ; do
     case "$opt" in
     d)  verbose=1 ;
         DEBUGLEVEL="--sym DEBUG"
-        ECHO=echo 	    
+        ECHO=echo
         ;;
     h|\?)
         usage
@@ -195,7 +196,7 @@ while getopts "dhvt:s:" opt ; do
        testSetName=$OPTARG
        ;;
 
-    
+
    *)  # redundant clause if getopts is totally selective
 	echo Incorrect argument "$opt" >/dev/stderr
 	exit 2
@@ -240,4 +241,4 @@ esac;
 # alpine           3.13        6dbb9cc54074   7 weeks ago   5.61MB
 # node             10          28dca6642db8   8 weeks ago   910MB
 # ---------------------------------------------------------------------
-# 
+#

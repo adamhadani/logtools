@@ -77,6 +77,21 @@ FLUSH PRIVILEGES;
 SELECT host,user FROM mysql.user;
 
 END
+# ............................................................
+# USER TABLE OBSERVED AFTER SETTING PRIVILEGES ABOVE ON TOP
+# OF DEFAULT CONFIG:
+# ............................................................
+# host       user
+# 127.0.0.1  ***
+# 127.0.0.1  user
+# localhost  debian-sys-maint
+# localhost  mysql.infoschema
+# localhost  mysql.session
+# localhost  mysql.sys
+# localhost  ***
+# localhost  user
+# ............................................................
+
 
 echo "Produced script file $DESTFILE, containing secret passwords"
 

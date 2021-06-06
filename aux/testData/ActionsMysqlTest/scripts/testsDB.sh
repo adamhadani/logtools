@@ -10,6 +10,9 @@
 
 ECHO=""
 
+# exit upon first error in pipes etc.
+set -e
+
 function usage() {
     cat >/dev/stderr <<EOF
 usage testDB.sh [-d][-h][-v][-t testname][-s testSetName]

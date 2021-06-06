@@ -21,11 +21,15 @@ name: Test python package logtools with database features
     #
     # ------------------------------------------------------------
     #
-    # Note:
-    # There is a more security minful example at
+    # Note(s):
+    # There is a more security minded example at
     # https://github.com/marketplace/actions/setup-mysql
     # which runs a Mysql in a container after shutting down the default mysql
     # Source cloned at ~/src/Github/mysql-action/.
+    #
+    # For substituting secrets, this scripts does it with ad-hoc shell scripts
+    # another way would be to use the following Action
+    # https://github.com/marketplace/actions/variable-substitution
     # ------------------------------------------------------------
 
 on:
@@ -52,14 +56,22 @@ jobs:
             rootCNFDefault: aux/.secrets/rootDft.cnf
             rootCNFFile: aux/.secrets/root.cnf
             userCNFFile: aux/.secrets/user.cnf
+            #
+            # Information used for filling the database
+            createTblFile: aux/testData/ActionsMysqlTest/mysql/createLogtoolsTables.sql
+            fillTblFile: aux/testData/ActionsMysqlTest/mysql/dumpDBData.sql
 
             #  From:
             #  https://docs.github.com/en/actions/reference/environment-variables
             #  ``The workspace directory is a copy of your repository if your
             #    workflow uses the actions/checkout action. If you don't use
-            #    the actions/checkout action, the directory will be empty.''
+            #    the actions/checkout action, the directory denoted in
+            #    GITHUB_WORKSPACE will be empty.''
+            #
             #  So using a handwired  version (TB CHECKED LATER, not modular)
-            src_Dpath_path: /home/runner/work/lib/srcDpath
+            #  There are constraints on src_Dpath_path value, see below
+            #
+            src_Dpath_path: /home/runner/work/logtools/logtools/aux/lib/srcDpath
             AMTS_PATH: /home/runner/work/logtools/logtools/aux/testData/ActionsMysqlTest/scripts
 
         steps:
@@ -111,14 +123,13 @@ jobs:
             python -m pip install --upgrade pip setuptools wheel
 
         - name: Install full featured dpath from my own github repo
-                # Need to load dpath from my repository; otherwise the setup.py
-                # will install the default version without the special features
+          # Need to load dpath from my repository; otherwise the setup.py
+          # will install the default version without the special features
 
-                # Repo information: origin/AL-addRegexp
-                #      https://github.com/AlainLich/dpath-python.git
-                # Using https://github.com/actions/checkout for all required
-                # information on actions/checkout@v2
-
+          # Repo information: origin/AL-addRegexp
+          #      https://github.com/AlainLich/dpath-python.git
+          # Using https://github.com/actions/checkout for all required
+          # information on actions/checkout@v2
 
           uses: actions/checkout@v2
           with:
@@ -132,7 +143,15 @@ jobs:
               # branch.
               ref: 'AL-addRegexp'
 
-              # Absolute path to place the repository
+              # Absolute path to place the repository. There seems to be
+              # constraints, as I received an error "... is not under ..."
+              # See https://github.com/actions/checkout
+              # and more specifically https://github.com/actions/checkout/issues/197
+              #    `` Today the path input is the only way to change the directory
+              #       where the code is cloned. Also there is a restriction that it
+              #       must be under GITHUB_WORKSPACE. ''
+              # See Feature Request https://github.com/actions/checkout/issues/327
+              #
               path: ${{ env.src_Dpath_path }}
 
         - name: Install dpath with config
@@ -148,6 +167,19 @@ jobs:
             else
                 echo FAILURE IN INSTALLATION OF dpath
             fi
+
+        - name: Install logtools with config.py
+          if: always()
+          run: |
+            pwd
+            ls -ltha
+            python setup.py install
+            if [ $? -eq 0 ] ; then
+                echo Installed logtools successfully
+            else
+                echo FAILURE IN INSTALLATION OF logtools
+            fi
+
 
         - name: Install other python dependencies
           if: always()
@@ -289,13 +321,16 @@ jobs:
             export PATH=${PATH}:${AMTS_PATH}
             echo PATH "${PATH}"
             hash -r
+            # ----------------------------------
+            set -e
             echo checking last path component dir
             ls -lth ${AMTS_PATH}
+            echo looking in PATH for testDB.sh
             which testDB.sh
             ls -lth $(which testDB.sh)
+            # ----------------------------------
             testDB.sh -s sDBJ
             testDB.sh -s sDBOP
-
 
         - name: Dump Values in database
           if: always()
@@ -303,7 +338,7 @@ jobs:
           # getting the log back, and this seems easier to read.
           # Also, only table 'tree' gets modified / filled
           run: |
-            echo "SELECT * FROM logfromtool.tree;" |
+            echo "USE logfromtool; SELECT * FROM tree;" |
                 mysql --defaults-file=${userCNFFile} -u user
 
 

@@ -198,13 +198,20 @@ jobs:
           if: always()
           #
           #     File ~/.logtoolsrc is used by the package to setup defaults
-          #      - absence results in failure; it contains filepaths and secret
-          #        passwd and thus must be adapted to actuals filepaths
+          #      - absence results in failure;
+          #      - it contains filepaths and secret passwd and thus must be adapted
+          #        to actuals filepaths
+          #      -file may name other config files that must
+          #        exist with proper contents. In particular this test
+          #        uses ~/.logtools.d/tradivariantParsing.txt
+
           run: |
-            echo executing: aux/dot_logtoolsrc.sh $(pwd) "${HOME}/.logtoolsrc"
-            aux/dot_logtoolsrc.sh $(pwd) "${HOME}/.logtoolsrc"
+            echo executing: "aux/dot_logtoolsrc.sh $(pwd) ${HOME}/.logtoolsrc ${HOME}/.logtools.d"
+            aux/dot_logtoolsrc.sh $(pwd) "${HOME}/.logtoolsrc" "${HOME}/.logtools.d"
             echo Files in  home dir: "$HOME"
             ls -ltha ~
+            echo Files in  home dir: "$HOME/.logtools.d"
+            ls -ltha ~/.logtools.d
 
         - name: Confirm list of available docker images
           if: always()
@@ -307,6 +314,13 @@ jobs:
           #     are of interest
           #     Environment variables: documented in aux/matTests.py
           #     Note that if DEBUG not set, some tests suppress error output
+          #
+          #     Configuration:
+          #            This uses ~/.logtoolsrc
+          #                 and this file may name other config files that must
+          #                 exist with proper contents. In particular this test
+          #                 uses ~/.logtools.d/tradivariantParsing.txt
+          #
           run: |
             export ZTESTPGM="logtools/test/test_logtools.py"
             export TESTDATADIR="aux/testData"
@@ -328,11 +342,12 @@ jobs:
             set -e
             echo checking last path component dir
             ls -lth ${AMTS_PATH}
-            echo looking in PATH for testDB.sh
-            which testDB.sh  || echo which testDB.sh :: not found
+            echo looking in PATH for testsDB.sh
+            # here need to emit a msg if not found otherwise quiet exit
+            which testsDB.sh  || echo which testsDB.sh :: not found
             # ----------------------------------
-            testDB.sh -s sDBJ
-            testDB.sh -s sDBOP
+            testsDB.sh -s sDBJ
+            testsDB.sh -s sDBOP
 
         - name: Dump Values in database
           if: always()

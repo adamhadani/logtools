@@ -7,10 +7,13 @@
 #  Arguments
 #      1) first argument: PATH leading to logtools package source
 #      2) second argument: path for ~/.logtoolsrc; default to ~/.logtoolsrc
+#      3) third argument: path for ~/.logtools.d
 
 BASEPATH="$1"
 arg2="$2"
+arg3="$3"
 DESTFILE="${arg2:=/tmp/.logtoolsrc}"
+DESTDIR="${arg3:=/tmp/.logtools.d}"
 
 echo "In dot_logtoolsrc.sh"
 echo "   substituting : $BASEPATH to \$BASEPATH, emitting $DESTFILE"
@@ -94,3 +97,22 @@ END
 echo Produced file $DESTFILE
 # reset umask
 $maskOrig
+
+if [ ! -d ${DESTDIR} ] ; then
+    mkdir -p ${DESTDIR}
+    echo Created dir  ${DESTDIR}
+fi
+
+cat >${DESTDIR}/tradivariantParsing.txt <<EOF
+#$template TestA,"%HOSTNAME%"
+
+#$template TestB,"%HOSTNAME%\n"
+
+#$template TFFA,"%TIMESTAMP% %HOSTNAME%\n"
+#$template TFFB,"%TIMESTAMP% %HOSTNAME% %syslogtag%"
+#$template TFFC1,"%TIMESTAMP%"
+
+EOF
+
+echo Produced file ${DESTDIR}/tradivariantParsing.txt
+

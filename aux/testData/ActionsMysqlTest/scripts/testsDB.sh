@@ -10,6 +10,9 @@
 
 ECHO=""
 
+# selected by virtue of small size
+DOCKER_IMAGE=alpine
+
 # exit upon first error in pipes etc.
 set -e
 
@@ -23,6 +26,9 @@ Arguments:
     -v       : verbose
     -t  xx   : execute test xx
     -s  xx   : execute test set xx
+
+Configurable:
+   DOCKER_IMAGE: ${DOCKER_IMAGE}
 EOF
 
     exit 0
@@ -30,8 +36,12 @@ EOF
 
 
 function checkEnv () {
-    # this function is used in the development version
-    return 0
+    # if the docker image used to get JSON data is not locally
+    # available, pull it
+    if ! $(docker inspect --type=image  ${DOCKER_IMAGE} >/dev/null 2>&1) ; then
+	echo pulling docker image  ${DOCKER_IMAGE} to use in test data
+	docker pull  ${DOCKER_IMAGE}
+    fi
 }
 
 
@@ -40,7 +50,7 @@ function doTestByName () {
     testNm=$1
     case ${testNm} in
 
-        DB2) docker image inspect ubuntu | \
+        DB2) docker image inspect ${DOCKER_IMAGE} | \
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP" | \
 	     logjoin -f "**/RepoTags" --frontend JSONParserPlus \
@@ -49,7 +59,7 @@ function doTestByName () {
 	     ;;
 
         # the following DB2* test several syntaxes for selecting in -logjoin
-        DB2a) docker image inspect ubuntu |
+        DB2a) docker image inspect ${DOCKER_IMAGE} |
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP"  |  \
 	     logjoin -f "*/0/RepoTags" --frontend JSONParserPlus \
@@ -58,7 +68,7 @@ function doTestByName () {
 	      ;;
 
 	# here we have multiple keys, see how we want this to pan out (extension??)
-        DB2b) docker image inspect ubuntu |
+        DB2b) docker image inspect ${DOCKER_IMAGE} |
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP"  |  \
 	     logjoin -f "**/{RepoTags|Created}" --frontend JSONParserPlus \
@@ -67,7 +77,7 @@ function doTestByName () {
 	      ;;
 
 	# here we hve an empty key, then we will need to define desirable behaviour
-        DB2c) docker image inspect ubuntu |
+        DB2c) docker image inspect ${DOCKER_IMAGE} |
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP"  |  \
 	     logjoin -f "**/Zorro" --frontend JSONParserPlus \
@@ -76,7 +86,7 @@ function doTestByName () {
 	     ;;
 
         # same as DB3W, uses the non ORM backend using flag --backend
-	DB3w) docker image inspect ubuntu | \
+	DB3w) docker image inspect ${DOCKER_IMAGE} | \
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP" | \
 	     logjoin -f "**/RepoTags" --frontend JSONParserPlus \
@@ -89,7 +99,7 @@ function doTestByName () {
 
 	# these are intended for exploring the V2 / ORM based version
 	# backend specified in ~/.logtoolsrc
-	DB3W) docker image inspect ubuntu | \
+	DB3W) docker image inspect ${DOCKER_IMAGE} | \
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP" | \
 	     logjoin -f "**/RepoTags" --frontend JSONParserPlus \
@@ -101,7 +111,7 @@ function doTestByName () {
 
         # test suppression of the where clause, otherwise it is the same
 	# in practice this uses metadata loaded from server, and tests it
-	DB3WW) docker image inspect ubuntu | \
+	DB3WW) docker image inspect ${DOCKER_IMAGE} | \
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP" | \
 	     logjoin -f "**/RepoTags" --frontend JSONParserPlus \
@@ -112,7 +122,7 @@ function doTestByName () {
 
 	# test/demo the logdb capabilities
 	#
-	DBOP1) docker image inspect ubuntu | \
+	DBOP1) docker image inspect ${DOCKER_IMAGE} | \
 	     wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP" |  \
 	     logdb -f "TOP/*/{RepoTags|Config}/{Env}" --frontend JSONParserPlus \

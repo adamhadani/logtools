@@ -188,11 +188,12 @@ jobs:
           # Also needed for testing purposes: pymysql
           #
           run: |
+            echo installing logtools requirements
             if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-            # The pymysql module dependency is not included in the requirements
-            # since the generic user may be using another SQL backend besides mysql
-            echo Separate installation of module pymysql
-            pip install pymysql
+            #
+            echo installing extra test requirements
+            testsDBReq=${AMTS_PATH}/testsDB.requirements
+            if [ -f ${testsDBReq}  ]; then pip install -r ${testsDBReq} ; fi            
 
         - name: Install .logtoolsrc
           if: always()
@@ -339,12 +340,8 @@ jobs:
             echo PATH "${PATH}"
             hash -r
             # ----------------------------------
-            set -e
-            echo checking last path component dir
-            ls -lth ${AMTS_PATH}
-            echo looking in PATH for testsDB.sh
-            # here need to emit a msg if not found otherwise quiet exit
-            which testsDB.sh  || echo which testsDB.sh :: not found
+            # warn user: testsDB.sh may pull a docker image
+            echo testsDB may pull docker image to be inspected to generate JSON            
             # ----------------------------------
             testsDB.sh -s sDBJ
             testsDB.sh -s sDBOP

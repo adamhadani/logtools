@@ -184,12 +184,15 @@ jobs:
         - name: Install other python dependencies
           if: always()
           # Take into account the requirements and setup.py built in
-          # dependencies. At this point, I do not think that more packages are
-          # needed for testing purposes!
+          # dependencies.
+          # Also needed for testing purposes: pymysql
           #
           run: |
             if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
+            # The pymysql module dependency is not included in the requirements
+            # since the generic user may be using another SQL backend besides mysql
+            echo Separate installation of module pymysql
+            pip install pymysql
 
         - name: Install .logtoolsrc
           if: always()
@@ -326,8 +329,7 @@ jobs:
             echo checking last path component dir
             ls -lth ${AMTS_PATH}
             echo looking in PATH for testDB.sh
-            which testDB.sh
-            ls -lth $(which testDB.sh)
+            which testDB.sh  || echo which testDB.sh :: not found
             # ----------------------------------
             testDB.sh -s sDBJ
             testDB.sh -s sDBOP
@@ -340,7 +342,7 @@ jobs:
           run: |
             echo "USE logfromtool; SELECT * FROM tree;" |
                 mysql --defaults-file=${userCNFFile} -u user
-
+            echo dumped logfromtool.tree
 
         - name: Close mysql server
           if: always()

@@ -12,7 +12,8 @@ ECHO=""
 
 # default "alpine" selected by virtue of small size
 DOCKER_IMAGE=${DOCKER_IMAGE:-alpine}
-
+# Base working dir, default is pwd output
+BASE_WD=${BASE_WD:-$(pwd)}
 
 # exit upon first error in pipes etc.
 set -e
@@ -30,8 +31,8 @@ Arguments:
 
 Configurable:
    DOCKER_IMAGE: ${DOCKER_IMAGE}; if variable set, it is kept, otherwise default supplied
+   BASE_WD: ${BASE_WD}
 EOF
-
     exit 0
     }
 
@@ -132,14 +133,24 @@ function doTestByName () {
     	                  ${DEBUGLEVEL}
 	     ;;
 
-	DBOP2) docker  network inspect mysql-docker-net | \
-	     wrapList2Json.py | \
+	DBOP2) gunzip -c ${BASE_WD}/aux/testData/docker-net.log.gz| \
+	       wrapList2Json.py | \
 	     logparse --parser JSONParserPlus -f "TOP" |  \
 	     logdb -f "**/{Containers|IPAM}" --frontend JSONParserPlus \
     	                 --join-remote-key "application" \
 			 --join-remote-name EventTable \
     	                  ${DEBUGLEVEL}
 	     ;;
+
+	DBDOCK1) gunzip -c ${BASE_WD}/aux/testData/docker-mysql1.log.gz | \
+		 head -2     | \
+		 testLogparse  --parser   DockerCLog --raw \
+		               -f TIMESTAMP,NUM,bracket,bracket1,bracket2,msg  -s ERROR
+		 ;;
+
+	DBDOCK2) gunzip -c ${BASE_WD}/aux/testData/docker-mysql1.log.gz | \
+		       testLogparse  --parser  DockerCLog  -f 1 -s DEBUG
+		 ;;
 
         *)
     	echo parameter testNm=${testNm} not accepted
@@ -165,7 +176,7 @@ function doTestSet () {
 	    ;;
 
 	sDBOP) msg "testing Logdb with database operations (insertion)"
-	    tset=( DBOP1 DBOP2)
+	    tset=( DBOP1 DBOP2	DBDOCK1 DBDOCK2 )
 	    ;;
 	*) echo "incorrect test set name: ${testSetNm}" >/dev/stderr
 	   exit 3
@@ -231,6 +242,8 @@ esac;
 
 # ---------------------------------------------------------------------
 # docker images available in VM (observed 6/5/21)
+# this does not mean that if you need docker images, you can dispense
+# with pulling.
 # ---------------------------------------------------------------------
 #
 # REPOSITORY       TAG         IMAGE ID       CREATED       SIZE

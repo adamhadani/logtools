@@ -160,17 +160,38 @@ class SQLAlchemyJoinBackendV0(SQLAlchemyBackBase):
     def join(self, key):
         """ Perform the join query.
         """
-        engine = self.db
-        try:
-            query_stmt = ( self.query_stmt_dict["wherekey"]
-                            if len(key)>0 else self.query_stmt_dict[None] )
+        def yield_rows(key, doWhere=True):
+            """ yield the table rows, where key is a single entry
+            """
+            if doWhere: 
+               query = self.query_stmt_dict["wherekey"]
+               args = {'selvalue' : key}
+            else:
+               query = self.query_stmt_dict[None]
+               args = {}
+               
+            
+            logging.debug(f"In {type(self)}.join.yield_rows query:\n\t{query}\n\tkey:{key}")
+            result = self.connection.execute( text(query), key=key)
+            
+            logging.debug(f"In {type(self)}.join.yield_rows result returned from execute:{type(result)}{result}")
 
-            logging.debug(f"{type(self)}.join toexecute db query with key={key}" +
-                          f"and query={query_stmt}")
-
-            result = self.connection.execute( text(query_stmt), key=key)
             for row in result:
                 yield row
+        
+        engine = self.db
+        
+        try:
+            if len(key) == 1:
+                for r in yield_rows(key, len(key) > 0):
+                    yield r
+            else:
+                for k in key:
+                    ## Here must deal with situation where key is an array with len > 1
+                    ## simplest way seems to be iterating.
+                    for r in yield_rows(k, True):
+                        yield r
+            
         except Exception as err:
             self._emitDiagnostic( "In engine.connect or in connection.execute\n\t"
                                   +f"SQL={query_stmt}\n\tkey={key} ",  err)
@@ -198,6 +219,12 @@ class SQLAlchemyJoinBackendV0(SQLAlchemyBackBase):
         #
         # Generalize by authorizing removing the WHERE clause;
         # Use SQLAlchemy capability to handle various DBs with identical syntax
+        if not isinstance(self.remote_key, str) and len(self.remote_key)!=1:
+            where = False
+            logging.error(f"class {type(self)} not appropriate for multivalued keys"
+                          + f"\n\tkeys={self.remote_key}"
+                          + f"\n\tdo not use --backend sqlalchemyV0"
+            )
         if self.remote_key != "-" and where:
             query_stmt2 = """WHERE {0} = :key""".format(self.remote_key)
         else:

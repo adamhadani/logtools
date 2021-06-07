@@ -316,19 +316,42 @@ class SQLAlchemyJoinBackend(SQLAlchemyORMBackBase):
                                              remote_key, connect_string)
 
     def join(self, key):
-        """ perform the join query :
+        """ perform the join query/queries dependinf on key:
+            - if key is empty list: remove WHERE Clause
+            -        has len >= 1: iterate over key elements using WHERE
+
             TBD: see if we wouldn't prefer a general query execution method
             (not limited to join)
         """
-        try:
-            query = ( self.query_stmt_dict["wherekey"]
-                      if len(key)>0 else self.query_stmt_dict[None] )
-            q = query(metadata=self.metadata, selvalue=key)
+        def yield_rows(key, doWhere=True):
+            """ yield the table rows, where key is a single entry
+            """
+            if doWhere: 
+               query = self.query_stmt_dict["wherekey"]
+               args = {'selvalue' : key}
+            else:
+               query = self.query_stmt_dict[None]
+               args = {}
+               
+            q = query(metadata=self.metadata, **args)
+            logging.debug(f"In  {type(self)}.join.yield_rows query:\n\t{q}\n\tkey:{key}")
             result = self.session.execute(q)
-            logging.debug(f"In {type(self)}.join result returned from execute:{type(result)}{result}")
+            logging.debug(f"In {type(self)}.join.yield_rows result returned from execute:{type(result)}{result}")
 
             for row in result:
                 yield row
+
+        try:
+            if len(key) == 1:
+                for r in yield_rows(key, len(key) > 0):
+                    yield r
+            else:
+                for k in key:
+                    ## Here must deal with situation where key is an array with len > 1
+                    ## simplest way seems to be iterating.
+                    for r in yield_rows(k, True):
+                        yield r
+
         except Exception as err:
             printMetadataTables(self.metadata)
             self._emitDiagnostic( "In session.execute(?)\n\t"

@@ -10,8 +10,9 @@
 
 ECHO=""
 
-# selected by virtue of small size
-DOCKER_IMAGE=alpine
+# default "alpine" selected by virtue of small size
+DOCKER_IMAGE=${DOCKER_IMAGE:-alpine}
+
 
 # exit upon first error in pipes etc.
 set -e
@@ -28,7 +29,7 @@ Arguments:
     -s  xx   : execute test set xx
 
 Configurable:
-   DOCKER_IMAGE: ${DOCKER_IMAGE}
+   DOCKER_IMAGE: ${DOCKER_IMAGE}; if variable set, it is kept, otherwise default supplied
 EOF
 
     exit 0

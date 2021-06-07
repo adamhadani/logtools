@@ -144,12 +144,12 @@ function doTestByName () {
 
 	DBDOCK1) gunzip -c ${BASE_WD}/aux/testData/docker-mysql1.log.gz | \
 		 head -2     | \
-		 testLogparse  --parser   DockerCLog --raw \
+		 logparse  --parser   DockerCLog --raw \
 		               -f TIMESTAMP,NUM,bracket,bracket1,bracket2,msg  -s ERROR
 		 ;;
 
 	DBDOCK2) gunzip -c ${BASE_WD}/aux/testData/docker-mysql1.log.gz | \
-		       testLogparse  --parser  DockerCLog  -f 1 -s DEBUG
+		       logparse  --parser  DockerCLog  -f 1 -s DEBUG
 		 ;;
 
         *)

@@ -12,7 +12,9 @@
   - [Test and operations](#test-and-operations)
     - [Test and operative environment](#test-and-operative-environment)
     - [Installation](#installation)
+    - [Configuration](#configuration)
     - [First experiments](#first-experiments)
+    - [More examples and tests](#more-examples-and-tests)
 
 <!--TOC-->
 
@@ -119,23 +121,45 @@ Following issues were encountered:
  - development and maintenance of the package are all performed under this environment
  
 ### Installation
+  
+ This is a pure Python package. At the time of this writing, PRs have not been 
+ accepted which would enable a straightforward installation via `Pypi`.
  
- This may be done as follows:
+ The full functionality requires also a particular version of package `dpath-python`,
+ adapted to accept regular expressions in both "bash/globbing" format at Python's `re`;
+ otherwise it should degrade to accepting only "bash/globbing" format, but some
+ of our tests will fail. *If this functionality becomes available, the process below
+ will be simplified...*
+ 
+
+ This process will install both; it  is  used in test
+ https://github.com/AlainLich/logtools/blob/ALPython3/.github/workflows/pythonDBExercise.yml
 
  - setup <I>or activate</I> the `virtualenv` environment using the 
    [requirements.txt](./requirements.txt) file.
- - change directory to the package (where `setup.py` and source code are found)
- - run `setup.py` using the python interpreter in the `virtualenv` environment:
+   
+ - copy or clone our versions of the packages:
+   1. https://github.com/AlainLich/dpath-python (branch AL-addRegexp)
+   2. https://github.com/AlainLich/logtools  (branch ̀ALPython3`)
  
-  
+   3. For each of these (in order)
+      - change directory to the package (where `setup.py` and source code are found)
+      - run `setup.py` using the python interpreter in the `virtualenv` environment:
+ 
+      This is done as follows:
 ```
    # establish virtualenv
    . venvSandBox/bin/activate
    # keep track of wd and cd to source
    v=`pwd`
-   pushd ~/src/logtools/
-   # install proper
+
+   pushd ${dpath_dir}
    $v/venvSandBox/bin/python3 setup.py install
+   popd
+
+   pushd ${logtools_dir}
+   $v/venvSandBox/bin/python3 setup.py install
+   popd
 ```
 
  
@@ -143,14 +167,29 @@ Following issues were encountered:
    - establish a  `~/.logtoolsrc` file, which will used for setting 
      parameters or defaults. There are many fields needed from this configuration,
 	 some of which can be overriden from the command line.
-	 + for doing this, a model can be found in aux/dot_logtoolsrc.sh, which 
+	 + for doing this, a model can be found in 
+	  [aux/dot_logtoolsrc.sh](./aux/dot_logtoolsrc.sh) , which 
 	   creates test configuration file(s) for CI in Github's Action system
-   - For the following configuration files, named in   `~/.logtoolsrc`, create and populate them,
+	   
+     + if using the database interface, login information will need to be 
+	   provided in the files; this allows for keeping password secret.
+	   
+	 + if some files are named in the above configuration, they will need to
+	   be provided too.
+	   
+   - For the following configuration files, named in   `~/.logtoolsrc`, 
+     create and populate them,
      empty files are acceptable if there is no blacklist:
 ```
 touch bots_hosts.txt         # File designated in ~/.logtoolsrc
 touch bots_useragents.txt    # File designated in ~/.logtoolsrc
- ```
+```
+
+   - in the case of the .yml script example ,  file
+   ` ~/.logtools.d/tradivariantParsing.txt `
+     needs to be provided since it is named in  `~/.logtoolsrc`
+	 (see example, where the files are generated for password
+	 inclusion by script [aux/dot_logtoolsrc.sh](./aux/dot_logtoolsrc.sh) ).
 
 
 ### First experiments
@@ -209,13 +248,13 @@ filterbots -s ERROR -r ".*sudo:(?P<ua>[^:]+).*COMMAND=(?P<ip>\S+).*"  --print
 		 Usable with /var/log/{syslog,kern.log,auth.log}.
 		 ```
 		 cat testData/TestAuth.data  | \
-		     testLogparse --parser TraditionalFileFormat -f TIMESTAMP -s ERROR	
+		     logparse --parser TraditionalFileFormat -f TIMESTAMP -s ERROR	
 		 ```
          Among capabilities, handle Docker log format:
 		 
 		 ```
 		 docker container logs mysql1  2>/dev/stdout >/dev/null| head -2| \
-		 testLogparse  --parser   DockerCLog --raw \
+		 logparse  --parser   DockerCLog --raw \
 		               -f TIMESTAMP,NUM,bracket,bracket1,bracket2,msg  -s ERROR
 		 ```
 		 where DockerCLog is defined in parsers2.py, but could also be supplied
@@ -233,8 +272,8 @@ filterbots -s ERROR -r ".*sudo:(?P<ua>[^:]+).*COMMAND=(?P<ip>\S+).*"  --print
          ~~~
          docker image inspect nginx | \
 	     wrapList2Json.py | \
-	     testLogparse --parser JSONParserPlus -f "TOP" | head -1 | \
-	     testLogdb -f "TOP/*/{RepoTags|Config}/{Env}" --frontend JSONParserPlus \
+	     logparse --parser JSONParserPlus -f "TOP" | head -1 | \
+	     logdb -f "TOP/*/{RepoTags|Config}/{Env}" --frontend JSONParserPlus \
     	                 --join-remote-key "application" \
 			             --join-remote-name EventTable 
          ~~~ 
@@ -270,4 +309,14 @@ filterbots -s ERROR -r ".*sudo:(?P<ua>[^:]+).*COMMAND=(?P<ip>\S+).*"  --print
          1031,1000,RangeEnd,1030
           ~~~
 
+         **Note**: utility `wrapList2Json.py`is  in directory 
+		 `./aux/testData/ActionsMysqlTest/scripts/wrapList2Json.py`, it will probably
+		 move to appear with other executables in later versions. It's function is 
+		 to wrap a JSONish list into a directory entry with key `TOP`.
+
 		 
+### More examples and tests
+
+See the Github Actions scripts for more details, which include complete configured
+test suites. https://github.com/AlainLich/logtools/actions with 
+test codes at https://github.com/AlainLich/logtools/tree/ALPython3/aux

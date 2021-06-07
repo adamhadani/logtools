@@ -8,7 +8,10 @@
   - [TOC](#toc)
   - [Note](#note)
   - [Intent](#intent)
-    - [Added functionality](#added-functionality)
+  - [Added functionality](#added-functionality)
+  - [Non functional changes](#non-functional-changes)
+  - [Ongoing development](#ongoing-development)
+    - [Findings](#findings)
 
 <!--TOC-->
 
@@ -26,10 +29,11 @@ Linux/Ubuntu or Docker produced logs.
 Other aspects:
  - emphasis on `fr_FR.UTF-8` locale
  - most logs are in `RSYSLOG_TraditionalFileFormat`
- - found `logjoin` interesting, but running under `Mysql 8.0` which requires an up to date 
-   version of the DB interface `SQLAlchemy`. 
-   This prompted removal of `SQLSoup` and move to current version of
-   `SQLAlchemy`, with interest on the ORM. 
+ - found `logjoin` interesting, but needed to change the DB interface:
+   since I am running under `Mysql 8.0` which requires an up to date 
+   version of the DB interface `SQLAlchemy`, I removed  `SQLSoup` 
+   and converted to current version of`SQLAlchemy`, with interest on the ORM. This
+   is used in `logjoin` and in the (added) `logdb`.
    
 ## Added functionality
  
@@ -57,15 +61,15 @@ Other aspects:
      where templates are defined in the style of traditional templates. 
 	 + This can be extended by adding more templates. (However not all features are 
 	   suppported)
-     + When extending, you must (in current state) add special function definition
-	   in  `logtools/parsers2.py`like :
-	   ```
-	    def FileFormat():
-            return RSysTradiVariant("FileFormat")
-	   ```
-	   and add some import instructions in `logtools/_parse.py`.
-     + Fields can be selected by field number or by using the property (symbol) appearing 
-	   in the template (for now, look for `templateDefs`  in `logtools/parsers2.py`).
+     + When extending, you may either:
+	   1. add special function definition
+	      in  `logtools/parsers2.py`like :
+	      ```
+	      def FileFormat():
+              return RSysTradiVariant("FileFormat")
+	      ```
+	      and add some import instructions in `logtools/_parse.py`.
+	   2. use configuration definable field descriptions as explained below.
 
      + these formats forms a set extensible via configuration file(s):
        requires adding to `~/.logtoolsrc`
@@ -85,6 +89,9 @@ Other aspects:
        ~~~
 
 	   
+     + Fields can be selected by field number or by using the property (symbol) appearing 
+	   in the template (for now, look for `templateDefs`  in `logtools/parsers2.py`).
+	   
    - Usable with /var/log/{syslog,kern.log,auth.log} (on the Ubuntu Linux configuration
      described) and ̀docker container logs` (one of my use cases)
 	 
@@ -99,57 +106,63 @@ Other aspects:
     ```
 
 1. Parsing of JSON Data
-  + supported in `logjoin` via frontend interface
+
+   supported in `logjoin` via frontend interface
 
 1. Changes in `logjoin`. 
-  + Data Base interface
-    + removed all `SQLSoup` dependencies; moving to `SQLAlchemy`. This option
-	  was selected because `SQLSoup` was found incompatible with newer versions 
-      of  `SQLAlchemy`, making `Mysql 8.0` unavailable.
-    + supports `Mysql 8.0`
-    + only testing with  `Mysql 8.0` DB
-  + added `frontend` filtering
-    + frontend may return JSON, internally as (recursive dict of list)...
-	+ permits to ingest JSON data (see tests)
-  + added a (parameterizable) notion of `backend`
-    + performs database operations depending of flow of data streaming out of `frontend`
-	+ collect SQL Schema (tables) information from SQL server after connection,
+
+   + Data Base interface
+     + removed all `SQLSoup` dependencies; moving to `SQLAlchemy`. This option
+	   was selected because `SQLSoup` was found incompatible with newer versions 
+       of  `SQLAlchemy`, making `Mysql 8.0` unavailable.
+     + supports `Mysql 8.0`
+     + only testing with  `Mysql 8.0` DB
+	 
+   + added `frontend` filtering
+     + frontend may return JSON, internally as (recursive dict of list)...
+	 + permits to ingest JSON data (see tests)
+	 
+   + added a (parameterizable) notion of `backend`
+     + performs database operations depending of flow of data streaming out of `frontend`
+	 + collect SQL Schema (tables) information from SQL server after connection,
 	  this may be used to simplify emitting more sophisticated queries
-    + generates SELECT SQL (for parameters in CLI or `~/.logtoolsrc`) using 
+     + generates SELECT SQL (for parameters in CLI or `~/.logtoolsrc`) using 
 	  SQLAlchemy using either ORM or Core. 
 	  
-  + support of additional data base transactions:
-    + table creation (for now table wired in, ... this may become parametrizable)
-	+ able to use SQLAlchemy via non ORM connections and OPRM sessions
-	+ able to use "mapped table"
+   + support of additional data base transactions:
+     + table creation (for now table wired in, ... this may become parametrizable)
+	 + able to use SQLAlchemy via non ORM connections and OPRM sessions
+	 + able to use "mapped table"
 	
 
 1. Changes in backend filtering
-  + started with difficulties when piping into applications expecting ready to parse
-    JSON structures as lines
-  + distinguish form of returned data (string, binary, with filtering)
+
+   + started with difficulties when piping into applications expecting ready to parse
+     JSON structures as lines
+   + distinguish form of returned data (string, binary, with filtering)
     - not systematic yet
   	
 1. Changes  to ̀flattenjson`:
-  + added --raw to dispense with utf-8 encoding, therefore can pipe to xargs,
+
+   + added --raw to dispense with utf-8 encoding, therefore can pipe to xargs,
 	   did not change default for backwards compatibility. This could have a CLI 
 	   like `--output-encoding`in `logjoin`
 
 1. Addition of `logdb`
 
-  This focuses on the performance of quite general ORM supported database operations,
-  the first examples performing additions and updates based on the incoming flow
-  of data from the logs
-  +  This uses quite general SQLAlchemy ORM tools, using Classes `SQLAlchemyDbOperator` 
+   This focuses on the performance of quite general ORM supported database operations,
+   the first examples performing additions and updates based on the incoming flow
+   of data from the logs
+   +  This uses quite general SQLAlchemy ORM tools, using Classes `SQLAlchemyDbOperator` 
      and `SQLAlchemyORMBackBase`, for providing 
      DB related operations, implemented in CLI program `logdb`, like:
     - filling a database table from data collected from a log stream
-  + this is implemented with some generality in classes  `SQLAlchemyORMBackBase` 
-    and `SQLAlchemyDbOperator` 
-  + this feature is parametrized by CLI or config file; for now a single
-    case has been implemented:
+   + this is implemented with some generality in classes  `SQLAlchemyORMBackBase` 
+     and `SQLAlchemyDbOperator` 
+   + this feature is parametrized by CLI or config file; for now a single
+     case has been implemented:
 	
-    +  `NestedTreeDbOperator ` (parm. `dbOperator: SQLAlcDbOp`
+   +  `NestedTreeDbOperator ` (parm. `dbOperator: SQLAlcDbOp`
 	  in `~/.logtoolsrc`) which provides for entering in a tree-like database schema the 
       content of  JSON (here from a Docker `inspect`   command):
    ~~~   
@@ -216,23 +229,11 @@ Other aspects:
 
 The issues here should be resolved before this file hits Github!
 
-### Issues
-Failing tests:
-  1. Test F, F1, F1b, F1c: 
-    + syntax of -f (field)
-	+ identification of (multilevel) keys in json produced by JSONParserPlus
-	+ need to understand function flatten
-	
-	
-More tests:
-  1. figure out what to do with ̀tox`
-  1. coverage tests (?)
-  1. decide how to test with database, including in CI (Github Actions)
-  
  
-Improvements:
+Improvements TBD(?):
   1. change --raw in flattenjson to use  `--output-encoding`like `logjoin`
-  1. document aux/parseRsyslogd.py
+  1. document aux/parseRsyslogd.py, which is a **test tool** for users that
+  add parsing variants via the `RSysTradiVariant` key in `.logtoolsrc`
 	 
   
 ### Findings 
@@ -245,13 +246,5 @@ Improvements:
 	 by keeping some Core based classes and moving to ORM for `_db.py` and CLI 
 	 `logdb`
   
-  Concerning  SQLAlchemy, there are further projects/tools worth looking at:
-  
-  + https://alembic.sqlalchemy.org/en/latest/  is a migration tool:
-  > ''For management of an application database schema over the long term
-  > however, a schema management tool such as Alembic, which builds upon
-  > SQLAlchemy, is likely a better choice, as it can manage and
-  > orchestrate the process of incrementally altering a fixed database
-  > schema over time as the design of the application changes.''
 
 

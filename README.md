@@ -33,10 +33,6 @@
 	 + For features see
 	   [PYTHON3-README.md](./PYTHON3-README.md) 
 	   and [PYTHON3-ADDITIONS.md](./PYTHON3-ADDITIONS.md).
-	   
-	  + For local applications, see 
-	   [LOCAL-LOGS.md](./LOCAL-LOGS.md) (this link only works if installation features 
-	   this information, typically not distributed via Github).
 	 
 <B>Notes</B>: this version
    -  is not compatible with Python-2
@@ -47,40 +43,52 @@
 	      <TD>Development</TD><TD>Github Actions</TD>
 	  </TH>
       <TR>
-	      <TD>Status</TD><TD>Tested</TD><TD>Not tested<BR>(in progress, errors remaining)</TD>
+	      <TD COLSPAN="3"><CENTER><B>Status</B></CENTER></TD>
+	  </TR>
+	  </TR>
+	      <TR><TD>Status</TD><TD>OK on dev. machine</TD>
+	      <TD> <IMG SRC="https://github.com/AlainLich/logtools/actions/workflows/pythonExercise.yml/badge.svg?branch=ALPython3"/></TD>
+	  </TR>
+	  </TR>
+	      <TR><TD>Status Extensions</TD><TD>OK on dev. machine</TD>
+	      <TD> <IMG SRC="https://github.com/AlainLich/logtools/actions/workflows/pythonDBExercise.yml/badge.svg?branch=ALPython3" /></TD>
 	  </TR>
       <TR>
-	      <TD>System</TD><TD>Ubuntu 20.10</TD><TD>Ubuntu 20.04 LTS</TD>
+	      <TD COLSPAN="3"><CENTER><B>Test Configurations</B></CENTER></TD>
+	  </TR>
+      <TR>
+	      <TD>System</TD><TD>Ubuntu 20.10</TD><TD>Ubuntu 20.04.2 LTS</TD>
 	  </TR>
       <TR>
 	      <TD>Linux</TD><TD>5.8.0-25-generic </TD><TD></TD>
 	  </TR>
       <TR>
-	      <TD>Python</TD><TD>3.8.6</TD><TD>3.8.8</TD>
+	      <TD>Python</TD><TD>3.8.6</TD><TD>CPython 3.8.10</TD>
 	  </TR>
       <TR>
 	      <TD>virtualenv</TD><TD>20.0.29+d</TD><TD>not used</TD>
 	  </TR>
       <TR>
-	      <TD>Used modules</TD><TD>see <A HREF="./requirements.txt">requirements.txt</A>
+	      <TD>Used modules</TD><TD>see <A HREF="./requirements.txt">requirements.txt</A> 
 		  </TD>
-		  <TD><A HREF="./requirements.txt">requirements.txt</A>, installed at startup</TD>
+		  <TD><A HREF="./requirements.txt">requirements.txt</A>, and 
+              <A HREF="./aux/testData/ActionsMysqlTest/scripts/testsDB.requirements">for test</A>
+          </TD>
 	  </TR>
 	  <TR>
 	      <TD>Locale</TD><TD>fr_FR.UTF-8</TD><TD>C.UTF-8</TD>
 	  </TR>
 	  <TR>
-	      <TD rowspan="3">Mysql</TD><TD>DockerHub reference</TD><TD></TD>
+	      <TD rowspan="3">Mysql</TD><TD>DockerHub reference</TD>
+		  <TD><A HREF="https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md">
+		  Github VM standard
+		  </A></TD>
 	  </TR>
 	  <TR>
-	      <TD>mysql/mysql-server:latest</TD><TD></TD>
+	      <TD>mysql/mysql-server:latest</TD><TD>MySQL 8.0.25</TD>
 	  </TR>
 	  <TR>
 	      <TD>2021-01-19T14:27:35</TD><TD></TD>
-	  </TR>
-	      <TR><TD>Status</TD><TD>OK on dev. machine</TD>
-	      <TD> <IMG SRC="https://github.com/AlainLich/logtools/actions/workflows/pythonExercise.yml/badge.svg?branch=ALPython3"/></TD>
-	  </TR>
       </TABLE>
    
 
@@ -157,8 +165,8 @@ you can easily install it if you have setuptools installed by running:
 
 Concerning the Python3 port, see  [PYTHON3-README.md](./PYTHON3-README.md)
 
-Supplemental documentation, extracted in the process of porting can be found
-at [MORE-DOC.md](./MORE-DOC.md). For installation, much information can be
+For installation, see  [PYTHON3-README.md](./PYTHON3-README.md#installation), 
+much information can be
 gleaned from [Github Actions YAML](.github/workflows/pythonExercise.yml). 
 
 ## Console Scripts

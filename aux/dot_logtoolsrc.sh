@@ -81,7 +81,7 @@ dbOperator: SQLAlcDbOp
 
    ## here we expect an rfc1738 URL
    ## these are the connect parameters of sqlalchemy instantiation   
-join_connect_string: mysql://user:${USER_DB_PASS}@localhost/logfromtool
+dbOp_connect_string: mysql://user:${USER_DB_PASS}@localhost/logfromtool
 
 dbOp_remote_fields: *
 dbOp_remote_name: testTable

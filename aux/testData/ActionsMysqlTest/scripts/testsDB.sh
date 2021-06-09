@@ -3,9 +3,10 @@
 # ------------------------------------------------------------------------------
 #
 # This script is installed in /aux/testData/ActionsMysqlTest/scripts
-# and is used to run Mysql DB tests on Github Actions hosted VM
-#
-# The available docker images in the VM used are listed at bottom
+# and is used to run DB tests with both Mysql and SQLite on Github Actions 
+# hosted VM
+# The available docker images in the VM used are listed at bottom; these are
+# to get data using 'docker image inspect' after a pull (see DOCKER_IMAGE)
 # ------------------------------------------------------------------------------
 
 ECHO=""

@@ -9,6 +9,7 @@
   - [Note](#note)
   - [Intent](#intent)
   - [Added functionality](#added-functionality)
+  - [Database](#database)
   - [Non functional changes](#non-functional-changes)
   - [Ongoing development](#ongoing-development)
     - [Findings](#findings)
@@ -39,9 +40,19 @@ Other aspects:
  
 1. added CLI flags to customize the level of logging; not customizable from 
    ~/.logtoolsrc (implementation propagates slowly to various entries)
-    - adds flags `-s` (symbolic designation like ̀-s DEBUG`)  `-n` (numerical
-	 like `-n 10`)
-	 
+    - adds flags `-s` (symbolic designation like ̀`-s DEBUG`)  `-n` (numerical
+	 like `-n 10`). Symbolic names and values as in Python `logging` module.
+
+    ```
+    logparse --parser JSONParserPlus -f "{(Id|ContainerC.*)}" -s DEBUG 
+    logparse --parser JSONParserPlus -f "{(Id|ContainerC.*)}" -s ERROR 
+    ```
+
+1. "INI" configuration files :
+   CLI commands will look at the environment variable LOGTOOLS_RC, which should 
+   contain a comma separated list of configuration files in INI format; if not set, 
+   defaut "/etc/logtools.cfg:~/.logtoolsrc" is used. 
+   ConfigParser is used in ExtendedInterpolation mode.
 	 
 1. Added RFC 5424 parser `SyslogRFC5424`, here ̀-f`supports symbolic field selection.
    This addition makes use of package `syslog_rfc5424_parser` from 
@@ -115,8 +126,8 @@ Other aspects:
      + removed all `SQLSoup` dependencies; moving to `SQLAlchemy`. This option
 	   was selected because `SQLSoup` was found incompatible with newer versions 
        of  `SQLAlchemy`, making `Mysql 8.0` unavailable.
-     + supports `Mysql 8.0`
-     + only testing with  `Mysql 8.0` DB
+     + supports `Mysql 8.0` and `SQLite`
+     + tested with both `Mysql 8.0` and ̀`SQLite`
 	 
    + added `frontend` filtering
      + frontend may return JSON, internally as (recursive dict of list)...
@@ -131,7 +142,7 @@ Other aspects:
 	  
    + support of additional data base transactions:
      + table creation (for now table wired in, ... this may become parametrizable)
-	 + able to use SQLAlchemy via non ORM connections and OPRM sessions
+	 + able to use SQLAlchemy via non ORM connections and ORM sessions
 	 + able to use "mapped table"
 	
 
@@ -150,9 +161,9 @@ Other aspects:
 
 1. Addition of `logdb`
 
-   This focuses on the performance of quite general ORM supported database operations,
-   the first examples performing additions and updates based on the incoming flow
-   of data from the logs
+   This focuses on the performance of ORM supported database operations,
+   the first example performing additions and updates based on the incoming flow
+   of data from the logs.
    +  This uses quite general SQLAlchemy ORM tools, using Classes `SQLAlchemyDbOperator` 
      and `SQLAlchemyORMBackBase`, for providing 
      DB related operations, implemented in CLI program `logdb`, like:
@@ -184,6 +195,8 @@ Other aspects:
 								'IPv4Address': '172.19.0.3/16', 
 								'IPv6Address': ''}}}]}
    ~~~
+   
+      results in inserting the following data in the database:
    
    ~~~
     id,parent_id,name,nval
@@ -219,7 +232,28 @@ Other aspects:
     and 'Containers'  keys.... which is obviously not a terrific idea!!
   + structurally, all methods dependent on the DB schema should be moved to
     file ̀ext_db.py`. 
-  
+
+## Database
+
+   The ̀`logjoin` and `logdb` programs and the corresponding modules make 
+   use of a database. Since the interface is done through SQLAlchemy,
+   selection of the database interface is done in the ̀`connect_string`
+   specified either by means of the INI configuration file or command
+   line argument (or class constructor).
+   
+   The interface (and therefore the programs) is (are) (apparently)  mostly 
+   independent of the database. However:
+   1. we found that SQLite was not able to use `enum` type data, 
+      which was OK for Mysql. 
+   1. We provide ̀class `SQLite_Data_Standardize` (and base class 
+      DB_Data_Standardize ) in `db_ext.py` to adjust
+      for not supported data types. **If more numerous interfaces 
+	  need data adaptation, the selection mechanism will need to be 
+	  generalized in class  `NestedTreeDbOperator` CTOR.**
+
+   Exemples are included in Github Actions CI tests, in ̀̀
+   `.github/workflows/`.
+   
 ## Non functional changes
 
 1. removed most of the `eval` function calls by function `utils.getObj`,

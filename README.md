@@ -50,20 +50,30 @@
 	      <TD> <IMG SRC="https://github.com/AlainLich/logtools/actions/workflows/pythonExercise.yml/badge.svg?branch=ALPython3"/></TD>
 	  </TR>
 	  </TR>
-	      <TR><TD>Status Extensions</TD><TD>OK on dev. machine</TD>
+	      <TR><TD>Status Extensions Mysql</TD><TD>OK on dev. machine</TD>
 	      <TD> <IMG SRC="https://github.com/AlainLich/logtools/actions/workflows/pythonDBExercise.yml/badge.svg?branch=ALPython3" /></TD>
+	  </TR>
+	  </TR>
+	      <TR><TD>Status Extensions SQLite</TD><TD>OK on dev. machine</TD>
+	      <TD> <IMG SRC="https://github.com/AlainLich/logtools/actions/workflows/pythonSQLiteExercise.yml/badge.svg?branch=ALPython3" /></TD>
 	  </TR>
       <TR>
 	      <TD COLSPAN="3"><CENTER><B>Test Configurations</B></CENTER></TD>
 	  </TR>
       <TR>
-	      <TD>System</TD><TD>Ubuntu 20.10</TD><TD>Ubuntu 20.04.2 LTS</TD>
+	      <TD ROWSPAN="2">System</TD><TD>Ubuntu 20.10</TD><TD ROWSPAN="2">Ubuntu 20.04.2 LTS</TD>
+	  </TR>
+      <TR>
+	      <TD>Ubuntu 21.04</TD>
 	  </TR>
       <TR>
 	      <TD>Linux</TD><TD>5.8.0-25-generic </TD><TD></TD>
 	  </TR>
       <TR>
-	      <TD>Python</TD><TD>3.8.6</TD><TD>CPython 3.8.10</TD>
+	      <TD ROWSPAN="2">Python</TD><TD>3.8.6</TD><TD ROWSPAN="2">CPython 3.8.10</TD>
+	  </TR>
+      <TR>
+	      <TD>3.9.4</TD>
 	  </TR>
       <TR>
 	      <TD>virtualenv</TD><TD>20.0.29+d</TD><TD>not used</TD>
@@ -89,6 +99,9 @@
 	  </TR>
 	  <TR>
 	      <TD>2021-01-19T14:27:35</TD><TD></TD>
+	  <TR>
+	      <TD>SQLite</TD><TD>3.34.1</TD><TD></TD>
+	  </TR>
       </TABLE>
    
 

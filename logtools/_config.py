@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 #
-#  Licensed under the Apache License, Version 2.0 (the "License"); 
-#  you may not use this file except in compliance with the License. 
-#  You may obtain a copy of the License at 
-#  
-#      http://www.apache.org/licenses/LICENSE-2.0 
-#     
-#  Unless required by applicable law or agreed to in writing, software 
-#  distributed under the License is distributed on an "AS IS" BASIS, 
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-#  See the License for the specific language governing permissions and 
-#  limitations under the License. 
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
 #
 # ........................................ NOTICE
 #
@@ -32,17 +32,30 @@ import logging
 
 from configparser import ConfigParser, NoOptionError, NoSectionError, ExtendedInterpolation
 
-__all__ = ['logtools_config', 'interpolate_config', 'AttrDict', 'setLoglevel']
+__all__ = ['logtools_config', 'interpolate_config', 'AttrDict', 'setLoglevel' ]
+
+
+if  "LOGTOOLS_RC" in os.environ and len(os.environ["LOGTOOLS_RC"]) > 0 :
+    logtools_config_paths = list(map(os.path.expanduser,
+                                     os.environ["LOGTOOLS_RC"].split(":")))
+    s = "(from env. LOGTOOLS_RC)"
+else:
+    s = ""
+    logtools_config_paths = ['/etc/logtools.cfg', os.path.expanduser('~/.logtoolsrc')]
+logging.debug(f"INI (ConfigParser) files sought for {s}:{logtools_config_paths}")
 
 logtools_config = ConfigParser( interpolation = ExtendedInterpolation())
-logtools_config_paths = ['/etc/logtools.cfg', os.path.expanduser('~/.logtoolsrc')]
 logtools_config.read(logtools_config_paths)
+
+
+MYSQL_NOT_FOUND = None
 
 
 class AttrDict(dict):
     """Helper class for simulation OptionParser options object"""
     def __getattr__(self, key):
         return self[key]
+
 
 def interpolate_config(var, section, key, default=None, type=str):
     """Interpolate a parameter. if var is None,
@@ -58,20 +71,20 @@ def interpolate_config(var, section, key, default=None, type=str):
     except KeyError as err:
         if False:
             #at this point, logging not intialized (?)
-            logging.info( f"{err}\n\ttype parm={type}", file=sys.stderr)        
-        raise KeyError("Invalid parameter type: '{0}'".format(type))    
+            logging.info( f"{err}\n\ttype parm={type}", file=sys.stderr)
+        raise KeyError("Invalid parameter type: '{0}'".format(type))
     except (NoOptionError, NoSectionError) as err:
         if False:
             #at this point, logging not intialized (?)
             logging.info( f"Error: {err}\n\tdefault={default}"
                 +f"\n\ttype parm={type}\n\tsection={repr(section)}\tkey={repr(key)}"
                 +f"\n\tconfig file sought: {logtools_config_paths}")
-        
+
         if default is not None:
             return default
         raise KeyError("Missing parameter: '{0}'".format(key))
-    
-    
+
+
 def setLoglevel(options):
     """ Customize logging level, using options dictionnary collected from CLI
     """
@@ -83,9 +96,9 @@ def setLoglevel(options):
         if options.logLevVal:
             basics['level'] = options.logLevVal
         elif options.logLevSym:
-            basics['level'] = options.logLevSym 
+            basics['level'] = options.logLevSym
         logging.basicConfig(**basics)
-        
+
     except ValueError as err:
         print( f"Bad --sym or --num flag value\n\t{err}", file = sys.stderr)
         sys.exit(2)
@@ -93,30 +106,60 @@ def setLoglevel(options):
         print( f"Unexpected error\n\t{err}", file = sys.stderr)
         raise
 
+def setMysqlNotFound(x):
+    """ Used to set MYSQL_NOT_FOUND from __init, permits checkMysql to warn when
+        this DB interface is absent. This functionality will evolve since the
+        plan is to be SQL interface neutral.....
+    """
+    global MYSQL_NOT_FOUND
+    MYSQL_NOT_FOUND = x
+
+def checkMysql( required=False):
+    """ Used in functions that may use the DB interface either that this is required
+        or that functionality may be degraded.
+
+        argument: required: if True, then signal an error and exit
+    """
+    doExit=False
+    if MYSQL_NOT_FOUND is not None:
+         if MYSQL_NOT_FOUND:
+             if required:
+                 logging.error(f"Module pymysql not available")
+                 doExit = True
+             else:
+                 logging.warning(f"Module pymysql not available, functionality may be degraded")
+
+         else:
+             logging.debug(f"CheckMysql:_config.MYSQL_NOT_FOUND assigned:{MYSQL_NOT_FOUND}")
+    else:
+        logging.error(f"CheckMysql:_config.MYSQL_NOT_FOUND  not assigned")
+        doExit = required
+    if doExit:
+        sys.exit(20)
 
 def checkDpath(doExtended=True):
     """
     This checks that we are using a full featured (i.e. extended when compared with
     standard package distribution) dpath module, able to recognize segments with 're'
     regexps.
- 
+
     The option is then set according to argument doExtended (default:True).
 
     Experimental method used since we do not control the releases of dpath.
     """
     import dpath
-    
+
     if hasattr(dpath.options,"DPATH_ACCEPT_RE_REGEXP"):
         dpath.options.DPATH_ACCEPT_RE_REGEXP = doExtended
         return
-    
+
     if not doExtended:
         return
-    
+
     if ( 'dpath'  in logtools_config.sections()
          and logtools_config['dpath'].get('no-dpath-warning').lower()=="true"):
         return
-    
+
     js={"Env":True, "Cmd":True}
     selPath = '{(Env|Cmd)}'
     x = dpath.util.search(js, selPath)
@@ -132,5 +175,3 @@ def checkDpath(doExtended=True):
 
     """
         logging.warn(wmsg)
-
-        

@@ -41,7 +41,7 @@ import logtools.parsers
 import logtools.parsers2
 from .join_backends import *
 from ._config import logtools_config, interpolate_config, AttrDict, setLoglevel
-from ._config import checkDpath
+from ._config import checkDpath, checkMysql
 from .utils import flatten, ucodeNorm, getObj
 
 import dpath
@@ -226,6 +226,9 @@ Function: Perform a join between new information and information in a database
 
 def logjoin_main():
     """Console entry-point"""
+
+    checkMysql(required=True)
+
     options, args = logjoin_parse_args()
     if options.inFileName:
         fh = open(options.inFileName, "r")

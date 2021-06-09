@@ -22,18 +22,27 @@
 
 import logging
 
-## This might be specific to Ubuntu+Python3: +++++++++++++++++++++++++++++++++
-##
-## used by sqlalchemy/dialects/mysql/mysqldb.py", line 118, in dbapi
-## in class MySQLDialect_mysqldb
-#
-## Had to:
-##     sudo pip3 install mysql-connector (not sure necessary)
-##     pip3 install PyMySQL
+## ------------------------------------------------------------------------------
+## Configure pymysql if it is available, otherwise do not bother: functions
+## that need mysql or another query interface will warn the user and/or abort
+## if required, using function _config.checkMysql
+mysqlNotFound=False
+try:
+    import pymysql
 
-import pymysql
-pymysql.install_as_MySQLdb()
-## END OF SPECIFIC TO Ubuntu+Python3:        +++++++++++++++++++++++++++++++++
+    ## This might be specific to Ubuntu+Python3: +++++++++++++++++++++++++++++++++
+    ##
+    ## used by sqlalchemy/dialects/mysql/mysqldb.py", line 118, in dbapi
+    ## in class MySQLDialect_mysqldb
+    #
+
+    pymysql.install_as_MySQLdb()
+    ## END OF SPECIFIC TO Ubuntu+Python3:        +++++++++++++++++++++++++++++++++
+    
+except Exception as err:
+    logging.debug(f"Module pymysql not available: {err}")
+    mysqlNotFound=True
+## ------------------------------------------------------------------------------
 
 
 from ._config import *
@@ -53,3 +62,7 @@ from ._tail import *
 from ._sumstat import *
 from ._serve import *
 
+## ------------------------------------------------------------------------------
+from ._config import setMysqlNotFound 
+setMysqlNotFound(mysqlNotFound)    
+## ------------------------------------------------------------------------------

@@ -41,7 +41,7 @@ import logtools.parsers2
 from .join_backends import *
 from ._join import jsonKeyExtract
 from ._config import logtools_config, interpolate_config, AttrDict, setLoglevel
-from ._config import checkDpath
+from ._config import checkDpath, checkMysql
 from .utils import flatten, ucodeNorm, getObj
 from .ext_db import DB_Tree_Maker, NestedTreeDbOperator
 import dpath
@@ -231,6 +231,9 @@ Function: Perform misc. operations between new logstream  information and inform
 def logdb_main():
     """Console entry-point"""
     options, args = logdb_parse_args()
+    
+    checkMysql(required=True)
+
     if options.inFileName:
         fh = open(options.inFileName, "r")
     else:

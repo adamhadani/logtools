@@ -162,7 +162,11 @@ class NestedTreeDbOperator( SQLAlchemyDbOperator ):
         SQLAlchemyDbOperator.__init__(self, remote_fields, remote_name,
                                             remote_key, connect_string)
 
-    
+        if connect_string.startswith("sqlite"):
+            self.dataStandardizer =  SQLite_Data_Standardize()
+        else:
+            self.dataStandardizer =  DB_Data_Standardize()
+        
     def _operate_init(self):
         # fetch uniqueId from tree with parent_id == 0 
         self.uniqueId = self._fetch_unique_id()
@@ -252,7 +256,7 @@ class NestedTreeDbOperator( SQLAlchemyDbOperator ):
         args['nval'] = val 
         sid = pos if isinstance(pos, str) else ( pos[-1] if len(pos)>0 else "**TOP**" )
 
-        node = TreeNode(self.uniqueId, sid, **args)
+        node = TreeNode(self.uniqueId, sid, **self.dataStandardizer(args))
         self.session.add(node)
 
         if not fillOnly:
@@ -322,3 +326,34 @@ def dictOfDictIterator(dodTree, pos=None):
     else:
         yield (dodTree,pos)
 
+
+class DB_Data_Standardize():
+    """ Do nothing base class for data standardizer, the major requirement 
+        we have is to handle data output to SQLite, which is more restrictive
+        than Mysql
+    """
+
+
+    def __call__(self, items):
+        return items
+
+
+
+class SQLite_Data_Standardize( DB_Data_Standardize):
+    """ Adapt the data for SQLite...
+    """
+    def __init__(self):
+         DB_Data_Standardize.__init__(self)
+
+    def __call__(self, items):
+        if isinstance(items, dict):
+            ret = { k:self.std(v) for (k,v) in items.items()}
+        elif not isinstance(items,(str,bytes)):
+            ret = list( [self.std(v) for v in items])
+        return ret
+
+    def std(self,x):
+        if x in (int, str, bytes):
+            return x
+        logging.debug(f"In {self}.__std converted to str x={type(x)}:{x}")
+        return str(x)

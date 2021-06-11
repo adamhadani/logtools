@@ -1,4 +1,4 @@
-name: Test python package logtools with SQLite database features
+name: Test python package logtools with SQLite database
     # ------------------------------------------------------------
     # (C) Alain Lichnewsky, 2021
     #
@@ -242,7 +242,14 @@ jobs:
         - name: Dump Values in database
           if: always()
           # Only table 'tree' gets modified / filled, so that we do not
-          # need the rest
+          # need to print the rest
+          #
+          # Watch out:sqlite3 won't return an error code if we omit the
+          # ${sqlite_file} parameter. The documentation says:
+          #  ``  If no database file is specified on the command-line, a
+          #      temporary database is created, then deleted when the "sqlite3"
+          #      program exits. ''
           run: |
-            echo "SELECT * FROM tree;" | sqlite3
+            echo ".tables" | sqlite3  ${sqlite_file}
+            echo "SELECT * FROM tree;" | sqlite3 ${sqlite_file}
             echo dumped logfromtool.tree

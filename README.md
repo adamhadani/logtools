@@ -67,7 +67,10 @@
 	      <TD>Ubuntu 21.04</TD>
 	  </TR>
       <TR>
-	      <TD>Linux</TD><TD>5.8.0-25-generic </TD><TD></TD>
+	      <TD ROWSPAN="2">Linux</TD><TD>5.8.0-25-generic </TD><TD ROWSPAN="2"></TD>
+	  </TR>
+      <TR>
+	      <TD>5.11.0-16.generic </TD>
 	  </TR>
       <TR>
 	      <TD ROWSPAN="2">Python</TD><TD>3.8.6</TD><TD ROWSPAN="2">CPython 3.8.10</TD>

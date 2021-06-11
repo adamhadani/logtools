@@ -231,8 +231,7 @@ Function: Perform misc. operations between new logstream  information and inform
 def logdb_main():
     """Console entry-point"""
     options, args = logdb_parse_args()
-    
-    checkMysql(required=True)
+    checkMysql(checkOptions="dbOp_connect_string", options=options, required=True)
 
     if options.inFileName:
         fh = open(options.inFileName, "r")

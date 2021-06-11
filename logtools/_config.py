@@ -114,21 +114,33 @@ def setMysqlNotFound(x):
     global MYSQL_NOT_FOUND
     MYSQL_NOT_FOUND = x
 
-def checkMysql( required=False):
+def checkMysql(checkOptions, options, required=False):
     """ Used in functions that may use the DB interface either that this is required
         or that functionality may be degraded.
 
-        argument: required: if True, then signal an error and exit
-    """
+        <condition> = mysql is not used or pymysql is available 
+        arguments: 
+              options:  dictionnary, derived from command line args
+              checkOptions: look for this entry ( *connect_string ) in options which
+                            is a dictionnary, see if it names mysql
+              required: if True and <condition> not met, then signal an error and exit
+                        if False : no action  
+                        if None   and <condition> not met: emit a warning
+    """ 
+    def usingMysql():
+        if checkOptions in options:
+            return options[checkOptions].startswith("mysql:")
+        return False
+        
     doExit=False
     if MYSQL_NOT_FOUND is not None:
          if MYSQL_NOT_FOUND:
-             if required:
-                 logging.error(f"Module pymysql not available")
-                 doExit = True
-             else:
-                 logging.warning(f"Module pymysql not available, functionality may be degraded")
-
+             if  usingMysql():
+                 if required: 
+                     logging.error(f"Module pymysql not available")
+                     doExit = True
+                 elif required is None:
+                     logging.warning(f"Module pymysql not available, functionality may be degraded")
          else:
              logging.debug(f"CheckMysql:_config.MYSQL_NOT_FOUND assigned:{MYSQL_NOT_FOUND}")
     else:

@@ -227,9 +227,9 @@ Function: Perform a join between new information and information in a database
 def logjoin_main():
     """Console entry-point"""
 
-    checkMysql(required=True)
-
     options, args = logjoin_parse_args()
+    checkMysql(checkOptions="logjoin_connect_string", options=options, required=True)
+
     if options.inFileName:
         fh = open(options.inFileName, "r")
     else:

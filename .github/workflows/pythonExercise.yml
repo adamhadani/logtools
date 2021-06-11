@@ -1,4 +1,4 @@
-name: Test python package logtools non DB
+name: Test python package logtools without database
     # ------------------------------------------------------------
     # (C) Alain Lichnewsky, 2021
     #
@@ -10,80 +10,176 @@ name: Test python package logtools non DB
 
 on: #[push]
     workflow_dispatch:
-    
+
 jobs:
-  build:
+    build:
 
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.8'
-        architecture: 'x64'
+        runs-on: ubuntu-latest
 
-    # ------------------------------------------------------------
-    # Later see about caching pip dependencies
-    #   https://docs.github.com/en/actions/guides/building-and-testing-python
-    # ------------------------------------------------------------
+        # Defining environment variables at this level
+        env:
+            #  From:
+            #  https://docs.github.com/en/actions/reference/environment-variables
+            #  ``The workspace directory is a copy of your repository if your
+            #    workflow uses the actions/checkout action. If you don't use
+            #    the actions/checkout action, the directory denoted in
+            #    GITHUB_WORKSPACE will be empty.''
+            #
+            #  So using a handwired  version (TB CHECKED LATER, not modular)
+            #  There are constraints on src_Dpath_path value, see below
+            #
+            src_Dpath_path: /home/runner/work/logtools/logtools/aux/lib/srcDpath
 
-    - name: Ascertain configuration
-      #
-      #    Collect information concerning $HOME (for ~/.logtoolsrc setup)
-      #                                   location of file loaded from Github/
-      #    Also show $LANG ( Locale may be relevant in processing of dates )
-      run: |
-        echo Working dir $(pwd)
-        echo Files at this location:
-        ls -ltha
-        echo HOME: $HOME
-        echo LANG: $LANG
-      #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-      #    ** here :: **
-      #  pythonLocation: /opt/hostedtoolcache/Python/3.8.8/x64
-      #  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.8.8/x64/lib
-      #  Working dir /home/runner/work/logtools/logtools
-      #  HOME: /home/runner
-      #  LANG: C.UTF-8
-      #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip setuptools wheel
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        python setup.py install
 
-    - name: Install .logtoolsrc
-      #
-      #     File ~/.logtoolsrc is used by the package to setup defaults
-      #          absence results in failure; it contains filepaths and therefore
-      #          must be adapted to actual filepaths
-      #
-      run: |
-        echo executing: aux/dot_logtoolsrc.sh $(pwd) "${HOME}/.logtoolsrc"
-        aux/dot_logtoolsrc.sh $(pwd) "${HOME}/.logtoolsrc"
-        echo Files in  home dir: "$HOME"
-        ls -ltha ~
-        
-    - name: Test 
-      #
-      #     Test Z : runs logtools/test/test_logtools.py
-      #     Test A : runs a test scenario
-      #     Test + : runs all tests
-      #
-      #     These are redundant, ordered by increasing dependency on the
-      #     environment: Z:self contained, A requires 1 data file,
-      #
-      #     Parameter -s ZZZ indicates logging level; INFO, ERROR and DEBUG are of interest
-      #
-      #     Environment variables: documented in aux/matTests.py
-      #     Note that if DEBUG not set, some tests suppress error output
-      run: |        
-        export ZTESTPGM="logtools/test/test_logtools.py"
-        export TESTDATADIR="aux/testData"
-        export DEBUG="-"
-        python aux/manTests.py Z -s INFO
-        python aux/manTests.py A -s ERROR
-        python aux/manTests.py + -s INFO
+        steps:
+        - uses: actions/checkout@v2
+        - name: Set up Python 3.8
+          uses: actions/setup-python@v2
+          with:
+              python-version: '3.8'
+              architecture: 'x64'
+
+        # ------------------------------------------------------------
+        # Later see about caching pip dependencies
+        # https://docs.github.com/en/actions/guides/building-and-testing-python
+        # ------------------------------------------------------------
+
+        - name: Ascertain configuration and add some paths
+          #
+          #    Collect information concerning $HOME (for ~/.logtoolsrc setup)
+          #    i.e. location of file loaded from Github/
+          #    Also show $LANG ( Locale may be relevant in processing of dates )
+          #
+          run: |
+                if [ ! -d ${src_Dpath_path} ] ; then
+                    mkdir -p ${src_Dpath_path}
+                fi
+                echo Home dir $HOME
+                echo files at this location
+                ls -ltha $HOME
+                echo "+++++"
+                echo Working dir $(pwd)
+                echo Files at this location:
+                ls -ltha
+                echo "+++++"
+                echo HOME: $HOME
+                echo LANG: $LANG
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              #    ** here :: **
+              #  pythonLocation: /opt/hostedtoolcache/Python/3.8.8/x64
+              #  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.8.8/x64/lib
+              #  Working dir /home/runner/work/logtools/logtools
+              #  HOME: /home/runner
+              #  LANG: C.UTF-8
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+        - name: Prepare for Python installs
+          # We start by upgrading pip, if needed (?)
+          run: |
+                python -m pip install --upgrade pip setuptools wheel
+
+        - name: Install full featured dpath from my own github repo
+          # Need to load dpath from my repository; otherwise the setup.py
+          # will install the default version without the special features
+
+          # Repo information: origin/AL-addRegexp
+          #      https://github.com/AlainLich/dpath-python.git
+          # Using https://github.com/actions/checkout for all required
+          # information on actions/checkout@v2
+
+          uses: actions/checkout@v2
+          with:
+              # Repository name with owner. For example, actions/checkout
+              # Default: ${{ github.repository }}
+              repository: 'AlainLich/dpath-python'
+               # The branch, tag or SHA to checkout. When checking out the
+              # repository that triggered a workflow, this defaults to the
+              # reference or SHA for that event. Otherwise, uses the default
+              # branch.
+              ref: 'AL-addRegexp'
+               # Absolute path to place the repository. There seems to be
+              # constraints, as I received an error "... is not under ..."
+              # See https://github.com/actions/checkout
+              # and more specifically https://github.com/actions/checkout/issues/197
+              #    `` Today the path input is the only way to change the directory
+              #       where the code is cloned. Also there is a restriction that it
+              #       must be under GITHUB_WORKSPACE. ''
+              # See FR https://github.com/actions/checkout/issues/327
+              #
+              path: ${{ env.src_Dpath_path }}
+
+        - name: Install dpath with config
+
+          run: |
+                cd ${src_Dpath_path}
+                echo Files in the dpath directory $(pwd) just loaded
+                ls -ltha
+                python setup.py install
+                if [ $? -eq 0 ] ; then
+                    echo Installed dpath successfully in ${src_Dpath_path}
+                    ls -ltha ${src_Dpath_path}
+                else
+                    echo FAILURE IN INSTALLATION OF dpath
+                fi
+
+        - name: Install logtools with config.py
+          if: always()
+          run: |
+                pwd
+                ls -ltha
+                python setup.py install
+                if [ $? -eq 0 ] ; then
+                    echo Installed logtools successfully
+                else
+                    echo FAILURE IN INSTALLATION OF logtools
+                fi
+
+        - name: Install other python dependencies
+          if: always()
+          # Take into account the requirements and setup.py built in
+          # dependencies.
+          # Do not install : pymysql
+          #
+          run: |
+            echo installing logtools requirements
+            if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+            #
+            echo installing extra test requirements
+            testsDBReq=${AMTS_PATH}/testsNoDB.requirements
+            if [ -f ${testsDBReq}  ]; then pip install -r ${testsDBReq} ; fi
+
+        - name: Install .logtoolsrc
+          #
+          #     File ~/.logtoolsrc is used by the package to setup defaults
+          #          absence results in failure; it contains filepaths and
+          #          must be adapted to actual filepaths
+          #
+          run: |
+            echo executing: aux/dot_logtoolsrc.sh $(pwd) "${HOME}/.logtoolsrc"
+            aux/dot_logtoolsrc.sh $(pwd) "${HOME}/.logtoolsrc"
+            echo Files in  home dir: "$HOME"
+            ls -ltha ~
+
+        - name: Test
+          #
+          #     Test Z : runs logtools/test/test_logtools.py
+          #     Test A : runs a test scenario
+          #     Test + : runs all tests
+          #
+          #     These are redundant, ordered by increasing dependency on the
+          #     environment: Z:self contained, A requires 1 data file,
+          #
+
+
+          #     Parameter -s ZZZ indicates logging level; INFO, ERROR and DEBUG
+          #     are also of interest
+          #
+          #     Environment variables: documented in aux/matTests.py
+          #     Note that if DEBUG not set, some tests suppress error output
+          run: |
+            export ZTESTPGM="logtools/test/test_logtools.py"
+            export TESTDATADIR="aux/testData"
+            export DEBUG="-"
+            python aux/manTests.py Z -s INFO
+            python aux/manTests.py A -s ERROR
+            python aux/manTests.py + -s INFO

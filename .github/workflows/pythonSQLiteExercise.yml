@@ -249,10 +249,15 @@ jobs:
           #  ``  If no database file is specified on the command-line, a
           #      temporary database is created, then deleted when the "sqlite3"
           #      program exits. ''
+          #
+          # There is a disparity of version for sqlite3 between the dev system
+          # and the VM: .mode markdown is not supported
+          #
           run: |
+            echo sqlite3 version: $(sqlite3 --version)
             sqlite3 ${sqlite_file} <<EOD
             .tables
-            .mode markdown
+            .mode column
               SELECT * FROM tree;
             EOD
             echo dumped logfromtool.tree

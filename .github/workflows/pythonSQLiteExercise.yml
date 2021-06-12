@@ -250,6 +250,9 @@ jobs:
           #      temporary database is created, then deleted when the "sqlite3"
           #      program exits. ''
           run: |
-            echo ".tables" | sqlite3  ${sqlite_file}
-            echo "SELECT * FROM tree;" | sqlite3 ${sqlite_file}
+            sqlite3 ${sqlite_file} <<EOD
+            .tables
+            .mode markdown
+              SELECT * FROM tree;
+            EOD
             echo dumped logfromtool.tree

@@ -155,8 +155,10 @@ jobs:
           #          must be adapted to actual filepaths
           #
           run: |
-            echo executing: aux/dot_logtoolsrc.sh $(pwd) "${HOME}/.logtoolsrc"
-            aux/dot_logtoolsrc.sh $(pwd) "${HOME}/.logtoolsrc"
+            echo executing: aux/dot_logtoolsrc.sh $(pwd) "${HOME}/.logtoolsrc" \
+                   "${HOME}/.logtools.d"
+            aux/dot_logtoolsrc.sh $(pwd) "${HOME}/.logtoolsrc" \
+                   "${HOME}/.logtools.d"
             echo Files in  home dir: "$HOME"
             ls -ltha ~
 
@@ -175,6 +177,14 @@ jobs:
           #     are also of interest
           #
           #     Environment variables: documented in aux/matTests.py
+
+          #     Configuration:
+          #            This uses ~/.logtoolsrc
+          #                 and this file may name other config files that must
+          #                 exist with proper contents. In particular this test
+          #                 uses ~/.logtools.d/tradivariantParsing.txt
+          #
+
           #     Note that if DEBUG not set, some tests suppress error output
           run: |
             export ZTESTPGM="logtools/test/test_logtools.py"

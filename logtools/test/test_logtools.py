@@ -11,6 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """Unit-test code for logtools"""
 
 import os
@@ -19,7 +27,7 @@ import unittest
 import logging
 from tempfile import mkstemp
 from datetime import datetime
-from StringIO import StringIO
+from io import StringIO
 from operator import itemgetter
 
 from logtools import (filterbots, logfilter, geoip, logsample, logsample_weighted, 
@@ -50,13 +58,13 @@ class URLParseTestCase(unittest.TestCase):
         i=0
         for row in urlparse(StringIO('\n'.join(self.rows)+'\n'), part='netloc'):
             i+=1
-        self.assertEquals(i, len(self.rows), \
+        self.assertEqual(i, len(self.rows), \
                           "Number of rows output is not equal to input size")
         
     def testMultipleQueryParams(self):
         url = "http://www.mydomain.com/my/path/myfile?myparam1=myval1&myparam2=myval2"
         for row in urlparse(StringIO(url+"\n"), part='query', query_params='myparam1,myparam2'):
-            self.assertEquals(row[0], 'myval1', "Returned query param value was not as expected: %s" % \
+            self.assertEqual(row[0], 'myval1', "Returned query param value was not as expected: %s" % \
                           row)
 
     
@@ -78,7 +86,7 @@ class ParsingTestCase(unittest.TestCase):
         parser = JSONParser()
         for logrow in self.json_rows:
             parsed = parser(logrow)
-            self.assertNotEquals(parsed, None, "Could not parse line: %s" % str(logrow))
+            self.assertNotEqual(parsed, None, "Could not parse line: %s" % str(logrow))
         
     def testAccessLog(self):
         parser = AccessLog()
@@ -86,33 +94,33 @@ class ParsingTestCase(unittest.TestCase):
         self.assertRaises(ValueError, parser, 'example for invalid format')
         for logrow in self.clf_rows:
             parsed = parser(logrow)
-            self.assertNotEquals(parsed, None, "Could not parse line: %s" % str(logrow))
+            self.assertNotEqual(parsed, None, "Could not parse line: %s" % str(logrow))
             
     def testCommonLogFormat(self):
         parser = CommonLogFormat()
         self.assertRaises(ValueError, parser, 'example for invalid format')
         for logrow in self.clf_rows:
             parsed = parser(logrow)
-            self.assertNotEquals(parsed, None, "Could not parse line: %s" % str(logrow))        
+            self.assertNotEqual(parsed, None, "Could not parse line: %s" % str(logrow))        
 
     def testuWSGIParser(self):
         parser = uWSGIParser()
         for logrow in self.uwsgi_rows:
             parsed = parser(logrow)
-            self.assertNotEquals(parsed, None, "Could not parse line: %s" % logrow)
+            self.assertNotEqual(parsed, None, "Could not parse line: %s" % logrow)
 
     def testLogParse(self):
         options = AttrDict({'parser': 'CommonLogFormat', 'field': 4, 'header': False})
         fh = StringIO('\n'.join(self.clf_rows))
         output = [l for l in logparse(options, None, fh)]
-        self.assertEquals(len(output), len(self.clf_rows), "Output size was not equal to input size!")
+        self.assertEqual(len(output), len(self.clf_rows), "Output size was not equal to input size!")
         
     def testMultiKeyGetter(self):
         parser = parser = CommonLogFormat()
         func = multikey_getter_gen(parser, keys=(1,2), is_indices=True)
         fh = StringIO('\n'.join(self.clf_rows))
         output = [func(l) for l in fh]
-        self.assertEquals(len(output), len(self.clf_rows), "Output size was not equal to input size!")   
+        self.assertEqual(len(output), len(self.clf_rows), "Output size was not equal to input size!")   
         
             
 class FilterBotsTestCase(unittest.TestCase):
@@ -160,13 +168,13 @@ class FilterBotsTestCase(unittest.TestCase):
         i=0
         for l in filterbots(fh=self.json_fh, **json_options):
             i+=1
-        self.assertEquals(i, 1, "filterbots output size different than expected: %s" % str(i))
+        self.assertEqual(i, 1, "filterbots output size different than expected: %s" % str(i))
             
     def testRegExpFiltering(self):
         i=0
         for l in filterbots(fh=self.fh, **self.options): 
             i+=1
-        self.assertEquals(i, 1, "filterbots output size different than expected: %s" % str(i))
+        self.assertEqual(i, 1, "filterbots output size different than expected: %s" % str(i))
 
 
 class GeoIPTestCase(unittest.TestCase):
@@ -184,24 +192,26 @@ class GeoIPTestCase(unittest.TestCase):
         try:
             import GeoIP
         except ImportError:
-            print >> sys.stderr, "GeoIP Python package not available - skipping geoip unittest."
+            print( "GeoIP Python package not available - skipping geoip unittest.",
+                    file = sys.stderr)
             return
 
         output = [(geocode, ip, line) for geocode, ip, line in geoip(fh=self.fh, **self.options)]
-        self.assertEquals(len(output), 2, "Output size was different than expected: %s" % str(len(output)))
+        self.assertEqual(len(output), 2, "Output size was different than expected: %s" % str(len(output)))
         
     def testFilter(self):
         """Test GeoIP filtering functionality"""        
         try:
             import GeoIP
         except ImportError:
-            print >> sys.stderr, "GeoIP Python package not available - skipping geoip unittest."
+            print ("GeoIP Python package not available - skipping geoip unittest.",
+                   file = sys.stderr)
             return        
         
         # Check positive filter
         self.options['filter'] = 'United States'
         output = [(geocode, ip, line) for geocode, ip, line in geoip(fh=self.fh, **self.options)]
-        self.assertEquals(len(output), 2, "Output size was different than expected: %s" % str(len(output)))
+        self.assertEqual(len(output), 2, "Output size was different than expected: %s" % str(len(output)))
         
         # Check negative filter
         self.options['filter'] = 'India'
@@ -225,12 +235,12 @@ class SamplingTestCase(unittest.TestCase):
 
     def testUniformSampling(self):
         output = [r for r in logsample(fh=self.fh, **self.options)]
-        self.assertEquals(len(output), self.options.num_samples, 
+        self.assertEqual(len(output), self.options.num_samples, 
                           "logsample output size different than expected: %s" % len(output))
         
     def testWeightedSampling(self):
         output = [(k, r) for k, r in logsample_weighted(fh=self.fh, **self.weighted_opts)]
-        self.assertEquals(len(output), self.weighted_opts.num_samples, 
+        self.assertEqual(len(output), self.weighted_opts.num_samples, 
                           "logsample output size different than expected: %s" % len(output))        
 
 class FilterTestCase(unittest.TestCase):
@@ -262,9 +272,9 @@ class FilterTestCase(unittest.TestCase):
         for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
                            with_acora=True, ignorecase=False,
                            word_boundaries=True):
-            #print l
+            #print(l)
             lines += 1
-        self.assertEquals(lines, self.exp_emitted_wb, "Number of lines emitted was not as expected: %s (Expected: %s)" %
+        self.assertEqual(lines, self.exp_emitted_wb, "Number of lines emitted was not as expected: %s (Expected: %s)" %
                           (lines, self.exp_emitted_wb))
         
     def testAC(self):
@@ -273,9 +283,9 @@ class FilterTestCase(unittest.TestCase):
         for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
                            with_acora=True, ignorecase=False,
                            word_boundaries=False):
-            #print l
+            #print(l)
             lines += 1
-        self.assertEquals(lines, self.exp_emitted, "Number of lines emitted was not as expected: %s (Expected: %s)" %
+        self.assertEqual(lines, self.exp_emitted, "Number of lines emitted was not as expected: %s (Expected: %s)" %
                           (lines, self.exp_emitted))        
         
     def testRE(self):
@@ -284,9 +294,9 @@ class FilterTestCase(unittest.TestCase):
         for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
                            with_acora=False, ignorecase=False,
                            word_boundaries=False):
-            #print l
+            #print( l)
             lines += 1
-        self.assertEquals(lines, self.exp_emitted, "Number of lines emitted was not as expected: %s (Expected: %s)" %
+        self.assertEqual(lines, self.exp_emitted, "Number of lines emitted was not as expected: %s (Expected: %s)" %
                           (lines, self.exp_emitted))          
     
     def testREWB(self):
@@ -295,9 +305,9 @@ class FilterTestCase(unittest.TestCase):
         for l in logfilter(self.testset, blacklist=self.blacklist, field=1, delimiter="\t", 
                            with_acora=False, ignorecase=False,
                            word_boundaries=True):
-            #print l
+            #print( l)
             lines += 1
-        self.assertEquals(lines, self.exp_emitted_wb, "Number of lines emitted was not as expected: %s (Expected: %s)" %
+        self.assertEqual(lines, self.exp_emitted_wb, "Number of lines emitted was not as expected: %s (Expected: %s)" %
                           (lines, self.exp_emitted_wb))          
 
 
@@ -312,51 +322,65 @@ class MergeTestCase(unittest.TestCase):
             os.remove(fname)
             
     def testNumericMerge(self):
-        os.write(self.tempfiles[0][0], "\n".join(['1 one', '5 five', '300 threehundred', 
-                                            '500 fivehundred']))
-        os.write(self.tempfiles[1][0], "\n".join(['-1 minusone', '0 zero',
-                                            '670 sixhundredseventy' ,'1000 thousand']))
-        os.write(self.tempfiles[2][0], "\n".join(['3 three', '22 twentytwo', '80 eighty']))
+        t1 =['1 one', '5 five', '300 threehundred', 
+                                            '500 fivehundred']
+        os.write(self.tempfiles[0][0], "\n".join(t1).encode())
+        t2 = ['-1 minusone', '0 zero',
+              '670 sixhundredseventy' ,'1000 thousand']
+        os.write(self.tempfiles[1][0], "\n".join(t2).encode())
+        t3= ['3 three', '22 twentytwo', '80 eighty']
+        os.write(self.tempfiles[2][0], "\n".join(t3).encode())
         
         options = AttrDict({'delimiter': ' ', 'field': 1, 'numeric': True })
         output = [(k, l) for k, l in logmerge(options, self.args)]
         
-        self.assertEquals(len(output), 11, "Output size was not equal to input size!")
-        self.assertEquals(map(itemgetter(0), output), sorted(map(lambda x: int(x[0]), output)), 
+        self.assertEqual(len(output), 11, "Output size was not equal to input size!")
+        self.assertEqual( list( map(itemgetter(0), output)),
+                          sorted ( list( map( lambda x: int(x[0]), output))), 
                           "Output was not numerically sorted!")
         
     def testDateMerge(self):
-        os.write(self.tempfiles[0][0], "\n".join(['2010/01/12 07:00:00,one', '2010/01/12 08:00:00,five', 
-                                                  '2010/01/13 10:00:00,threehundred']))
-        os.write(self.tempfiles[1][0], "\n".join(['2010/01/12 07:30:00,one', '2010/01/12 08:10:00,five', 
-                                                  '2010/01/12 21:00:00,threehundred']))
-        os.write(self.tempfiles[2][0], "\n".join(['2010/01/11 05:33:03,one', '2010/01/12 03:10:00,five', 
-                                                  '2010/01/21 22:00:00,threehundred']))
+        t1 = ['2010/01/12 07:00:00,one', '2010/01/12 08:00:00,five', 
+              '2010/01/13 10:00:00,threehundred']
+        os.write(self.tempfiles[0][0], "\n".join(t1).encode())
+        t2 =['2010/01/12 07:30:00,one', '2010/01/12 08:10:00,five', 
+             '2010/01/12 21:00:00,threehundred']
+        os.write(self.tempfiles[1][0], "\n".join(t2).encode())
+        t3 = ['2010/01/11 05:33:03,one', '2010/01/12 03:10:00,five', 
+              '2010/01/21 22:00:00,threehundred']
+        os.write(self.tempfiles[2][0], "\n".join(t3).encode())
         
         dateformat = '%Y/%m/%d %H:%M:%S'
         options = AttrDict({'delimiter': ',', 'field': 1, 'datetime': True, 'dateformat': dateformat })
         output = [(k, l) for k, l in logmerge(options, self.args)]
         
-        self.assertEquals(len(output), 9, "Output size was not equal to input size!")
-        self.assertEquals(map(itemgetter(0), output), sorted(map(itemgetter(0), output)), 
+        self.assertEqual(len(output), 9, "Output size was not equal to input size!")
+        self.assertEqual( list( map(itemgetter(0), output)),
+                         sorted( list( map(itemgetter(0), output))), 
                           "Output was not time sorted!")        
         
     def testLexicalMerge(self):
-        os.write(self.tempfiles[0][0], "\n".join(['1 one', '300 threehundred', '5 five', 
-                                            '500 fivehundred']))
-        os.write(self.tempfiles[1][0], "\n".join(['-1 minusone', '0 zero', '1000 thousand',
-                                            '670 sixhundredseventy']))
-        os.write(self.tempfiles[2][0], "\n".join(['22 twentytwo', '3 three', 
-                                            '80 eighty']))
+        t1 = ['1 one', '300 threehundred', '5 five', 
+              '500 fivehundred']
+        os.write(self.tempfiles[0][0], "\n".join(t1).encode())
+        t2 = ['-1 minusone', '0 zero', '1000 thousand',
+              '670 sixhundredseventy']
+        os.write(self.tempfiles[1][0], "\n".join(t2).encode())
+        t3 = ['22 twentytwo', '3 three', 
+              '80 eighty']
+        os.write(self.tempfiles[2][0], "\n".join(t3).encode())
         
         options = AttrDict({ 'delimiter': ' ', 'field': 1, 'numeric': False })
         output = [(k, l) for k, l in logmerge(options, self.args)]
         
-        self.assertEquals(len(output), 11, "Output size was not equal to input size!")
-        self.assertEquals(map(itemgetter(0), output), sorted(map(itemgetter(0), output)), 
+        self.assertEqual(len(output), 11, "Output size was not equal to input size!")
+        self.assertEqual( list( map(itemgetter(0), output)),
+                          sorted( list( map(itemgetter(0), output))), 
                           "Output was not lexically sorted!")
         
-   
+#
+# QPS: Queries Per Second
+#
 class QPSTestCase(unittest.TestCase):
     def setUp(self):
         self.options = AttrDict({
@@ -377,10 +401,13 @@ class QPSTestCase(unittest.TestCase):
     def testQps(self):
         blocks=0
         qs=[]
-        for q in qps(fh=self.fh, **self.options):
+        qpsVal = list( qps(fh=self.fh, **self.options))
+        sys.stderr.write(f"In testQps, qpsVal ({type(qpsVal)}):\t{qpsVal}\n")
+        for q in qpsVal:
             blocks+=1
             qs.append(q)
-        self.assertEquals(blocks, 3, "qps output size different than expected: %s" % str(blocks))
+        self.assertEqual(blocks, 3,
+                         "qps output size different than expected: %s" % str(blocks))
             
         
 class PlotTestCase(unittest.TestCase):
@@ -395,7 +422,8 @@ class PlotTestCase(unittest.TestCase):
         try:
             import pygooglechart
         except ImportError:
-            print >> sys.stderr, "pygooglechart Python package not available - skipping logplot gchart unittest."
+            print( "pygooglechart Python package not available - skipping logplot gchart unittest.",
+                    file = sys.stderr)
             return        
         options = AttrDict({
             'backend': 'gchart',
@@ -412,7 +440,7 @@ class PlotTestCase(unittest.TestCase):
             self.fh.seek(0)
             options['type'] = plot_type
             chart = logplot(options, None, self.fh)
-            self.assertNotEquals(chart, None, "logplot returned None. Expected a Plot object")
+            self.assertNotEqual(chart, None, "logplot returned None. Expected a Plot object")
             
         # Should raise ValueError here due to fh being at EOF
         self.assertRaises(ValueError, logplot, options, None, self.fh)
@@ -437,9 +465,9 @@ class SumstatTestCase(unittest.TestCase):
         
     def testSumstat(self):
         stat = sumstat(fh=self.data, delimiter=' ', reverse=True)
-        self.assertEquals(stat['M'], self.M)
-        self.assertEquals(stat['N'], self.N)
-        self.assertEquals(stat['avg'], self.avg)
+        self.assertEqual(stat['M'], self.M)
+        self.assertEqual(stat['N'], self.N)
+        self.assertEqual(stat['avg'], self.avg)
         
 if __name__ == "__main__":
     unittest.main()

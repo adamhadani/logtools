@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._urlparse
 
@@ -21,13 +29,12 @@ import re
 import sys
 import logging
 from time import time
-from itertools import imap
 from datetime import datetime
-from urllib import unquote_plus
+from urllib.parse import unquote_plus
+from urllib.parse import parse_qs, urlsplit
 from optparse import OptionParser
-from urlparse import parse_qs, urlsplit
 
-from _config import logtools_config, interpolate_config, AttrDict
+from ._config import logtools_config, interpolate_config, AttrDict,  setLoglevel
 
 __all__ = ['urlparse_parse_args', 'urlparse', 'urlparse_main']
 
@@ -44,6 +51,14 @@ def urlparse_parse_args():
 
     parser.add_option("-P", "--profile", dest="profile", default='qps',
                       help="Configuration profile (section in configuration file)")
+    
+    parser.add_option("-s","--sym" , type = str,
+                                  dest="logLevSym",
+                                  help="logging level (symbol)")
+
+    parser.add_option("-n","--num" , type=int , 
+                                  dest="logLevVal",
+                                  help="logging level (value)")
 
     options, args = parser.parse_args()
 
@@ -54,6 +69,9 @@ def urlparse_parse_args():
     options.part  = interpolate_config(options.part, options.profile, 'part', default=False)    
     options.query_params = interpolate_config(options.query_params, options.profile, 'query_params', default=False)  
     options.decode = interpolate_config(options.decode, options.profile, 'decode', default=False) 
+
+    # Set the logging level
+    setLoglevel(options)
 
     return AttrDict(options.__dict__), args
 
@@ -71,10 +89,10 @@ def urlparse(fh, part=None, query_params=None, decode=False, **kwargs):
                     [val.get(p, (None,))[0] for p in query_params]
     
     if decode is True:
-        for line in imap(lambda x: x.strip(), fh):
+        for line in map(lambda x: x.strip(), fh):
             yield unquote_plus(line)
     else:
-        for line in imap(lambda x: x.strip(), fh):
+        for line in map(lambda x: x.strip(), fh):
             url = urlsplit(line)
             val = {
                 "scheme": url.scheme,
@@ -95,9 +113,9 @@ def urlparse_main():
             if hasattr(parsed_url, '__iter__'):
                 # Format as tab-delimited for output
                 parsed_url = "\t".join(parsed_url)
-            print parsed_url
+            print(parsed_url)
         else:
             # Lines where we couldnt get any match (e.g when using -q)
-            print ''
+            print ('')
 
     return 0

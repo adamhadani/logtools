@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._tail
 A tail-like utility that allows tailing via time-frames and more complex
@@ -20,7 +28,6 @@ import re
 import sys
 import string
 import logging
-from itertools import imap
 from functools import partial
 from operator import and_
 from datetime import datetime
@@ -28,7 +35,8 @@ from optparse import OptionParser
 
 import dateutil.parser
 
-from _config import logtools_config, interpolate_config, AttrDict
+from ._config import logtools_config, interpolate_config, AttrDict
+from .utils import getObj
 import logtools.parsers
 
 __all__ = ['logtail_parse_args', 'logtail', 
@@ -96,7 +104,7 @@ def logtail(fh, date_format, start_date, field, parser=None, delimiter=None,
     _is_match_func = _is_match
     if parser:
         # Custom parser specified, use field-based matching
-        parser = eval(parser, vars(logtools.parsers), {})()
+        parser = getObj(parser, (logtools.parsers,))()
         is_indices = field.isdigit()
         if is_indices:
             # Field index based matching
@@ -117,7 +125,7 @@ def logtail(fh, date_format, start_date, field, parser=None, delimiter=None,
     num_lines=0
     num_filtered=0
     num_nomatch=0
-    for line in imap(lambda x: x.strip(), fh):
+    for line in map(lambda x: x.strip(), fh):
         try:
              is_match = _is_match_func(line)
         except (KeyError, ValueError):
@@ -146,7 +154,7 @@ def logtail_main():
     options, args = logtail_parse_args()
     if options.printlines:
         for line in logtail(fh=sys.stdin, *args, **options):
-            print line
+            print( line)
     else:
         for line in logtail(fh=sys.stdin, *args, **options): 
             pass

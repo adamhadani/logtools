@@ -1,0 +1,46 @@
+# This is a basic workflow to work with Github's Actions
+
+name: LinterExercise
+
+# Controls when the action will run. 
+on:
+  #
+  #
+  # Triggers the workflow on push or pull request events but only for the ALPython3 branch
+  #push:
+  #  branches: [ ALPython3 ]
+  
+  # Allows you to run this workflow manually from the Github Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  super-lint:
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    # Name the Job
+    name: Lint code base
+    # Set the type of machine to run on
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks out a copy of your repository on the ubuntu-latest machine
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell
+      #      + not convinced by first version added ';'
+      - name: Run a multi-line script
+        run: echo Hello from Github Actions !!;
+             pwd;
+             ls -ltha
+
+      # Runs the Super-Linter action
+      - name: Run Super-Linter
+        uses: github/super-linter@v3
+      # this defines environment variables made available to the
+      # script/action being executed
+        env:
+          DEFAULT_BRANCH: ALPython3
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+ 

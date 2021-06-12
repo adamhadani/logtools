@@ -1,0 +1,10 @@
+2021-03-19T08:21:10.226123Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.0.21-1) starting as process 1095
+2021-03-19T08:21:10.253542Z 1 [System] [MY-011012] [Server] Starting upgrade of data directory.
+2021-03-19T08:21:10.253672Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+2021-03-19T08:21:10.390757Z 1 [ERROR] [MY-012526] [InnoDB] Upgrade after a crash is not supported. This redo log was created with MySQL 5.7.12. Please follow the instructions at http://dev.mysql.com/doc/refman/8.0/en/upgrading.html
+2021-03-19T08:21:10.390930Z 1 [ERROR] [MY-012930] [InnoDB] Plugin initialization aborted with error Generic error.
+2021-03-19T08:21:10.814060Z 1 [ERROR] [MY-011013] [Server] Failed to initialize DD Storage Engine.
+2021-03-19T08:21:10.814343Z 0 [ERROR] [MY-010020] [Server] Data Dictionary initialization failed.
+2021-03-19T08:21:10.814529Z 0 [ERROR] [MY-010119] [Server] Aborting
+2021-03-19T08:21:10.815060Z 0 [System] [MY-010910] [Server] /usr/sbin/mysqld: Shutdown complete (mysqld 8.0.21-1)  (Ubuntu).
+2021-03-19T08:21:11.536763Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.0.21-1) starting as process 1176

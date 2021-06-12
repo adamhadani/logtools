@@ -1,6 +1,119 @@
 # logtools
 
-[![Build Status](https://travis-ci.org/adamhadani/logtools.svg?branch=master)](https://travis-ci.org/adamhadani/logtools)
+## TOC
+<!--TOC-->
+
+- [logtools](#logtools)
+  - [TOC](#toc)
+  - [Derived Version Notice](#derived-version-notice)
+  - [<CENTER>Original README</CENTER>](#original-readme)
+    - [A log files analysis / filtering framework.](#a-log-files-analysis--filtering-framework)
+  - [Installation](#installation)
+    - [Python2](#python2)
+    - [Python3](#python3)
+  - [Console Scripts](#console-scripts)
+  - [Configuration](#configuration)
+  - [Usage Examples](#usage-examples)
+  - [Credits](#credits)
+  - [Contact](#contact)
+  - [License](#license)
+
+<!--TOC-->
+
+
+## Derived Version Notice
+   This is a derived version of <B>logtools</B>, 
+   including a port to Python-3 and
+   additional features. 
+   - The original version, for Python-2 (<I>as far as I know</I>), by Adam Ever-Hadani  is available at
+     http://github.com/adamhadani <IMG SRC="https://travis-ci.org/adamhadani/logtools.svg?branch=master"/>.
+   - This version, for <B>Python-3 only</B>, with additions and changes by  Alain Lichnewsky,   is available at 
+     https://github.com/AlainLich/logtools
+     distributed <I>as is</I>, with no warranty, under the Apache 2.0 license. 
+	 + For features see
+	   [PYTHON3-README.md](./PYTHON3-README.md) 
+	   and [PYTHON3-ADDITIONS.md](./PYTHON3-ADDITIONS.md).
+	 
+<B>Notes</B>: this version
+   -  is not compatible with Python-2
+   -  has been tested in the following configurations
+
+      <TABLE>
+      <TH>
+	      <TD>Development</TD><TD>Github Actions</TD>
+	  </TH>
+      <TR>
+	      <TD COLSPAN="3"><CENTER><B>Status</B></CENTER></TD>
+	  </TR>
+	  </TR>
+	      <TR><TD>Status</TD><TD>OK on dev. machine</TD>
+	      <TD> <IMG SRC="https://github.com/AlainLich/logtools/actions/workflows/pythonExercise.yml/badge.svg?branch=ALPython3"/></TD>
+	  </TR>
+	  </TR>
+	      <TR><TD>Status Extensions Mysql</TD><TD>OK on dev. machine</TD>
+	      <TD> <IMG SRC="https://github.com/AlainLich/logtools/actions/workflows/pythonDBExercise.yml/badge.svg?branch=ALPython3" /></TD>
+	  </TR>
+	  </TR>
+	      <TR><TD>Status Extensions SQLite</TD><TD>OK on dev. machine</TD>
+	      <TD> <IMG SRC="https://github.com/AlainLich/logtools/actions/workflows/pythonSQLiteExercise.yml/badge.svg?branch=ALPython3" /></TD>
+	  </TR>
+      <TR>
+	      <TD COLSPAN="3"><CENTER><B>Test Configurations</B></CENTER></TD>
+	  </TR>
+      <TR>
+	      <TD ROWSPAN="2">System</TD><TD>Ubuntu 20.10</TD><TD ROWSPAN="2">Ubuntu 20.04.2 LTS</TD>
+	  </TR>
+      <TR>
+	      <TD>Ubuntu 21.04</TD>
+	  </TR>
+      <TR>
+	      <TD ROWSPAN="2">Linux</TD><TD>5.8.0-25-generic </TD><TD ROWSPAN="2"></TD>
+	  </TR>
+      <TR>
+	      <TD>5.11.0-16.generic </TD>
+	  </TR>
+      <TR>
+	      <TD ROWSPAN="2">Python</TD><TD>3.8.6</TD><TD ROWSPAN="2">CPython 3.8.10</TD>
+	  </TR>
+      <TR>
+	      <TD>3.9.4</TD>
+	  </TR>
+      <TR>
+	      <TD>virtualenv</TD><TD>20.0.29+d</TD><TD>not used</TD>
+	  </TR>
+      <TR>
+	      <TD>Used modules</TD><TD>see <A HREF="./requirements.txt">requirements.txt</A> 
+		  </TD>
+		  <TD><A HREF="./requirements.txt">requirements.txt</A>, and 
+              <A HREF="./aux/testData/ActionsMysqlTest/scripts/testsDB.requirements">for test</A>
+          </TD>
+	  </TR>
+	  <TR>
+	      <TD>Locale</TD><TD>fr_FR.UTF-8</TD><TD>C.UTF-8</TD>
+	  </TR>
+	  <TR>
+	      <TD rowspan="3">Mysql</TD><TD>DockerHub reference</TD>
+		  <TD><A HREF="https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md">
+		  Github VM standard
+		  </A></TD>
+	  </TR>
+	  <TR>
+	      <TD>mysql/mysql-server:latest</TD><TD>MySQL 8.0.25</TD>
+	  </TR>
+	  <TR>
+	      <TD>2021-01-19T14:27:35</TD><TD></TD>
+	  <TR>
+	      <TD>SQLite</TD><TD>3.34.1</TD><TD></TD>
+	  </TR>
+      </TABLE>
+   
+
+----------------------------------------------------------
+
+## <CENTER>Original README</CENTER>
+
+----------------------------------------------------------
+
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -39,6 +152,9 @@ This software is distributed under the Apache 2.0 license.
 
 
 ## Installation
+### Python2
+<B>Note</B> <I>This applies to the original package, not the port in this directory; please 
+see [Adam Ever-Hadani](http://github.com/adamhadani/) site and original version.</I>
 
 To install this package and associated console scripts, unpack the distributable tar file,
 or check out the project directory, and then run:
@@ -60,7 +176,14 @@ If for some reason setuptools does not install 'nose' by default,
 you can easily install it if you have setuptools installed by running:
 
 	easy_install nose
+	
+### Python3
 
+Concerning the Python3 port, see  [PYTHON3-README.md](./PYTHON3-README.md)
+
+For installation, see  [PYTHON3-README.md](./PYTHON3-README.md#installation), 
+much information can be
+gleaned from [Github Actions YAML](.github/workflows/pythonExercise.yml). 
 
 ## Console Scripts
 
@@ -71,7 +194,7 @@ you can easily install it if you have setuptools installed by running:
 	Blacklist files can specify both exact match as well as more complex matching
 	types (prefix/suffix match, regexp match. See examples below).
 
-* ``geoip``
+* ``geoip`` (Not ported to Python-3)
 	Simple helper utility for using the Maxmind GeoIP library to tag log lines by the IP's country.
         The regular expression mask used for matching the IP in the log line is user-specified.
 	This tool requires the Maxmind GeoIP library and python bindings. See http://www.maxmind.com/app/country

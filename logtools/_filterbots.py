@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._filterbots
 Filter bots from logrows based on an ip/host and useragent blacklists.
@@ -18,16 +26,18 @@ Filter bots from logrows based on an ip/host and useragent blacklists.
 import re
 import sys
 import logging
-from itertools import imap
-from functools import partial
+from functools import partial, reduce
 from operator import and_
 from optparse import OptionParser
 
-from _config import logtools_config, interpolate_config, AttrDict
+from ._config import logtools_config, interpolate_config, AttrDict, setLoglevel
+from .utils import getObj
 import logtools.parsers
 
 __all__ = ['filterbots_parse_args', 'filterbots', 
            'filterbots_main', 'parse_bots_ua', 'is_bot_ua']
+
+
 
 def filterbots_parse_args():
     usage = "%prog " \
@@ -58,6 +68,15 @@ def filterbots_parse_args():
 
     parser.add_option("-P", "--profile", dest="profile", default='filterbots',
                       help="Configuration profile (section in configuration file)")
+    
+    parser.add_option("-s","--sym" , type = str,
+                                  dest="logLevSym",
+                                  help="logging level (symbol)")
+
+    parser.add_option("-n","--num" , type=int , 
+                                  dest="logLevVal",
+                                  help="logging level (value)")
+
 
     options, args = parser.parse_args()
 
@@ -84,6 +103,9 @@ def filterbots_parse_args():
     if options.parser and not options.ip_ua_fields:
         parser.error("Must supply --ip-ua-fields parameter when using parser-based matching.")
 
+    # Set the logging level
+    setLoglevel(options)
+    
     return AttrDict(options.__dict__), args
 
 def parse_bots_ua(bots_ua):
@@ -95,7 +117,7 @@ def parse_bots_ua(bots_ua):
     bots_ua_suffix_dict = {}
     bots_ua_re   = []
 
-    for line in imap(lambda x: x.strip(), bots_ua):
+    for line in map(lambda x: x.strip(), bots_ua):
         if line.startswith("#"):
             # Comment line
             continue
@@ -179,7 +201,7 @@ def filterbots(fh, ip_ua_re, bots_ua, bots_ips,
                 
     else:
         # Custom parser specified, use field-based matching
-        parser = eval(parser, vars(logtools.parsers), {})()
+        parser = getObj(parser, (logtools.parsers,))()
         try:
             fields_map = dict([tuple(k.split(':')) for k in ip_ua_fields.split(',')])
         except ValueError:
@@ -209,7 +231,7 @@ def filterbots(fh, ip_ua_re, bots_ua, bots_ips,
     num_lines=0
     num_filtered=0
     num_nomatch=0
-    for line in imap(lambda x: x.strip(), fh):
+    for line in map(lambda x: x.strip(), fh):
         try:
             is_bot = _is_bot_func(line)
         except (KeyError, ValueError):
@@ -238,7 +260,7 @@ def filterbots_main():
     options, args = filterbots_parse_args()
     if options.printlines:
         for line in filterbots(fh=sys.stdin, *args, **options):
-            print line
+            print( line )
     else:
         for line in filterbots(fh=sys.stdin, *args, **options): 
             pass

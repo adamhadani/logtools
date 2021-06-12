@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._flattenjson
 
@@ -23,7 +31,7 @@ import sys
 from json import dumps, load
 from optparse import OptionParser
 
-from _config import interpolate_config, AttrDict
+from ._config import interpolate_config, AttrDict
 
 
 __all__ = ['flattenjson_parse_args', 'flattenjson', 'flattenjson_main']
@@ -35,23 +43,36 @@ def flattenjson_parse_args():
                       help="JSON root field to extract objects from (should point to a list)")  # noqa
     parser.add_option("-P", "--profile", dest="profile", default='flattenjson',
                       help="Configuration profile (section in configuration file)")  # noqa
-
+    
+    parser.add_option("-R", "--raw", dest="raw", default=None, action="store_true",
+                      help="When set output is not encoded for UTF-8")  
+                      ## default kept for compatibility
+    
     options, args = parser.parse_args()
     options.field = interpolate_config(options.field, options.profile, 'field')
+    options.raw = interpolate_config(options.raw, options.profile, 'raw')
 
     return AttrDict(options.__dict__), args
 
 
 def flattenjson(options, args, fh):
     data = load(fh)
-    for line in data[options.field]:
-        yield dumps(line)
 
-
+    try:
+        for line in data[options.field]:
+            yield dumps(line)
+    except Exception as err:
+        print(f"Error: ({type(err)}){err}", file=sys.stderr)
+        print(f"\tkeys avail in data ({type(data)}): {data.keys()}", file=sys.stderr)
+        raise err
+    
 def flattenjson_main():
     """Console entry-point"""
     options, args = flattenjson_parse_args()
     for row in flattenjson(options, args, fh=sys.stdin):
         if row:
-            print row.encode('utf-8', 'ignore')
+            if options.raw:
+                print(row)
+            else:
+                print( row.encode('utf-8', 'ignore') )
     return 0

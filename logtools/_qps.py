@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._qps
 Compute QPS estimates based on parsing of timestamps from logs on
@@ -20,11 +28,10 @@ import re
 import sys
 import logging
 from time import time
-from itertools import imap
 from datetime import datetime
 from optparse import OptionParser
 
-from _config import logtools_config, interpolate_config, AttrDict
+from ._config import logtools_config, interpolate_config, AttrDict, setLoglevel
 
 __all__ = ['qps_parse_args', 'qps', 'qps_main']
 
@@ -49,6 +56,15 @@ def qps_parse_args():
     parser.add_option("-P", "--profile", dest="profile", default='qps',
                       help="Configuration profile (section in configuration file)")
 
+    parser.add_option("-s","--sym" , type = str,
+                                  dest="logLevSym",
+                                  help="logging level (symbol)")
+
+    parser.add_option("-n","--num" , type=int , 
+                                  dest="logLevVal",
+                                  help="logging level (value)")
+
+    
     options, args = parser.parse_args()
 
     # Interpolate from configuration and open filehandle
@@ -58,9 +74,13 @@ def qps_parse_args():
     options.window_size = interpolate_config(options.window_size, 
                                             options.profile, 'window_size', type=int)
     options.ignore = interpolate_config(options.ignore, options.profile, 'ignore', 
-                                        default=False, type=bool)    
+                                        default=False, type=bool)
+    
+    # Set the logging level
+    setLoglevel(options)
 
     return AttrDict(options.__dict__), args
+
 
 def qps(fh, dt_re, dateformat, window_size, ignore, **kwargs):
     """Calculate QPS from input stream based on
@@ -76,8 +96,11 @@ def qps(fh, dt_re, dateformat, window_size, ignore, **kwargs):
         if not line:
             return
         try:
-            t = datetime.strptime(_re.match(line).groups()[0], dateformat)
-        except (AttributeError, KeyError, TypeError, ValueError):
+            mstr = _re.match(line).groups()[0]
+            t = datetime.strptime(mstr, dateformat)
+        except (AttributeError, KeyError, TypeError, ValueError) as err:
+            sys.stderr.write(f"In qps: Exception in line:{line[:-1]}\n\t{err}\n\t{type(err)}\n")
+
             if ignore:
                 logging.debug("Could not match datefield for parsed line: %s", line)
                 continue
@@ -89,10 +112,11 @@ def qps(fh, dt_re, dateformat, window_size, ignore, **kwargs):
             samples.append(t0)
     
     # Run over rest of input stream
-    for line in imap(lambda x: x.strip(), fh):
+    for line in map(lambda x: x.strip(), fh):
         try:
             t = datetime.strptime(_re.match(line).groups()[0], dateformat)
-        except (AttributeError, KeyError, TypeError, ValueError):
+        except (AttributeError, KeyError, TypeError, ValueError) as err:
+            sys.stderr.write(f"In qps: Exception in line:{line[:-1]}\n\t{err}\n\t{type(err)}\n")
             if ignore:
                 logging.debug("Could not match datefield for parsed line: %s", line)
                 continue
@@ -128,6 +152,7 @@ def qps_main():
     """Console entry-point"""
     options, args = qps_parse_args()
     for qps_info in qps(fh=sys.stdin, *args, **options):
-        print >> sys.stdout, "{start_time}\t{end_time}\t{num_samples}\t{qps:.2f}".format(**qps_info)
+        print ( "{start_time}\t{end_time}\t{num_samples}\t{qps:.2f}".format(**qps_info),
+                file = sys.stdout)
 
     return 0

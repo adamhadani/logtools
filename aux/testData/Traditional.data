@@ -1,0 +1,24 @@
+2013-07-12 20:35:00 - [ERROR] - This error occured at 8pm
+2013-07-13 08:15:21 - [WARNING] - This warning occured at 8:15
+2013-07-14 10:00:00 - [ERROR] - This error occured at 10:00
+2013-07-14 10:00:33 - [ERROR] - This error occured at 10:00:33
+Mar 19 09:17:20 alain-PORTEGE-Z30-B NetworkManager[916]: <info>  [1616141840.0795] device (p2p-dev-wlp2s0): state change: unmanaged -> unavailable (reason 'managed', sys-iface-state: 'managed')
+Mar 19 09:17:20 alain-PORTEGE-Z30-B NetworkManager[916]: <info>  [1616141840.0814] manager: NetworkManager state is now CONNECTED_LOCAL
+Mar 19 09:17:20 alain-PORTEGE-Z30-B rsyslogd: [origin software="rsyslogd" swVersion="8.2006.0" x-pid="941" x-info="https://www.rsyslog.com"] rsyslogd was HUPed
+Mar 19 09:17:20 alain-PORTEGE-Z30-B systemd[1]: logrotate.service: Succeeded.
+Mar 19 09:17:20 alain-PORTEGE-Z30-B systemd[1]: Finished Rotate log files.
+Mar 19 09:17:20 alain-PORTEGE-Z30-B NetworkManager[916]: <info>  [1616141840.1363] device (wlp2s0): supplicant interface state: internal-starting -> disconnected
+Mar 19 09:17:20 alain-PORTEGE-Z30-B NetworkManager[916]: <info>  [1616141840.1364] device (p2p-dev-wlp2s0): state change: unavailable -> unmanaged (reason 'removed', sys-iface-state: 'removed')
+Mar 19 09:17:20 alain-PORTEGE-Z30-B NetworkManager[916]: <info>  [1616141840.1376] Wi-Fi P2P device controlled by interface wlp2s0 created
+Mar 19 09:17:20 alain-PORTEGE-Z30-B NetworkManager[916]: <info>  [1616141840.1383] manager: (p2p-dev-wlp2s0): new 802.11 Wi-Fi P2P device (/org/freedesktop/NetworkManager/Devices/31)
+Mar 19 09:17:20 alain-PORTEGE-Z30-B NetworkManager[916]: <info>  [1616141840.1387] device (p2p-dev-wlp2s0): state change: unmanaged -> unavailable (reason 'managed', sys-iface-state: 'external')
+Mar 19 09:17:26 alain-PORTEGE-Z30-B kernel: [75355.495278] wlp2s0: authenticate with 20:c9:d0:1f:1f:ac
+Mar 19 09:17:26 alain-PORTEGE-Z30-B kernel: [75355.501006] wlp2s0: send auth to 20:c9:d0:1f:1f:ac (try 1/3)
+Mar 19 09:17:26 alain-PORTEGE-Z30-B kernel: [75355.502110] wlp2s0: authenticated
+Mar 19 09:17:26 alain-PORTEGE-Z30-B kernel: [75355.503497] wlp2s0: associate with 20:c9:d0:1f:1f:ac (try 1/3)
+Mar 19 09:17:26 alain-PORTEGE-Z30-B kernel: [75355.504408] wlp2s0: RX AssocResp from 20:c9:d0:1f:1f:ac (capab=0x1511 status=0 aid=1)
+Mar 19 09:17:26 alain-PORTEGE-Z30-B kernel: [75355.506270] wlp2s0: associated
+Mar 19 09:17:26 alain-PORTEGE-Z30-B kernel: [75355.513088] IPv6: ADDRCONF(NETDEV_CHANGE): wlp2s0: link becomes ready
+Mar 19 09:17:26 alain-PORTEGE-Z30-B kernel: [75355.561343] wlp2s0: Limiting TX power to 30 (30 - 0) dBm as advertised by 20:c9:d0:1f:1f:ac
+Mar 19 09:20:43 alain-PORTEGE-Z30-B kernel: [75553.180414] rfkill: input handler enabled
+Mar 19 09:21:09 alain-PORTEGE-Z30-B kernel: [    0.000000] microcode: microcode updated early to revision 0x2f, date = 2019-11-12

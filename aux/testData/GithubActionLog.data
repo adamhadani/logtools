@@ -1,0 +1,68 @@
+2021-03-22T16:50:52.6302582Z ##[section]Starting: Prepare job super-lint
+2021-03-22T16:50:52.6399630Z Evaluating strategy
+2021-03-22T16:50:52.6399911Z Creating job '__default'
+2021-03-22T16:50:52.6400247Z Evaluating timeout
+2021-03-22T16:50:52.6400332Z Evaluating cancel timeout
+2021-03-22T16:50:52.6400425Z Evaluating continue on error
+2021-03-22T16:50:52.6400528Z Evaluating target
+2021-03-22T16:50:52.6489831Z ##[section]Finishing: Prepare job super-lint
+2021-03-22T16:50:52.8820033Z ##[section]Starting: Request a runner to run this job
+2021-03-22T16:50:54.9235968Z Can't find any online and idle self-hosted runner in current repository that matches the required labels: 'ubuntu-latest'
+2021-03-22T16:50:54.9236069Z Can't find any online and idle self-hosted runner in current repository's account/organization that matches the required labels: 'ubuntu-latest'
+2021-03-22T16:50:54.9236456Z Found online and idle hosted runner in current repository's account/organization that matches the required labels: 'ubuntu-latest'
+2021-03-22T16:50:55.1675498Z ##[section]Finishing: Request a runner to run this job
+2021-03-22T16:51:03.3460548Z Current runner version: '2.277.1'
+2021-03-22T16:51:03.3489002Z ##[group]Operating System
+2021-03-22T16:51:03.3489999Z Ubuntu
+2021-03-22T16:51:03.3490586Z 20.04.2
+2021-03-22T16:51:03.3491021Z LTS
+2021-03-22T16:51:03.3491540Z ##[endgroup]
+2021-03-22T16:51:03.3492103Z ##[group]Virtual Environment
+2021-03-22T16:51:03.3492812Z Environment: ubuntu-20.04
+2021-03-22T16:51:03.3493384Z Version: 20210315.1
+2021-03-22T16:51:03.3494439Z Included Software: https://github.com/actions/virtual-environments/blob/ubuntu20/20210315.1/images/linux/Ubuntu2004-README.md
+2021-03-22T16:51:03.3495906Z Image Release: https://github.com/actions/virtual-environments/releases/tag/ubuntu20%2F
+2021-03-22T16:51:03.3496788Z ##[endgroup]
+2021-03-22T16:51:03.3499018Z ##[group]GITHUB_TOKEN Permissions
+2021-03-22T16:51:03.3500450Z Actions: write
+2021-03-22T16:51:03.3500981Z Checks: write
+2021-03-22T16:51:03.3501492Z Contents: write
+2021-03-22T16:51:03.3502081Z Deployments: write
+2021-03-22T16:51:03.3502779Z Issues: write
+2021-03-22T16:51:03.3503391Z Metadata: read
+2021-03-22T16:51:03.3504010Z OrganizationPackages: write
+2021-03-22T16:51:03.3504684Z Packages: write
+2021-03-22T16:51:03.3505234Z PullRequests: write
+2021-03-22T16:51:03.3505891Z RepositoryProjects: write
+2021-03-22T16:51:03.3506591Z SecurityEvents: write
+2021-03-22T16:51:03.3507181Z Statuses: write
+2021-03-22T16:55:03.8228199Z [0m2021-03-22 16:55:03 [0;34m[INFO][0m   ----------------------------------------------[0m
+2021-03-22T16:55:03.8261790Z [0m2021-03-22 16:55:03 [0;34m[INFO][0m   ----------------------------------------------[0m
+2021-03-22T16:55:03.8295245Z [0m2021-03-22 16:55:03 [0;34m[INFO][0m   Generated reports:[0m
+2021-03-22T16:55:03.8330871Z [0m2021-03-22 16:55:03 [0;34m[INFO][0m   ----------------------------------------------[0m
+2021-03-22T16:55:03.8372455Z [0m2021-03-22 16:55:03 [0;34m[INFO][0m   ----------------------------------------------[0m
+2021-03-22T16:55:03.8406757Z [0m2021-03-22 16:55:03 [0;34m[INFO][0m   Reports generated in folder /github/workspace/super-linter.report[0m
+2021-03-22T16:55:03.8440358Z [0m2021-03-22 16:55:03 [0;33m[WARN][0m   Report output folder (/github/workspace/super-linter.report) does NOT exist.[0m
+2021-03-22T16:55:03.8472516Z [0m2021-03-22 16:55:03 [0;34m[INFO][0m   ----------------------------------------------[0m
+2021-03-22T16:55:03.8506705Z [0m2021-03-22 16:55:03 [0;34m[INFO][0m   ----------------------------------------------[0m
+2021-03-22T16:55:03.8581777Z [0m2021-03-22 16:55:03 [0;34m[INFO][0m   The script has completed[0m
+2021-03-22T16:55:03.8617637Z [0m2021-03-22 16:55:03 [0;34m[INFO][0m   ----------------------------------------------[0m
+2021-03-22T16:55:03.8649755Z [0m2021-03-22 16:55:03 [0;34m[INFO][0m   ----------------------------------------------[0m
+2021-03-22T16:55:03.8735057Z [0m2021-03-22 16:55:03 [0;31m[ERROR][0m   ERRORS FOUND[0m in BASH:[4][0m
+2021-03-22T16:55:04.7368010Z [0m2021-03-22 16:55:04 [0;31m[ERROR][0m   ERRORS FOUND[0m in JSCPD:[4][0m
+2021-03-22T16:55:05.1134266Z [0m2021-03-22 16:55:05 [0;31m[ERROR][0m   ERRORS FOUND[0m in MARKDOWN:[5][0m
+2021-03-22T16:55:05.4574557Z [0m2021-03-22 16:55:05 [0;31m[ERROR][0m   ERRORS FOUND[0m in PYTHON_BLACK:[25][0m
+2021-03-22T16:55:05.7648379Z [0m2021-03-22 16:55:05 [0;31m[ERROR][0m   ERRORS FOUND[0m in PYTHON_PYLINT:[5][0m
+2021-03-22T16:55:06.1255639Z [0m2021-03-22 16:55:06 [0;31m[ERROR][0m   ERRORS FOUND[0m in PYTHON_FLAKE8:[25][0m
+2021-03-22T16:55:06.4739669Z [0m2021-03-22 16:55:06 [0;31m[ERROR][0m   ERRORS FOUND[0m in PYTHON_ISORT:[25][0m
+2021-03-22T16:55:07.1490036Z [0m2021-03-22 16:55:07 [41m[0;37m[FATAL][0m   Exiting with errors found![0m
+2021-03-22T16:55:07.3115856Z Post job cleanup.
+2021-03-22T16:55:07.4263467Z [command]/usr/bin/git version
+2021-03-22T16:55:07.4325565Z git version 2.30.2
+2021-03-22T16:55:07.4366706Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2021-03-22T16:55:07.4400616Z [command]/usr/bin/git submodule foreach --recursive git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :
+2021-03-22T16:55:07.4667928Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2021-03-22T16:55:07.4692122Z http.https://github.com/.extraheader
+2021-03-22T16:55:07.4707250Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2021-03-22T16:55:07.4735330Z [command]/usr/bin/git submodule foreach --recursive git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :
+2021-03-22T16:55:07.5048611Z Cleaning up orphan processes

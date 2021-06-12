@@ -1,0 +1,14 @@
+#  Required for running tests.
+#
+# The pymysql module dependency is not included in the logtools requirements
+# since the generic user may be using another SQL backend besides mysql
+PyMySQL>=1.0.2
+#
+# 'cryptography' package is required for sha256_password or caching_sha2_password auth
+#  methods.
+#  Note This does not seem to be a requirement for SQLAlchemy, see 'pip show';
+#       may be the requirement depends on connection type, parameters or
+#       negotiation with server. For now I do not put this in logtools requirements,
+#       to avoid increasing the footprint.
+cryptography>=3.0
+#

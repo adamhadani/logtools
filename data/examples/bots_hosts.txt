@@ -1,0 +1,3 @@
+tyty.tutu.ru
+*.ru
+*.*.edu.cn

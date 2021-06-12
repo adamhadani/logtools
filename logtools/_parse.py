@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._parse
 Log format parsing programmatic and command-line utilities.
@@ -20,9 +28,19 @@ import sys
 import logging
 from operator import and_
 from optparse import OptionParser
+from functools import reduce
+import json
 
 import logtools.parsers
-from _config import interpolate_config, AttrDict
+import logtools.parsers2
+from ._config import interpolate_config, AttrDict, setLoglevel
+from ._config import checkDpath
+
+from .parsers2 import FileFormat , TraditionalFileFormat, ForwardFormat
+from .parsers2 import TraditionalForwardFormat
+from .utils    import getObj
+
+checkDpath()
 
 __all__ = ['logparse_parse_args', 'logparse', 'logparse_main']
 
@@ -43,6 +61,20 @@ def logparse_parse_args():
     parser.add_option("-P", "--profile", dest="profile", default='logparse',
                       help="Configuration profile (section in configuration file)")  # noqa
 
+    parser.add_option("-R", "--raw", dest="raw", default=None, action="store_true",
+                      help="When set output is not encoded for UTF-8")  
+                      ## default kept for compatibility
+
+    # logging level for debug and other information
+    parser.add_option("-s","--sym" , type = str,
+                                  dest="logLevSym",
+                                  help="logging level (symbol)")
+
+    parser.add_option("-n","--num" , type=int ,
+                                  dest="logLevVal",
+                                  help="logging level (value)")
+
+
     options, args = parser.parse_args()
 
     # Interpolate from configuration
@@ -54,6 +86,11 @@ def logparse_parse_args():
                                         default=False, type=bool)
     options.header = interpolate_config(options.header, options.profile, 'header',
                                         default=False, type=bool)
+    options.raw = interpolate_config(options.raw, options.profile, 'raw')
+
+
+    # Set the logging level
+    setLoglevel(options)
 
     return AttrDict(options.__dict__), args
 
@@ -63,32 +100,37 @@ def logparse(options, args, fh):
     parser class and emit specified field(s)"""
 
     field = options.field
+    logtools.parsers2.addConfigFileSection()
 
-    parser = eval(options.parser, vars(logtools.parsers), {})()
+    
+    parser = getObj(options.parser, (logtools.parsers, logtools.parsers2))()
+     
     if options.get('format', None):
         parser.set_format(options.format)
 
     keyfunc = None
     keys = None
     if isinstance(options.field, int) or \
-       (isinstance(options.field, basestring) and options.field.isdigit()):
+       (isinstance(options.field, str) and options.field.isdigit()):
         # Field given as integer (index)
         field = int(options.field) - 1
         key_func = lambda x: parser(x.strip()).by_index(field, raw=True)
         keys = [options.field]
     else:
-        # Field given as string
-
-        # Check how many fields are requested
-        keys = options.field.split(",")
-        L = len(keys)
-        if L == 1:
-            key_func = lambda x: parser(x.strip())[field]
+        if isinstance(parser, logtools.parsers2.JSONParserPlus):
+            key_func = logtools.parsers2.dpath_getter_gen(parser, options.field, options)
         else:
-            # Multiple fields requested
-            is_indices = reduce(and_, (k.isdigit() for k in keys), True)
-            key_func = logtools.parsers.multikey_getter_gen(parser, keys,
-                                        is_indices=is_indices)
+            # Field given as string
+            # Check how many fields are requested
+            keys = options.field.split(",")
+            L = len(keys)
+            if L == 1:
+                key_func = lambda x: parser(x.strip())[field]
+            else:
+                # Multiple fields requested
+                is_indices = reduce(and_, (k.isdigit() for k in keys), True)
+                key_func = logtools.parsers.multikey_getter_gen(parser, keys,
+                                                                is_indices=is_indices)
 
     if options.header is True:
         yield '\t'.join(keys)
@@ -96,10 +138,10 @@ def logparse(options, args, fh):
     for line in fh:
         try:
             yield key_func(line)
-        except KeyError, exc:
+        except KeyError as exc:
             # Could not find user-specified field
             logging.warn("Could not match user-specified fields: %s", exc)
-        except ValueError, exc:
+        except ValueError as exc:
             # Could not parse the log line
             if options.ignore:
                 logging.debug("Could not match fields for parsed line: %s", line)
@@ -112,7 +154,13 @@ def logparse(options, args, fh):
 def logparse_main():
     """Console entry-point"""
     options, args = logparse_parse_args()
+    
     for row in logparse(options, args, fh=sys.stdin):
         if row:
-            print row.encode('ascii', 'ignore')
+            if isinstance(row, dict):
+                json.dump(row, sys.stdout)
+            elif options.raw:
+                print(row)
+            else:
+                print( row.encode('ascii', 'ignore') )
     return 0

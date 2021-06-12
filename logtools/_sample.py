@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._sample
 Sampling tools for logfiles
@@ -20,12 +28,11 @@ import os
 import re
 import sys
 import logging
-from itertools import imap
 from random import randint, random
 from optparse import OptionParser
 from heapq import heappush, heappop, heapreplace
 
-from _config import logtools_config, interpolate_config, AttrDict
+from ._config import logtools_config, interpolate_config, AttrDict
 
 __all__ = ['logsample_parse_args', 'logsample', 'logsample_weighted', 'logsample_main']
 
@@ -117,10 +124,10 @@ def logsample_main():
     
     if options.weighted is True:
         for k, r in logsample_weighted(fh=sys.stdin, *args, **options):
-            print r
+            print( r )
     else:
         for r in logsample(fh=sys.stdin, *args, **options):
-            print r
+            print( r )
         
     return 0
 

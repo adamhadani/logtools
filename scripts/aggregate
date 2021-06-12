@@ -11,8 +11,8 @@ DELIM=' '
 FIELD=1
 
 usage() {
-	printf "Usage: $(basename $0) -d <delimiter> -f <field>\n" >&2
-	exit -1
+	printf "Usage: $(basename "$0") -d <delimiter> -f <field>\n" >&2
+	exit 255
 }
 
 while getopts "d:f:h" OPT
@@ -22,7 +22,7 @@ do
 			;;
 		f)	FIELD="$OPTARG"
 			;;
-		h)	usage
+		h|*)	usage
 			;;
 	esac
 done

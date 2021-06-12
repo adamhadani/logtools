@@ -1,0 +1,263 @@
+name: Test python package logtools with SQLite database
+    # ------------------------------------------------------------
+    # (C) Alain Lichnewsky, 2021
+    #
+    # For running under Github's Actions
+    #
+    #    Documentation at :
+    #    https://github.com/actions/virtual-environments/blob/main/images \
+    #                               /linux/Ubuntu2004-README.md
+    #
+    #    with  sqlite3 3.31.1 included (no loading required!)
+    #
+    # ------------------------------------------------------------
+
+on:
+    workflow_dispatch:
+
+jobs:
+    build:
+
+        runs-on: ubuntu-latest
+
+        # Defining environment variables at this level
+        env:
+            # Information used for creating and filling the database
+            fillTblFile: aux/testData/ActionsMysqlTest/SQLite/dumpDBData.sql
+
+            sqlite_file: /tmp/sqlite_file.db
+
+            #  From:
+            #  https://docs.github.com/en/actions/reference/environment-variables
+            #  ``The workspace directory is a copy of your repository if your
+            #    workflow uses the actions/checkout action. If you don't use
+            #    the actions/checkout action, the directory denoted in
+            #    GITHUB_WORKSPACE will be empty.''
+            #
+            #  So using a handwired  version (TB CHECKED LATER, not modular)
+            #  There are constraints on src_Dpath_path value, see below
+            #
+            src_Dpath_path: /home/runner/work/logtools/logtools/aux/lib/srcDpath
+            AMTS_PATH: /home/runner/work/logtools/logtools/aux/testData/ActionsMysqlTest/scripts
+
+        steps:
+        - uses: actions/checkout@v2
+
+        - name: Set up Python 3.8
+          uses: actions/setup-python@v2
+          with:
+              python-version: '3.8'
+              architecture: 'x64'
+
+
+        - name: Ascertain configuration and add some paths
+          #
+          #    Collect information concerning $HOME (for ~/.logtoolsrc setup)
+          #    i.e. location of file loaded from Github/
+          #    Also show $LANG ( Locale may be relevant in processing of dates )
+          #
+          run: |
+            if [ ! -d ${src_Dpath_path} ] ; then
+                mkdir -p ${src_Dpath_path}
+            fi
+            echo Home dir $HOME
+            echo files at this location
+            ls -ltha $HOME
+            echo "+++++"
+            echo Working dir $(pwd)
+            echo Files at this $(pwd) location:
+            ls -ltha
+            echo "+++++"
+            echo HOME: $HOME
+            echo LANG: $LANG
+
+        - name: Prepare for Python installs
+          # We start by upgrading pip, if needed (?)
+          run: |
+            python -m pip install --upgrade pip setuptools wheel
+
+        - name: Install full featured dpath from my own github repo
+          # Need to load dpath from my repository; otherwise the setup.py
+          # will install the default version without the special features
+
+          # Repo information: origin/AL-addRegexp
+          #      https://github.com/AlainLich/dpath-python.git
+          # Using https://github.com/actions/checkout for all required
+          # information on actions/checkout@v2
+
+          uses: actions/checkout@v2
+          with:
+              # Repository name with owner. For example, actions/checkout
+              # Default: ${{ github.repository }}
+              repository: 'AlainLich/dpath-python'
+
+              # The branch, tag or SHA to checkout. When checking out the
+              # repository that triggered a workflow, this defaults to the
+              # reference or SHA for that event. Otherwise, uses the default
+              # branch.
+              ref: 'AL-addRegexp'
+
+              # Absolute path to place the repository. There seems to be
+              # constraints, as I received an error "... is not under ..."
+              # See https://github.com/actions/checkout
+              # and more specifically https://github.com/actions/checkout/issues/197
+              #    `` Today the path input is the only way to change the directory
+              #       where the code is cloned. Also there is a restriction that it
+              #       must be under GITHUB_WORKSPACE. ''
+              # See Feature Request https://github.com/actions/checkout/issues/327
+              #
+              path: ${{ env.src_Dpath_path }}
+
+        - name: Install dpath with config
+
+          run: |
+            cd ${src_Dpath_path}
+            echo Files in the dpath directory $(pwd) just loaded
+            ls -ltha
+            python setup.py install
+            if [ $? -eq 0 ] ; then
+                echo Installed dpath successfully in ${src_Dpath_path}
+                ls -ltha ${src_Dpath_path}
+            else
+                echo FAILURE IN INSTALLATION OF dpath
+            fi
+
+        - name: Install logtools with config.py
+          if: always()
+          run: |
+            pwd
+            ls -ltha
+            python setup.py install
+            if [ $? -eq 0 ] ; then
+                echo Installed logtools successfully
+            else
+                echo FAILURE IN INSTALLATION OF logtools
+            fi
+
+
+        - name: Install other python dependencies
+          if: always()
+          # Take into account the requirements and setup.py built in
+          # dependencies.
+          # Expressly not loaded: pymysql
+          #
+          run: |
+            echo installing logtools requirements
+            if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+            #
+            echo NOT installing more test requirements possible issue cryptography
+            # testsDBReq=${AMTS_PATH}/testsDB.requirements
+            # if [ -f ${testsDBReq}  ]; then pip install -r ${testsDBReq} ; fi
+
+        - name: Install .logtoolsrc
+          if: always()
+          #
+          #     File ~/.logtoolsrc is used by the package to setup defaults
+          #      - absence results in failure;
+          #      - it contains filepaths and secret passwd and thus must be adapted
+          #        to actuals filepaths
+          #      -file may name other config files that must
+          #        exist with proper contents. In particular this test
+          #        uses ~/.logtools.d/tradivariantParsing.txt
+          #
+          #      Note: although it is the sqlite version of .logtoolsrc, we keep
+          #            the default file path, to avoid adding specifying a
+          #            file by means of setting env. variable LOGTOOLS_RC
+
+          run: |
+            echo executing: "aux/dot_logtoolsrc_sqlite.sh $(pwd) ${HOME}/.logtoolsrc \
+                     ${HOME}/.logtools.d" ${sqlite_file}
+            aux/dot_logtoolsrc_sqlite.sh $(pwd) "${HOME}/.logtoolsrc" \
+                    "${HOME}/.logtools.d" ${sqlite_file}
+            echo Files in  home dir: "$HOME"
+            ls -ltha ~
+            echo Files in  home dir: "$HOME/.logtools.d"
+            ls -ltha ~/.logtools.d
+
+        - name: Confirm list of available docker images
+          if: always()
+          #
+          #  These are to be used as source of data via inspect in script
+          #  testDB.sh
+          #
+          run: |
+            echo "Available docker images"
+            docker image ls -a
+            echo "----------------"
+
+        - name: Create and fill SQLite DB
+          if: always()
+          run: |
+            #
+            # This will create and fill as required the DB tables
+            #
+            sqlite3 ${sqlite_file} < ${fillTblFile}
+
+
+        - name: Non Database Tests
+          if: always()
+          #     Test Z : runs logtools/test/test_logtools.py
+          #     Test A : runs a test scenario
+          #     Test + : runs all tests
+          #
+          #     These are redundant, ordered by increasing dependency on the
+          #     environment: Z:self contained, A requires 1 data file,
+          #
+          #     Parameter -s ZZZ indicates logging level; INFO, ERROR and DEBUG
+          #     are of interest
+          #     Environment variables: documented in aux/manTests.py
+          #     Note that if DEBUG not set, some tests suppress error output
+          #
+          #     Configuration:
+          #            This uses ~/.logtoolsrc
+          #                 and this file may name other config files that must
+          #                 exist with proper contents. In particular this test
+          #                 uses ~/.logtools.d/tradivariantParsing.txt
+          #
+          run: |
+            export ZTESTPGM="logtools/test/test_logtools.py"
+            export TESTDATADIR="aux/testData"
+            export DEBUG="-"
+            python aux/manTests.py Z -s INFO
+            python aux/manTests.py A -s ERROR
+            python aux/manTests.py + -s INFO
+
+        - name: SQLite Tests
+          if: always()
+          #
+          #   Using testDB.sh with parameter sets
+          #   The content of the (join|dbOp)_connect_string in .logtoolsrc
+          #       will ensure that SQLite is used
+          run: |
+            export PATH=${PATH}:${AMTS_PATH}
+            echo PATH "${PATH}"
+            hash -r
+            # ----------------------------------
+            # warn user: testsDB.sh may pull a docker image
+            echo testsDB may pull docker image to be inspected to generate JSON
+            # ----------------------------------
+            testsDB.sh -s sDBJ
+            testsDB.sh -s sDBOP
+
+        - name: Dump Values in database
+          if: always()
+          # Only table 'tree' gets modified / filled, so that we do not
+          # need to print the rest
+          #
+          # Watch out:sqlite3 won't return an error code if we omit the
+          # ${sqlite_file} parameter. The documentation says:
+          #  ``  If no database file is specified on the command-line, a
+          #      temporary database is created, then deleted when the "sqlite3"
+          #      program exits. ''
+          #
+          # There is a disparity of version for sqlite3 between the dev system
+          # and the VM: .mode markdown is not supported
+          #
+          run: |
+            echo sqlite3 version: $(sqlite3 --version)
+            sqlite3 ${sqlite_file} <<EOD
+            .tables
+            .mode column
+              SELECT * FROM tree;
+            EOD
+            echo dumped logfromtool.tree

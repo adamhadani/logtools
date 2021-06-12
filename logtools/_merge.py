@@ -11,6 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+
 """
 logtools._merge
 Logfile merging utilities.
@@ -22,13 +30,17 @@ import os
 import re
 import sys
 import logging
-from itertools import imap
 from datetime import datetime
 from optparse import OptionParser
 from heapq import heappush, heappop, merge
 
-from _config import logtools_config, interpolate_config, AttrDict
 import logtools.parsers
+import logtools.parsers2
+from ._config import logtools_config, interpolate_config, AttrDict, setLoglevel
+from .parsers2 import FileFormat , TraditionalFileFormat, ForwardFormat
+from .parsers2 import TraditionalForwardFormat
+from .utils import getObj
+
 
 __all__ = ['logmerge_parse_args', 'logmerge', 'logmerge_main']
 
@@ -53,6 +65,16 @@ def logmerge_parse_args():
     parser.add_option("-P", "--profile", dest="profile", default='logmerge',
                       help="Configuration profile (section in configuration file)")
     
+    parser.add_option("-s","--sym" , type = str,
+                                  dest="logLevSym",
+                                  help="logging level (symbol)")
+
+    parser.add_option("-l","--num" , type=int , 
+                                  dest="logLevVal",
+                                  help="logging level (value)")
+
+
+    
     options, args = parser.parse_args()
     
     # Interpolate from configuration
@@ -69,6 +91,9 @@ def logmerge_parse_args():
     options.parser = interpolate_config(options.parser, 
                                     options.profile, 'parser', default=False)    
 
+    # Set the logging level
+    setLoglevel(options)
+
     return AttrDict(options.__dict__), args
 
 def logmerge(options, args):
@@ -81,7 +106,8 @@ def logmerge(options, args):
     key_func = None
     if options.get('parser', None):
         # Use a parser to extract field to merge/sort by
-        parser = eval(options.parser, vars(logtools.parsers), {})()
+        parser = getObj(options.parser, (logtools.parsers, logtools.parsers2))()
+
         if field.isdigit():            
             extract_func = lambda x: parser(x.strip()).by_index(int(field)-1)
         else:
@@ -98,7 +124,7 @@ def logmerge(options, args):
     else:
         key_func = lambda x: (extract_func(x), x)
         
-    iters = (imap(key_func, open(filename, "r")) for filename in args)
+    iters = ( map(key_func, open(filename, "r")) for filename in args)
     
     for k, line in merge(*iters):
         yield k, line.strip()
@@ -107,5 +133,5 @@ def logmerge_main():
     """Console entry-point"""
     options, args = logmerge_parse_args()
     for key, line in logmerge(options, args):
-        print line
+        print( line )
     return 0

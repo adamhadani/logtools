@@ -1,3 +1,8 @@
+version 0.8.7p3
+	Remove SQLsoup
+	** Check these things from git logs and markdown files
+        Added parsers
+	Improved selection capabilities
 version 0.8.6
 	Tweaks to the 'percentiles' utility - Added optional -N argument to force
 	tailing specific number of lines (samples), removed hard-coded 10000 lines

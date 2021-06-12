@@ -21,16 +21,17 @@ except ImportError:
 
 setup(
     name         = 'logtools',
-    version      = '0.8.7',
+    version      = '0.8.7p3',
     description  = 'Log analysis and filtering tools',
-    author       = 'Adam Ever-Hadani',
-    author_email = 'adamhadani@gmail.com',
-    url          = 'http://github.com/adamhadani/logtools',
+    author       = 'Adam Ever-Hadani, additions Alain Lich',
+    author_email = '',
+    url          = 'http://github.com/AlainLich/logtools',
     keywords     = ['logging', 'sampling', 'geoip', 'filterbots', 'aggregate',
-                    'logparse', 'logmerge', 'logjoin', 'urlparse', 'logplot', 'qps', 'filter'],
+                    'logparse', 'logmerge', 'logjoin', 'urlparse', 'logplot',
+                    'logdb', 'qps', 'filter'],
     classifiers = [
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 3.8.6",
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: POSIX",
@@ -45,7 +46,7 @@ setup(
 A log files analysis / filtering framework.
 
 logtools encompasses of a few easy-to-use, easy to configure command-line
-tools, typically used in conjunction with Apache logs.
+tools, typically used in conjunction with Apache logs, and other common formats.
 
 The idea is to standardize log parsing and filtering using a coherent
 configuration methodology and UNIX command-line interface (STDIN input streaming, command-line piping etc.)
@@ -63,12 +64,18 @@ This software is distributed under the Apache 2.0 license.
     include_package_data = False,
 
     install_requires = [
-        #"pygooglechart>=0.2.1", # Optional dependency, seems broken for now
-        "prettytable>=0.5",
-        "sqlalchemy>=0.7.9",
-        "sqlsoup>=0.9.0",
-        "acora>=1.7",
-        "python-dateutil>=2.1"
+        "greenlet>=1.0.0",
+        "lark-parser==0.6.7",  # ran into issue on Github,
+                               # lark-parser 0.11.2 is installed but lark-parser==0.6.* is required by
+                               # {'syslog-rfc5424-parser'}
+        "numpy>=1.20.1",
+        "pandas>=1.2.3",
+        "prettytable>=2.1.0",
+        "python-dateutil>=2.8.1",
+        "pytz>=2021.1",
+        "SQLAlchemy>=1.4.13",   # looking for compatibility with MySQL8.0
+        "syslog-rfc5424-parser>=0.3.2",
+        "wcwidth>=0.2.5"
     ],
 
     entry_points = {
@@ -79,6 +86,7 @@ This software is distributed under the Apache 2.0 license.
             'logparse = logtools:logparse_main',
             'logmerge = logtools:logmerge_main',
             'logjoin = logtools:logjoin_main',
+            'logdb = logtools:logdb_main',
             'logplot = logtools:logplot_main',
             'logsample = logtools:logsample_main',
             'logfilter = logtools:logfilter_main',

@@ -1,12 +1,13 @@
 # logtools RECIPES
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+## TOC
+<!--TOC-->
 
 - [logtools RECIPES](#logtools-recipes)
+  - [TOC](#toc)
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+<!--TOC-->
+
 
 1. The following example demonstrates specifying a custom regular expression for matching
 	the ip/user agent using the filterbots tool.

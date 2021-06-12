@@ -11,6 +11,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 #  See the License for the specific language governing permissions and 
 #  limitations under the License. 
+#
+# ........................................ NOTICE
+#
+# This file has been derived and modified from a source licensed under Apache Version 2.0.
+# See files NOTICE and README.md for more details.
+#
+# ........................................ ******
+#
+
 """
 logtools.parsers
 Parsers for some common log formats, e.g Common Log Format (CLF).
@@ -27,10 +36,10 @@ from datetime import datetime
 from abc import ABCMeta, abstractmethod
 import json
 
-from _config import AttrDict
+from ._config import AttrDict
 
-__all__ = ['multikey_getter_gen', 'unescape_json', 'LogParser', 'JSONParser', 'LogLine',
-           'AccessLog', 'CommonLogFormat', 'uWSGIParser']
+__all__ = ['multikey_getter_gen', 'unescape_json', 'LogParser', 'JSONParser', 
+           'LogLine', 'AccessLog', 'CommonLogFormat', 'uWSGIParser']
 
 
 def multikey_getter_gen(parser, keys, is_indices=False, delimiter="\t"):
@@ -41,11 +50,11 @@ def multikey_getter_gen(parser, keys, is_indices=False, delimiter="\t"):
         
     def multikey_getter(line, parser, keyset):
         data = parser(line.strip())
-        return delimiter.join((unicode(data[k]) for k in keyset))
+        return delimiter.join((str(data[k]) for k in keyset))
     
     def multiindex_getter(line, parser, keyset):
         data = parser(line.strip())
-        return delimiter.join((unicode(data.by_index(idx-1, raw=True)) for idx in keys))
+        return delimiter.join((str(data.by_index(idx-1, raw=True)) for idx in keys))
 
     if is_indices is True:
         # Field indices
@@ -79,6 +88,12 @@ class LogParser(object):
         Some parsers can use this to specify
         a format string"""
         
+    def fe_returns_Json(self):
+        """This indicator of a class returning JSON is False by default.
+           This is used to facilitate integration of parsers returning JSON 
+           as (recursive) dict of list.
+        """
+        return False
         
 class LogLine(dict):
     """Instrumented dictionary that allows
@@ -139,12 +154,13 @@ class JSONParser(LogParser):
         # JSON logs are generally schema-less and so fields
         # can change between lines.
         self._logline_wrapper.fieldnames = parsed_row.keys()
-            
-        data.clear()
-        for k, v in parsed_row.iteritems():
-            data[k] = v
 
+        data.clear()
+        for k, v in parsed_row.items():
+            data[k] = v
+        
         return data
+
     
 
 class AccessLog(LogParser):
@@ -176,7 +192,7 @@ class AccessLog(LogParser):
         """
         try:
             match = self.fieldselector.match(logline)
-        except AttributeError, exc:
+        except AttributeError as exc:
             raise AttributeError("%s needs a valid format string (--format)" % \
                     self.__class__.__name__ )
 
@@ -187,7 +203,7 @@ class AccessLog(LogParser):
                 data[k] = v
             return data                
         else:
-            raise ValueError("Could not parse log line: '%s'" % logline)
+            raise ValueError("Could not parse log line: %s" % repr(logline))
 
     def _parse_log_format(self, format):
         """This code piece is based on the apachelogs 
@@ -233,8 +249,10 @@ class AccessLog(LogParser):
             subpatterns.append(subpattern)
 
         _pattern = '^' + ' '.join(subpatterns) + '$'
+        logging.debug( f"_parse_log_format input format '{format}'")
+        logging.debug( f"\t\tgenerated rex:{repr(_pattern)} ")
+                       # repr adds escapes so the the regexp can be copied and used
         _regex = re.compile(_pattern)
-
         return _regex
 
     
@@ -268,4 +286,6 @@ class uWSGIParser(LogParser):
                 data[k] = v
             return data
         else:
-            raise ValueError("Could not parse log line: '%s'" % logline)
+            raise ValueError("Could not parse log line: %s" % repr(logline))
+
+

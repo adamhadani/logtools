@@ -1,0 +1,17 @@
+Mar 19 09:17:26 alain-PORTEGE-Z30-B gdm-fingerprint]: gkr-pam: no password is available for user
+Mar 19 09:17:28 alain-PORTEGE-Z30-B gdm-password]: gkr-pam: no password is available for user
+Mar 19 09:17:46 alain-PORTEGE-Z30-B CRON[41091]: pam_unix(cron:session): session opened for user root by (uid=0)
+Mar 19 09:17:46 alain-PORTEGE-Z30-B CRON[41091]: pam_unix(cron:session): session closed for user root
+Mar 19 09:21:11 alain-PORTEGE-Z30-B gdm-launch-environment]: pam_unix(gdm-launch-environment:session): session opened for user gdm by (uid=0)
+Mar 19 09:21:12 alain-PORTEGE-Z30-B systemd: pam_unix(systemd-user:session): session opened for user gdm by (uid=0)
+Mar 19 09:21:19 alain-PORTEGE-Z30-B gdm-fingerprint]: gkr-pam: no password is available for user
+Mar 19 09:21:22 alain-PORTEGE-Z30-B gdm-password]: gkr-pam: no password is available for user
+Mar 19 09:21:22 alain-PORTEGE-Z30-B gdm-password]: pam_unix(gdm-password:session): session opened for user alain by (uid=0)
+Mar 19 09:21:22 alain-PORTEGE-Z30-B systemd: pam_unix(systemd-user:session): session opened for user alain by (uid=0)
+Mar 19 09:21:23 alain-PORTEGE-Z30-B gdm-password]: gkr-pam: gnome-keyring-daemon started properly
+Mar 19 09:21:31 alain-PORTEGE-Z30-B gdm-launch-environment]: pam_unix(gdm-launch-environment:session): session closed for user gdm
+Mar 21 12:54:09 alain-PORTEGE-Z30-B sudo: pam_unix(sudo:auth): Couldn't open /etc/securetty: Aucun fichier ou dossier de ce type
+Mar 21 12:54:14 alain-PORTEGE-Z30-B sudo: pam_unix(sudo:auth): Couldn't open /etc/securetty: Aucun fichier ou dossier de ce type
+Mar 21 12:54:14 alain-PORTEGE-Z30-B sudo:    azerty : TTY=pts/1 ; PWD=/home/alain/test/VirtualEnvSandbox/logtoolsPy2 ; USER=root ; COMMAND=/bin/coucou -
+Mar 21 12:54:14 alain-PORTEGE-Z30-B sudo: pam_unix(sudo:session): session opened for user root by (uid=0)
+Mar 21 12:59:37 alain-PORTEGE-Z30-B sudo: pam_unix(sudo:session): session closed for user root
